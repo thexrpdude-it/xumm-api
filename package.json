@@ -1,0 +1,57 @@
+{
+  "name": "xrpl-sign-platform",
+  "version": "0.1.0",
+  "description": "XRPL Sign Platfrom",
+  "main": "./index.js",
+  "files": [
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WietseWind/xrpl-sign-platform.git"
+  },
+  "keywords": [
+    "xrp",
+    "xrpl",
+    "sign",
+    "platform"
+  ],
+  "author": "WietseWind",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WietseWind/xrpl-sign-platform/issues"
+  },
+  "homepage": "https://github.com/WietseWind/xrpl-sign-platform",
+  "dependencies": {
+    "express": "^4.16.4",
+    "form-data": "^2.3.3",
+    "helmet": "^3.15.0",
+    "ip-range-check": "0.0.2",
+    "mysql": "^2.16.0",
+    "node-fetch": "^2.3.0",
+    "nunjucks": "^3.1.4",
+    "uuid": "^3.3.2"
+  },
+  "scripts": {
+    "dev": "nodemon .",
+    "pm2": "pm2 reload pm2.config.js --env development",
+    "start": "docker-compose up -d",
+    "up": "docker-compose up -d",
+    "down": "docker-compose down",
+    "stop": "docker-compose down",
+    "logs": "docker-compose logs --tail 30 -f"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.6",
+    "pm2": "^3.2.2"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "test/*",
+      "docs/*",
+      "node_modules/*",
+      "db/*"
+    ],
+    "ext": "js,json"
+  }
+}

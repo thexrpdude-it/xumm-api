@@ -1,0 +1,6 @@
+/production.json
+/development.json
+.DS_store
+/db/
+/node_modules/
+/deploy.sh

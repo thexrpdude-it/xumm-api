@@ -1,0 +1,13 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <!-- https://mozilla.github.io/nunjucks/templating.html#if-expression -->
+    <h1>404{{ ':' if error }} {{ error | title }}</h1>
+
+    {# <p>{{ 'Hi!' | sleep(2) }}</p> #}
+    {# <p>{{ 'Hi!' }}</p> #}
+
+    {% for item in null | test(0.01) %}
+        <li>{{ item }}</li>
+    {% endfor %}
+{% endblock %}
