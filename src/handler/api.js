@@ -54,10 +54,15 @@ module.exports = async function (expressApp) {
       apiDetails.routes.map(route => {
         router[route.method](`/${apiVersion}/${apiType}/${route.path}`, [ async (req, res, next) => {
           if (typeof route.disableMiddleware === 'undefined' || !route.disableMiddleware) {
-            require(`../middleware/${apiDetails.middleware}`)(expressApp, req, res)
+            require(`../middleware/${apiDetails.middleware}`)(expressApp, req, res, {
+              route: route,
+              version: apiVersion,
+              type: apiType
+            })
               .then(r => {
                 if (typeof r !== 'undefined') {
-                  console.log(`API Auth middleware [ next ]`, r)
+                  // console.log(`API Auth middleware [ next ]`, r)
+                  req.__auth = r
                 }
                 /**
                  * Middleware is allowed to send cusom responses, skip
