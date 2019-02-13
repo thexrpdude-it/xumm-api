@@ -35,6 +35,8 @@ module.exports = async function (expressApp) {
             disableMiddleware: true,
             // module: 'some-alt-file-at-disk'
           },
+          { method: 'post', path: 'activate-device', disableMiddleware: true },
+          { method: 'post', path: 'ping' },
         ]
       },
       /**
