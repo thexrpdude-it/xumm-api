@@ -15,17 +15,14 @@ async function start () {
     { type: 'middleware', module: 'error-handler' }
   ]
 
-  console.log('Loading modules')
-  
+  console.log('Loading modules') 
   for (let i = 0; i<middleware.length; i++) {
     console.log(` - ${middleware[i].type}: ${middleware[i].module}`)
     await require(`./src/${middleware[i].type}/${middleware[i].module}`)(app)
   }
-
   console.log('Modules loaded')
 
   app.listen(app.config.port)
-
   console.log(`\nXRPL-SIGN ${app.config.mode} - Server running at port ${app.config.port}\n`)
 }
 
