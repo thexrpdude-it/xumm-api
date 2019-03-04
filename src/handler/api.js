@@ -35,8 +35,13 @@ module.exports = async function (expressApp) {
             disableMiddleware: true,
             // module: 'some-alt-file-at-disk'
           },
-          { method: 'post', path: 'activate-device', disableMiddleware: true },
-          { method: 'post', path: 'ping' },
+          { method: 'post',   path: 'activate-device', disableMiddleware: true },
+          { method: 'post',   path: 'ping' },
+          { method: 'post',   path: 'update-device' },
+          { method: 'post',   path: 'add-device' },
+          { method: 'get',    path: 'pending-devices' },
+          { method: 'patch',  path: 'pending-devices' },
+          { method: 'delete', path: 'pending-devices' },
         ]
       },
       /**
@@ -64,7 +69,14 @@ module.exports = async function (expressApp) {
               .then(r => {
                 if (typeof r !== 'undefined') {
                   // console.log(`API Auth middleware [ next ]`, r)
-                  req.__auth = r
+                  req.__auth = Object.keys(r).reduce((a, b) => {
+                    const s = b.replace(/^_+/, '').split('_')
+                    if (s[0] !== '') {
+                      if (typeof a[s[0]] === 'undefined') a[s[0]] = {}
+                      a[s[0]][s[1]] = r[b]
+                    }
+                    return a
+                  }, {})
                 }
                 /**
                  * Middleware is allowed to send cusom responses, skip

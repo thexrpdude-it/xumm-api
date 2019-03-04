@@ -14,7 +14,8 @@ module.exports = async (req, res) => {
 
         const deviceToActivateQuery = `
           SELECT
-            device_id
+            device_id,
+            device_lockedbydeviceid
           FROM 
             devices d
           LEFT JOIN
@@ -37,7 +38,7 @@ module.exports = async (req, res) => {
             device_pushtoken = :pushtoken,
             device_extuniqueid = :identifier,
             device_accesstoken = :accesstoken,
-            device_disabled = NULL
+            device_disabled = IF(device_lockedbydeviceid IS NULL, NULL, NOW())
           WHERE
             device_id = :device_id
           LIMIT 1
@@ -61,7 +62,8 @@ module.exports = async (req, res) => {
           if (activatedDevice.changedRows === 1) {
             res.json({
               activated: true,
-              accessToken: deviceAccessToken
+              accessToken: deviceAccessToken,
+              locked: device[0].device_lockedbydeviceid !== null
             })
           } else {
             throw new Error(`Couldn't activate device (invalid state)`)

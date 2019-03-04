@@ -4,12 +4,15 @@ module.exports = async (req, res) => {
   res.json({ 
     pong: true,
     auth: Object.keys(req.__auth).reduce((a, b) => {
-      const s = b.split('_')
-      if (typeof a[s[0]] === 'undefined') a[s[0]] = {}
-      if (s[1] !== 'id') {
-        a[s[0]][s[1]] = req.__auth[b]
-      }
-      return a
+      return Object.assign(a, { 
+        [b]: Object.keys(req.__auth[b]).filter(e => {
+          return e !== 'id'
+        }).reduce((c, d) => {
+          return Object.assign(c, {
+            [d]: req.__auth[b][d]
+          })
+        }, {})
+      })
     }, {})
   })
 }
