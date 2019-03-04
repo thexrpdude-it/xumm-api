@@ -8,9 +8,10 @@ module.exports = async (expressApp) => {
     },
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", 'maxcdn.bootstrapcdn.com'],
-        imgSrc: ["'self'"] // todo
+        defaultSrc: [ "'self'" ].concat(expressApp.config.resources.default || []),
+        styleSrc: [ "'self'" ].concat(expressApp.config.resources.styles || []),
+        imgSrc: [ "'self'" ].concat(expressApp.config.resources.images || []),
+        fontSrc: [ "'self'" ].concat(expressApp.config.resources.fonts || [])
       }
     }
   }))
