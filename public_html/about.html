@@ -1,9 +1,13 @@
 {% extends "index.html" %}
 
 {% block content %}
-    <h1>By @WietseWind</h1>
+  <div class="row">
+    <div class="col-12">
+      <h1>By @WietseWind</h1>
 
-    {% for i in [ 'a', 'b', 'c' ] %}
-        <li>{{ i }}</li>
-    {% endfor %}
+      {% for i in [ 'a', 'b', 'c' ] %}
+          <li>{{ i }}</li>
+      {% endfor %}
+    </div>
+  </div>
 {% endblock %}

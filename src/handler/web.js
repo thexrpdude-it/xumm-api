@@ -11,7 +11,7 @@ module.exports = async function (expressApp) {
   const router = express.Router()
 
   router.get(['/', '/index.html'], (req, res, next) => {
-    return res.render('index.html')
+    return res.render('index.html', { module: 'index' })
   })
 
   router.get('/*', express.static('public_html'))
@@ -39,22 +39,24 @@ module.exports = async function (expressApp) {
    */
   expressApp.set('view engine', 'html')
 
-  const env = nunjucks.configure('public_html', {
+  const env = nunjucks.configure([ 'public_html', 'public_html/assets/partials' ], {
     noCache:  expressApp.config.mode === 'development',
     watch: expressApp.config.mode === 'development',
     autoescape: true,
     express: expressApp
   })
 
-  /**
-   * Testing.
-   */
-  env.addFilter('sleep', function sleep (input, callback) {
-    const args = Object.values(arguments).slice(1, -1)
-    setTimeout(() => {
-      arguments[arguments.length - 1](false, arguments[0])
-    }, (args[0] || 1) * 1000)
-  }, true)
+  env.addGlobal('year', (new Date()).getYear() + 1900)
+
+  // /**
+  //  * Testing.
+  //  */
+  // env.addFilter('sleep', function sleep (input, callback) {
+  //   const args = Object.values(arguments).slice(1, -1)
+  //   setTimeout(() => {
+  //     arguments[arguments.length - 1](false, arguments[0])
+  //   }, (args[0] || 1) * 1000)
+  // }, true)
 
   env.addFilter('test', function sleep (input, callback) {
     const args = Object.values(arguments).slice(1, -1)
