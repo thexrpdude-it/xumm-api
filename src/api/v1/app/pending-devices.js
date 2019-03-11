@@ -1,5 +1,10 @@
 const uuid = require('uuid/v4')
 
+/**
+ * TODO:
+ * PUSH MESSAGE TO OTHER DEVICE UPON UNLOCK (see: `/activate-device`)
+ */
+
 module.exports = async (req, res) => {
   try {
     switch (req.method) {

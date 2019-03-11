@@ -1,5 +1,10 @@
 const uuid = require('uuid/v4')
 
+/**
+ * TODO:
+ * PUSH MESSAGE TO OTHER DEVICE UPON ACTIVATION (SEE: `/pending-devices`)
+ */
+
 module.exports = async (req, res) => {
   try {
     if (Object.keys(req.headers).indexOf('authorization') > -1) {
