@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+
+{% block content %}
+  <div class="content">
+    <div class="text-center mb-5">
+      <img class="mb-4" src="/assets/icons/xrplsign.png" alt="" width="100" height="100">
+      <h1 class="h3 font-weight-normal">XRPL Signing Platform</h1>
+      <h6 class="mb-4">
+        <small class="text-secondary">
+          by <a href="https://xrpl-labs.com" target="_blank">XRPL Labs</a>
+        </small>
+      </h6>
+
+      <h3 class="h3 text-primary font-weight-normal">
+        <b>Error 500</b>
+        <br />
+        <small class="text-secondary">Internal error</small>
+      </h3>
+
+      {% if error %}
+        <p class="mt-5 col-6 offset-3 alert alert-danger text-center">{{ error }}</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

@@ -9,7 +9,9 @@ module.exports = async (expressApp) => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: [ "'self'" ].concat(expressApp.config.resources.default || []),
-        styleSrc: [ "'self'" ].concat(expressApp.config.resources.styles || []),
+        scriptSrc: [ "'self'", "'unsafe-inline'" ].concat(expressApp.config.resources.script || []),
+        styleSrc: [ "'self'", "'unsafe-inline'" ].concat(expressApp.config.resources.styles || []),
+        connectSrc: [ "'self'" ].concat(expressApp.config.resources.connect || []),
         imgSrc: [ "'self'" ].concat(expressApp.config.resources.images || []),
         fontSrc: [ "'self'" ].concat(expressApp.config.resources.fonts || [])
       }

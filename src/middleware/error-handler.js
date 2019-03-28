@@ -5,7 +5,13 @@ module.exports = async function (expressApp) {
     if (req.routeType === 'api') {
       res.status(500).json({ error: true, req: req.url, message: error.toString() })
     } else {
-      res.status(500).render('500', { error: error.toString() })
+      res.status(500).render('500', { 
+        error: error.toString()
+                    .split('Error:')
+                    .slice(1)
+                    .join(' ')
+                    .trim() 
+      })
     }
   })
 }

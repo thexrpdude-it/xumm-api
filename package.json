@@ -24,12 +24,15 @@
   "homepage": "https://github.com/WietseWind/xrpl-sign-platform",
   "dependencies": {
     "express": "^4.16.4",
+    "express-locale": "^1.2.0",
+    "express-ws": "^4.0.0",
     "form-data": "^2.3.3",
     "helmet": "^3.15.0",
     "ip-range-check": "0.0.2",
     "mysql": "^2.16.0",
     "node-fetch": "^2.3.0",
     "nunjucks": "^3.1.4",
+    "qrcode-svg": "^1.0.0",
     "uuid": "^3.3.2"
   },
   "scripts": {
