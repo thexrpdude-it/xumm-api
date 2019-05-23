@@ -1,0 +1,26 @@
+{% macro render(title, body, color) %}
+  <div class="row">
+    <div class="col-12 col-md-6 offset-md-3 pt-md-5 pb-md-5">
+      <div class="card shadow-sm">
+        <div class="card-header {{ 'bg-danger' if not color }} {{ color|default('')|trim }} text-white font-weight-bold">
+          {% if title %}
+            {{ title|safe }}
+          {% else %}
+            <i class="fa fa-exclamation-triangle"></i>
+            {{ 'ERROR'|i18n }} (500)
+          {% endif %}
+        </div>
+        <div class="card-body">
+          {% if body %}
+            {{ body|safe }}
+          {% else %}
+            <p class="text-secondary">
+              {{ 'ERROR_500_BODY'|i18n }}
+            </p>
+            <img src="https://media.giphy.com/media/3fqXc6Z2HRgUE/giphy.gif" class="img-fluid rounded" alt="">
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endmacro %}

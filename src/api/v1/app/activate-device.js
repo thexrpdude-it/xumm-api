@@ -85,13 +85,6 @@ module.exports = async (req, res) => {
       throw new Error(`Invalid auth (missing bearer)`)
     }
   } catch (e) {
-    const errorRef = uuid()
-    console.log(`ERROR @ ${req.ip} ${errorRef} - ${e.message}`)
-    res.status(500).json({
-      error: {
-        reference: errorRef,
-        code: e.code || null
-      }
-    })
+    res.handleError(e)
   }
 }

@@ -1,0 +1,54 @@
+{% extends "template.html" %}
+
+{% block content %}
+  <div class="content">
+    {% block header %}
+      {# <img class="mb-4" src="/assets/icons/xrplsign.png" alt="" width="100" height="100"> #}
+      <div class="row">
+        <div class="col-12">
+          <h1 class="font-logo h1 py-0 my-0">
+            <a class="text-dark" href="/">xign<small class="pl-1"><i class="fa fa-check text-primary"></i></small></a>
+          </h1>
+          <h1 class="font-200 h4">Signing app &amp; -platform</h1>
+          <h6 class="mb-4">
+            <small class="text-secondary">
+              By <a href="https://xrpl-labs.com" class="text-muted" target="_blank"><u>XRPL Labs</u></a>
+            </small>
+          </h6>
+        </div>
+      </div>
+    {% endblock %}
+
+    {% block main %}
+      <div class="row mb-4">
+        <div class="col-12 col-md-6">
+          <h3 class="h6 text-primary font-weight-normal">For users</h3>
+          <p>
+            Interact with the XRP ledger from your smartphone (iOS / Android). Sign transactions and keep 
+            your XRP safe by allowing 3rd party applications to send <code>Sign Requests</code> to your mobile device. 
+          </p>
+        </div>
+        <div class="col-12 col-md-6">
+          <h3 class="h6 text-primary font-weight-normal">For developers</h3>
+          <p>
+            Allow your users to sign transactions to your app / platform using a simple redirect flow, without ever 
+            sharing their secrets. Push <code>Sign Requests</code> directly to your user's devices.
+          </p>
+        </div>
+      </div>
+    {% endblock %}
+  </div>
+
+  {% block button %}
+    <div class="text-right pb-4">
+      <a target="_blank" href="https://xrpl-labs.com" class="btn btn-primary"><i class="fas fa-caret-square-right"></i> About XRPL Labs</a>
+    </div>
+  {% endblock %}
+
+  {% block foot %}
+    <hr class="d-none d-md-block" />
+    <div class="d-block d-md-none mt-4"></div>
+    
+    <p class="text-muted">&copy; {{ year }} XRPL Labs <small>&bull; The Netherlands</small></p>
+  {% endblock %}
+{% endblock %}

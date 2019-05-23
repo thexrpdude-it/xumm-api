@@ -1,35 +1,24 @@
 {% extends "index.html" %}
 
-{% block content %}
-  <div class="content">
-    <div class="text-center mb-5">
-      <img class="mb-4" src="/assets/icons/xrplsign.png" alt="" width="100" height="100">
-      <h1 class="h3 font-weight-normal">XRPL Signing Platform</h1>
-      <h6 class="mb-4">
-        <small class="text-secondary">
-          by <a href="https://xrpl-labs.com" target="_blank">XRPL Labs</a>
-        </small>
-      </h6>
+{% block button %}
+  {# Nada #}
+{% endblock %}
 
-      <h3 class="h3 text-primary font-weight-normal">
-        <b>Error 404</b>
-        <br />
-        <small class="text-secondary">Page not found</small>
-      </h3>
-      
-      <!-- {% for i in [ 'a', 'b', 'c' ] %}
-        <li>{{ i }}</li>
-      {% endfor %} -->
+{% block main %}
+  <div class="row">
+    <div class="col-12 col-md-6 offset-md-3 pt-md-5 pb-md-5">
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <i class="fa fa-exclamation-triangle"></i>
+          {{ 'ERROR'|i18n }} (404)
+        </div>
+        <div class="card-body">
+          <p class="text-secondary">
+            {{ 'ERROR_404_BODY'|i18n }}
+          </p>
+          <img src="https://media.giphy.com/media/3fqXc6Z2HRgUE/giphy.gif" class="img-fluid rounded" alt="">
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}
-
-<!-- https://mozilla.github.io/nunjucks/templating.html#if-expression
-<h1>404{{ ':' if error }} {{ error | title }}</h1>
-
-{# <p>{{ 'Hi!' | sleep(2) }}</p> #}
-{# <p>{{ 'Hi!' }}</p> #}
-
-{% for item in null | test(0.01) %}
-    <li>{{ item }}</li>
-{% endfor %} -->

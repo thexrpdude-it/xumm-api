@@ -1,9 +1,10 @@
+const log = require('debug')('app:db')
 const mysql = require('mysql')
 
 module.exports = (app) => {
   if (typeof app.config.db === 'undefined') app.config.db = {}
 
-  console.log('>> Connect to DB')
+  log('Connecting to DB')
 
   const pool = mysql.createPool({
     connectionLimit: app.config.db.connectionLimit || 10,
@@ -20,6 +21,10 @@ module.exports = (app) => {
     }
   })
 
+  pool.on('connection', c => {
+    log(`Database connected @ ${c.threadId}`)
+  })
+
   Object.assign(app, {
     db: async (query, params) => {
       return new Promise ((resolve, reject) => {
@@ -30,6 +35,9 @@ module.exports = (app) => {
       })
     }    
   })
+
+  // Trigger pool connection
+  app.db('SELECT @@VERSION')
 
   app.use((req, res, next) => {
     req.db = app.db

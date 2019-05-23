@@ -1,3 +1,4 @@
+const log = require('debug')('app:qr')
 const nunjucks = require('nunjucks')
 const QRCode = require('qrcode-svg')
 
@@ -20,12 +21,10 @@ class qrExtension {
 
     this.run = (context, body, cb) => {
       // const err = new Error('xxxx')
-      // console.log(context)
-      // context.ctx.results = new nunjucks.runtime.SafeString('QRSOME <b>NICE</b> RESULTS')
       const err = null
       // cb(err, body())
       const svg = new QRCode(body().trim()).svg()
-      cb(err, new nunjucks.runtime.SafeString('QRSOME <b>NICE</b>' + svg + ' RESULTS'))
+      cb(err, new nunjucks.runtime.SafeString(svg))
     }  
   }
 }

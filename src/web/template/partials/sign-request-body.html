@@ -1,0 +1,101 @@
+{% if results %}
+
+  <div class="row">
+    <div class="col-12 col-lg-8 offset-lg-2 pt-md-5 pb-md-5">
+      <div class="card shadow-sm">
+
+        {# Title bar #}
+        <div class="card-header bg-dark text-white py-2">
+          <b class="font-200 py-0 my-0">
+            <i class="fas fa-signature mr-1"></i>
+            {{ 'TITLE_SIGNTX'|i18n }}
+          </b>
+        </div>
+
+        {# App #}
+        <div class="card-header bg-white text-dark">
+          <div class="row">
+            <div class="col-3 col-md-2">
+              <img src="{{ results.application_icon_url }}" class="img-fluid rounded" />
+            </div>
+            <div class="col-9 col-md-10">
+              <h1 class="h4 font-700">{{ results.application_name }}</h1>
+              <span class="d-inline-block lh-120 text-muted">
+                {{ results.application_description }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {% if mobile and (is.android or is.ios) %}
+          {# If you see this page while on a mobile device,  #}
+          <div class="alert-warning border-bottom-1 border-warning shadow-sm card-header text-center">
+            {{ 'PAYLOAD_PAGE_FOR_MOBILE'|i18n }}
+          </div>
+        {% endif %}
+
+        {# State & TX Details #}
+        <div class="card-body">
+          {% if mobile and (is.ios or is.android) %}
+            {# 
+              Mobile device. 
+              Should be handled as deep link,
+              so app is not installed.
+            #}
+            
+            <div class="h5 text-center py-3">
+              <i class="fas fa-mobile-alt"></i>
+              {{ 'PLEASE_INSTALL_APP'|i18n }}
+            </div>
+            {% if is.ios %}
+              {% set download_link_displayed = true %}
+              <a href="{{ appstorelinks.iOS }}" class="mb-4 btn btn-primary btn btn-block">
+                <i class="fab fa-app-store-ios"></i>
+                {{ 'GET_APP_IOS_MODAL_VISIT'|i18n }}
+              </a>
+            {% endif %}
+            {% if is.android %}
+              {% set download_link_displayed = true %}
+              <a href="{{ appstorelinks.Android }}" class="mb-4 btn btn-primary btn-block">
+                <i class="fab fa-google-play"></i>
+                {{ 'GET_APP_ANDROID_MODAL_VISIT'|i18n }}
+              </a>
+            {% endif %}
+          {% elseif results._pushed > 0 and not params.qr %}
+            {#
+              Pushed, not forced to show the QR. Inform
+              the user a push notification has been sent,
+              optionally show the QR.
+            #}
+
+            <div class="h5 text-center py-3 text-primary">
+              <i class="far fa-bell"></i>
+              {{ 'PAYLOAD_PUSH_NOTIFICATION_SENT'|i18n }}
+            </div>
+            <div class="text-center pb-3">
+              <div class="">{{ 'DIDNT_RECEIVE_PUSH_TEXT'|i18n }}</div>
+              <a href="{{ baselocation }}/sign/{{ uuid }}/qr" class="btn btn-warning mt-2">
+                <i class="fas fa-qrcode"></i>
+                {{ 'SHOW_QR'|i18n }}
+              </a>
+            </div>
+          {% else %}
+
+            {#
+              The actual signing!
+            #}
+            {% include 'partials/sign-request-body-qr-vdom.html' %}
+          {% endif %}
+        </div>
+
+        {% if not download_link_displayed %}
+          {% include 'partials/sign-request-body-store-btn-footer.html' %}
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+{% else %}
+  {{ _error.render(title, body) }}
+{% endif %}

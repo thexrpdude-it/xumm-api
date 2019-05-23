@@ -60,12 +60,6 @@ module.exports = async (req, res) => {
 
     res.json(response)
   } catch (e) {
-    const errorRef = uuid()
-    console.log(`ERROR @ ${req.ip} ${errorRef} - ${e.message}`)
-    res.status(500).json({
-      error: {
-        reference: errorRef
-      }
-    })
+    res.handleError(e)
   }
 }

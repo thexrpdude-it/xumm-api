@@ -35,7 +35,7 @@ class I18nFilter {
       if (typeof baseText === 'string') {
         baseText = baseText.replace(/__([a-z_]+)__/g, ($, m) => {
           if (Object.keys(replacements).indexOf(m) > -1) {
-            return replacements[m]
+            return nunjucks.runtime.suppressValue(replacements[m], true)
           }
           return ''
         })

@@ -1,0 +1,64 @@
+{% extends "index.html" %}
+
+{% block content %}
+  <div class="content">
+
+    {% include "ws.html" %}
+
+    <div class="text-center mb-5">
+      <img class="mb-4" src="/assets/icons/xrplsign.png" alt="" width="100" height="100">
+      <h1 class="h3 font-weight-normal">XRPL Signing Platform</h1>
+      <h6 class="mb-4">
+        <small class="text-secondary">
+          by <a href="https://xrpl-labs.com" target="_blank">XRPL Labs</a>
+        </small>
+      </h6>
+
+      <h3 class="h3 text-primary font-weight-normal"><b>About</b></h3>
+
+      {% set me = 'Wietse' %}
+      <p>{{ 'TEST'|i18n({ name: "John", me: me }) }}</p>
+
+      <hr />
+
+      {% db "SELECT * FROM users WHERE user_created_ip = :ip", ip = '::1' %} {# Or: , { ip: '::1' } #}
+        Got db results:
+        {{ results }}
+        <ul>
+          {% for r in results %}
+            <li>
+              <code>{{ r.user_id }}</code>: {{ r.user_uuidv4 }}
+              {# <pre>{{ r|dump }}</pre> #}
+            </li>
+          {% endfor %}
+        </ul>
+      {% error %}
+        Got error: {{ error }}
+      {% enddb %}
+
+      <hr />
+
+      {% qr %}
+        {# <!-- {{ 'https://tweakers.net' }} --> #}
+        https://www.google.nl
+      {% endqr %}
+
+      <hr />
+
+      <row>
+        <div class="col-3"></div>
+        <div class="col-3">
+          {% qr %}
+            https://n3tc4t.com
+          {% endqr %}          
+        </div>
+      </row>
+
+      <hr />
+
+      {% for i in [ 'a', 'b', 'c' ] %}
+        <li>{{ i }}</li>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

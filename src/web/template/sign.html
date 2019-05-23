@@ -1,0 +1,76 @@
+{% extends "index.html" %}
+
+{% import "partials/error.html" as _error %}
+
+{# Overall blocks #}
+
+{% block head %}
+  <link rel="stylesheet" href="/assets/css/sign_vue.css?{{ uuid }}" crossorigin="anonymous">
+{% endblock %}
+
+{% block button %}
+  {# No "About" button at the bottom right  #}
+{% endblock %}
+
+{% block script %}
+  {% if mobile %}
+    <!-- No script, showing "please download app" page -->
+  {% else %}
+    <script src="https://cdn.jsdelivr.net/npm/vue-json-pretty@1.6.0/vue-json-pretty.min.js"></script>
+    <script src="/assets/js/sign_vue.js?{{ uuid }}"></script>
+    <script src="/assets/js/sweetalert.min.js"></script>
+  {% endif %}
+{% endblock %}
+
+{% block main %}
+  {% api "payloadData", uuid %}
+    {% if not results %}
+      {% set title %}
+        <i class="fas fa-ban"></i> {{ 'ERROR'|i18n }}
+      {% endset %}
+      {% set body %}
+        {{ 'PAYLOAD_NOT_FOUND'|i18n }}
+      {% endset %}
+      {{ _error.render(title, body) }}
+    {% elseif results._expired > 0 %}
+      {% set title %}
+        <i class="fas fa-clock"></i> {{ 'ERROR'|i18n }}
+      {% endset %}
+      {% set body %}
+        {{ 'PAYLOAD_EXPIRED'|i18n }}
+      {% endset %}
+      {{ _error.render(title, body) }}
+    {% elseif results._finished > 0 %}
+      {% set title %}
+        <i class="far fa-hand-paper"></i> {{ 'ALREADY_SIGNED'|i18n }}
+      {% endset %}
+      {% set color %}
+        bg-warning text-dark
+      {% endset %}
+      {% set body %}
+        {{ 'PAYLOAD_RESOLVED'|i18n }}
+      {% endset %}
+      {{ _error.render(title, body, color) }}
+    {% elseif results.application_disabled > 0 %}
+      {% set title %}
+        <i class="fas fa-ban"></i> {{ 'ERROR'|i18n }}
+      {% endset %}
+      {% set body %}
+        {{ 'APPLICATION_DISABLED'|i18n({ appname: results.application_name }) }}
+      {% endset %}
+      {{ _error.render(title, body) }}
+    {% else %}
+      {% include "partials/sign-request-body.html" %}
+    {% endif %}
+  {% error %}
+    {% set body %}
+      {{ 'PAYLOAD_BACKEND_ERROR'|i18n }}
+      {% if trusted %}
+        <hr />
+        <small class="d-block"><code class="text-muted">Debug info:</code></small>
+        <code class="text-danger">{{ error }}</code>
+      {% endif %}
+    {% endset %}
+    {{ _error.render(title, body) }}
+  {% endapi %}
+{% endblock %}

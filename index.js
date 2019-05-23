@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const log = require('debug')('app:main')
 
 async function start () {
   const middleware = [
@@ -12,23 +13,25 @@ async function start () {
     { type: 'middleware', module: 'cli-logger' },
     { type: 'handler', module: 'web' },
     { type: 'handler', module: 'api' },
-    { type: 'middleware', module: 'error-handler' }
+    { type: 'handler', module: 'wss' },
+    { type: 'middleware', module: 'error-handler' },
+    { type: 'middleware', module: 'redis-pubsub' },
   ]
 
-  console.log('Loading modules') 
+  log('Loading modules') 
   for (let i = 0; i<middleware.length; i++) {
-    console.log(` - ${middleware[i].type}: ${middleware[i].module}`)
-    await require(`./src/${middleware[i].type}/${middleware[i].module}`)(app)
+    log(` - ${middleware[i].type}: ${middleware[i].module}`)
+    await require(`@src/${middleware[i].type}/${middleware[i].module}`)(app)
   }
-  console.log('Modules loaded')
+  log('Modules loaded')
 
   app.listen(app.config.port)
-  console.log(`\nXRPL-SIGN ${app.config.mode} - Server running at port ${app.config.port}\n`)
+  log(`\nXRPL-SIGN ${app.config.mode} - Server running at port ${app.config.port}\n`)
 }
 
 start()
 
 process.on('SIGINT', async () => {
-  console.log('--- STOPPING ---')
+  log('--- STOPPING ---')
   process.exit(0)
 })

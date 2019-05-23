@@ -1,8 +1,6 @@
 const uuid = require('uuid/v4')
 
-
 module.exports = (expressApp, req, res, apiDetails) => {
-  // console.log('<< API: APP AUTH (CUSTOM, TOKEN, HEADERS) MIDDLEWARE >>')
   return new Promise(async (resolve, reject) => {
     const call_uuidv4 = uuid()
     res.set('X-Call-Ref', call_uuidv4)
@@ -13,14 +11,11 @@ module.exports = (expressApp, req, res, apiDetails) => {
 
     const _reject = (message, code, httpCode) => {
       e = new Error(message)
-      Object.assign(e, { code: code })
-      console.log(`ERROR @ ${req.ip} ${call_uuidv4} - ${e.message}`)
-      res.status(typeof httpCode === 'undefined' || !isNaN(parseInt(httpCode)) ? 403 : parseInt(httpCode)).json({
-        error: {
-          reference: call_uuidv4,
-          code: e.code || null
-        }
+      Object.assign(e, { 
+        code: code, 
+        httpCode: typeof httpCode === 'undefined' || !isNaN(parseInt(httpCode)) ? 403 : parseInt(httpCode) 
       })
+      res.handleError(e)
       reject(e)
     }
 
@@ -44,11 +39,12 @@ module.exports = (expressApp, req, res, apiDetails) => {
         call_ecode = :call_ecode,
         call_emessage = :call_emessage,
         call_idempotence = :call_idempotence,
-        call_validauthhash = :call_validauthhash
+        call_validauthhash = :call_validauthhash,
+        call_extref = :call_extref
     `
     
-    const bearer = req.headers.authorization.match(/([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})\.([0-9]+)\.([a-f0-9]{64})/i)
-    if (bearer) {
+    const bearer = (req.headers.authorization || '').match(/([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})\.([0-9]+)\.([a-f0-9]{64})/i)
+    if (bearer || !apiDetails.auth) {
       const findUserDetailsQuery = `
         SELECT
           u.user_uuidv4,
@@ -81,35 +77,49 @@ module.exports = (expressApp, req, res, apiDetails) => {
         LIMIT 1
       `
 
-      userDetails = await req.db(findUserDetailsQuery, { 
-        device_accesstoken: bearer[1],
-        device_idempotence: bearer[2]
-      })
+      if (apiDetails.auth) {
+        userDetails = await req.db(findUserDetailsQuery, { 
+          device_accesstoken: bearer[1],
+          device_idempotence: bearer[2]
+        })
 
-      if (userDetails.length > 0) {
-        const hashAndIdempotencyValid = userDetails[0].__call_hash.toLowerCase() === bearer[3].toLowerCase() && userDetails[0].__call_idempotence_valid > 0
+        if (userDetails.length > 0) {
+          const hashAndIdempotencyValid = userDetails[0].__call_hash.toLowerCase() === bearer[3].toLowerCase() && userDetails[0].__call_idempotence_valid > 0
 
-        if (hashAndIdempotencyValid || req.ipTrusted) {
-          if (hashAndIdempotencyValid) {
-            validAuthHash = true
+          if (hashAndIdempotencyValid || req.ipTrusted) {
+            if (hashAndIdempotencyValid) {
+              validAuthHash = true
+            }
+
+            req.db(updateUserActivityQuery, {
+              device_accesstoken: bearer[1],
+              device_idempotence: bearer[2]
+            })
+
+            resolve(Object.assign(userDetails[0], {
+              call_uuidv4: call_uuidv4
+            }))
+          } else {
+            _reject(`Invalid bearer idempotency or signature`, 802)
           }
-
-          req.db(updateUserActivityQuery, {
-            device_accesstoken: bearer[1],
-            device_idempotence: bearer[2]
-          })
-
-          resolve(Object.assign(userDetails[0], {
-            call_uuidv4: call_uuidv4
-          }))
         } else {
-          _reject(`Invalid bearer idempotency or signature`, 802)
+          _reject(`Invalid credentials`, 801)
         }
       } else {
-        _reject(`Invalid credentials`, 801)
+        // NoAuth
+        resolve(Object.assign({}, {
+          call_uuidv4: call_uuidv4
+        }))
       }
     } else {
       _reject(`No auth 'bearer' present or header incomplete`, 800, 401)
+    }
+
+    let extRef = null
+    if (typeof req.params === 'object' && req.params !== null && Object.keys(req.params).length > 0) {
+      if (Object.keys(req.params)[0].match(/^[a-zA-Z0-9_]+__[a-zA-Z0-9_]+$/)) {
+        extRef = Object.keys(req.params)[0].split('__')[0] + '(' + req.params[Object.keys(req.params)[0]] + ')'
+      }
     }
 
     return req.db(insertCallLogQuery, { 
@@ -119,8 +129,8 @@ module.exports = (expressApp, req, res, apiDetails) => {
       call_ip: req.remoteAddress,
       call_method: req.method,
       call_contenttype: req.headers['content-type'] || null,
-      call_endpoint: apiDetails.route.path || req.url,
-      call_url: req.url,
+      call_endpoint: (apiDetails.route.path || req.url).split('/')[0],
+      call_url: req.url.slice(0, 64),
       call_type: apiDetails.type,
       call_version: apiDetails.version,
       call_useragent: req.headers['user-agent'] || null,
@@ -128,7 +138,8 @@ module.exports = (expressApp, req, res, apiDetails) => {
       call_ecode: typeof e !== 'undefined' ? e.code || null : null,
       call_emessage: typeof e !== 'undefined' ? e.message || null : null,
       call_idempotence: typeof userDetails !== 'undefined' && userDetails.length > 0 ? userDetails[0].device_idempotence : null,
-      call_validauthhash: validAuthHash
+      call_validauthhash: validAuthHash,
+      call_extref: extRef === null ? null : extRef.slice(0, 60)
     })
   })
 }

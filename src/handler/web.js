@@ -1,17 +1,19 @@
+// const log = require('debug')('app:web')
+
 const fs = require('fs')
 const express = require('express')
 const nunjucks = require('nunjucks')
 const locale = require('express-locale')
+const mobile = require('is-mobile')
 
 const bodyParser = require('body-parser')
 
-const qrExtension = require('./nunjucks_extensions/qr')
-const dbExtension = require('./nunjucks_extensions/db')
-const I18nFilter = require('./nunjucks_extensions/i18n')
+const dbExtension = require('@web/nunjucks_extensions/db')
+const apiExtension = require('@web/nunjucks_extensions/api')
+const qrExtension = require('@web/nunjucks_extensions/qr')
+const I18nFilter = require('@web/nunjucks_extensions/i18n')
 
 module.exports = async function (expressApp) {
-  require('express-ws')(expressApp)
-
   expressApp.use(bodyParser.urlencoded({ extended: true }))
   expressApp.use(locale({
     priority: [ 'accept-language', 'default' ],
@@ -27,20 +29,16 @@ module.exports = async function (expressApp) {
     return res.render('index.html', { module: 'index' })
   })
 
-  router.ws('/', (ws, req) => {
-    ws.on('message', (msg) => {
-      console.log('Got WS Message', msg)
-      ws.send('Right back at  you')
-    })
-  })
-
   router.get('/*', (req, res, next) => {
-    if (req.url.match(/\.(css|png|jpg|gif|js|ico)$/)) {
+    if (req.url.match(/\.(css|png|jpg|gif|js|ico|svg)$/)) {
       res.setHeader('Cache-Control', 'max-age=2592000, public')
     }
     Object.assign(res.locals, {
       locale: req.locale,
-      appname: 'SuperCoolApp'
+      baselocation: req.config.baselocation,
+      mode: req.config.mode,
+      appstorelinks: req.config.AppStoreLinks,
+      trusted: req.ipTrusted
     })
     next()
   }, express.static('public_html'))
@@ -48,6 +46,21 @@ module.exports = async function (expressApp) {
   router.get('/about', (req, res, next) => {
     // throw new Error("BROKEN")
     return res.render('about.html')
+  })
+
+  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):qr(/qr)?', (req, res, next) => {
+    Object.assign(res.locals, {
+      uuid: req.params.uuid || '',
+      params: req.params,
+      mobile: mobile({ ua: req.headers['user-agent'] || '', tablet: true }),
+      is: {
+        ios: (req.headers['user-agent'] || '').match(/iPhone|iPad/i),
+        mac: (req.headers['user-agent'] || '').match(/Macintosh/i),
+        android: (req.headers['user-agent'] || '').match(/android/i)
+      },
+      mode: req.config.mode
+    })
+    return res.render('sign.html')
   })
 
   // WEBROUTER WILDCARD - FALLBACK
@@ -77,6 +90,7 @@ module.exports = async function (expressApp) {
 
   env.addGlobal('year', (new Date()).getYear() + 1900)
 
+  env.addExtension('api', new apiExtension(expressApp, 'web'))
   env.addExtension('db', new dbExtension(expressApp))
   env.addExtension('qr', new qrExtension())
 

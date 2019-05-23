@@ -17,18 +17,22 @@ class dbExtension {
       return new nodes.CallExtensionAsync(this, 'run', args, [ body, errorBody ])
     }
 
-    this.run = async (context, query, body, errorBody, cb) => {
-      // return body()
-      // const err = new Error('xxxx')
-      // console.log(context)
-      // context.ctx.results = new nunjucks.runtime.SafeString('DBSOME <b>NICE</b> RESULTS')
+    this.run = async function () {
+      if (arguments.length < 6) {
+        var [ context, query, body, errorBody, cb ] = arguments
+      } else {
+        var [ context, query, args, body, errorBody, cb ] = arguments
+      }
+
       let results
       let response
       let err
-      await expressApp.db(query).then(res => {
+
+      await expressApp.db(query, args || {}).then(res => {
         results = res.map(r => {
           return { ...r }
         })
+        context.ctx.results = results // Assign before rendering body()
         response = new nunjucks.runtime.SafeString(body())
       }).catch(e => {
         context.ctx.error = e.message
@@ -37,8 +41,7 @@ class dbExtension {
         // If hard error
         // err = new Error('Shit hits the fan')
       })
-      context.ctx.results = results
-      // context.ctx.error = new nunjucks.runtime.SafeString('DBSOME <b>STRANGE</b> ERROR')
+
       cb(err, response)
     }  
   }
