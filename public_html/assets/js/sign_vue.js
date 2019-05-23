@@ -18,12 +18,13 @@ if (typeof payload !== 'undefined') {
         returnUrl: null,
         payload: payload,
         options: options,
-        message: ''
+        message: '',
+        rawTxDom: null
       }
     },
     methods: {
       showRawTx: function () {
-        swal({ content: document.querySelector('#showTx'), buttons: {} })
+        swal({ content: this.rawTxDom, buttons: {} })
       },
       receiveWebSocketMessage: function (message) {
         console.log('> Got WS data', message)
@@ -88,6 +89,9 @@ if (typeof payload !== 'undefined') {
           $.reconnectWebSocket()
         }
       }
+    },
+    mounted: function () {
+      this.rawTxDom = document.querySelector('#showTx')
     },
     created: function () {
       this.connectWebSocket()
