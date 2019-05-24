@@ -21,10 +21,10 @@ module.exports = async (req, res) => {
           AND
             device_accesstoken IS NOT NULL
           AND
-            device_created > :expiration
+            device_created > FROM_UNIXTIME(:expiration)
         `, {
           deviceId: req.__auth.device.id, 
-          expiration: pendingExpiry
+          expiration: pendingExpiry / 1000
         })
 
         res.json({

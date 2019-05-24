@@ -29,9 +29,11 @@ module.exports = async (uuid, expressApp, invoker) => {
         payloads.call_uuidv4 as _uuid,
         IF (knownaccounts.knownaccount_name IS NULL OR knownaccounts.knownaccount_name = '', payloads.payload_tx_destination, knownaccounts.knownaccount_name) as _destination,
         IF (payloads.payload_handler IS NULL, 0, 1) as _finished,
-        IF (payloads.payload_expiration >= :payload_expiration, 0, 1) as _expired,
-        IF (payloads.payload_expiration >= :payload_expiration, 0, 1) as _expired,
+        IF (payloads.payload_expiration >= FROM_UNIXTIME(:payload_expiration), 0, 1) as _expired,
         IF (payloads.token_id IS NOT NULL, 1, 0) as _pushed,
+        IF (payloads.payload_app_opencount > 0, 1, 0) as _app_opened,
+        DATE_FORMAT(payloads.payload_created, '%Y-%m-%dT%H:%i:%sZ') as payload_created_at,
+        DATE_FORMAT(payloads.payload_expiration, '%Y-%m-%dT%H:%i:%sZ') as payload_expires_at,
         payloads.payload_return_url_app,
         payloads.payload_return_url_web,
         payloads.payload_response_hex as response_hex,
@@ -58,7 +60,7 @@ module.exports = async (uuid, expressApp, invoker) => {
       LIMIT 1
     `, {
       call_uuidv4: payloadUuid,
-      payload_expiration: new Date()
+      payload_expiration: new Date() / 1000
     })
 
     if (dbResults.constructor.name === 'Array' && dbResults.length > 0 && dbResults[0].constructor.name === 'RowDataPacket') {

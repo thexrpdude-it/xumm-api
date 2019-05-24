@@ -182,7 +182,7 @@ module.exports = async (req, res) => {
             AND
               token_hidden = 0
             AND
-              token_expiration >= :token_expiration
+              token_expiration >= FROM_UNIXTIME(:token_expiration)
             AND
               devices.device_disabled IS NULL
             AND
@@ -195,7 +195,7 @@ module.exports = async (req, res) => {
               devices.device_lastcall DESC
           `, {
             token_accesstoken: req.body.user_token,
-            token_expiration: new Date()
+            token_expiration: new Date() / 1000
           })
 
           if (pushToken.constructor.name === 'Array' && pushToken.length > 0 && pushToken[0].constructor.name === 'RowDataPacket') {
@@ -228,8 +228,8 @@ module.exports = async (req, res) => {
           payload_tx_account = :payload_tx_account,
           payload_tx_destination = :payload_tx_destination,
           payload_tx_destination_tag = :payload_tx_destination_tag,
-          payload_created = :payload_created,
-          payload_expiration = :payload_expiration,
+          payload_created = FROM_UNIXTIME(:payload_created),
+          payload_expiration = FROM_UNIXTIME(:payload_expiration),
           payload_multisign = :payload_multisign,
           payload_submit = :payload_submit,
           payload_return_url_app = :payload_return_url_app,
@@ -246,8 +246,8 @@ module.exports = async (req, res) => {
         payload_tx_account: tx.json.Account || '',
         payload_tx_destination: tx.json.Destination || '',
         payload_tx_destination_tag: tx.json.DestinationTag || null,
-        payload_created: payloadMoment,
-        payload_expiration: payloadExpiry,
+        payload_created: payloadMoment / 1000,
+        payload_expiration: payloadExpiry / 1000,
         payload_multisign: options.multisign,
         payload_submit: options.submit,
         payload_return_url_app: options.return_url_app,

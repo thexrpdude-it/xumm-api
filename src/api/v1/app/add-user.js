@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       user_slug = '',
       user_name = '',
       user_profilepage = 0, 
-      user_created = :moment_creation,
+      user_created = FROM_UNIXTIME(:moment_creation),
       user_created_ip = :request_ip
   `
 
@@ -29,9 +29,9 @@ module.exports = async (req, res) => {
     SET 
       user_id = :userId,
       device_uuidv4 = :device_uuidv4,
-      device_created = :moment_creation,
+      device_created = FROM_UNIXTIME(:moment_creation),
       device_created_ip = :request_ip,
-      device_disabled = :device_expiration
+      device_disabled = FROM_UNIXTIME(:device_expiration)
   `
 
   let response = {
@@ -45,14 +45,18 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const user = await req.db(userQuery, data)
+    const user = await req.db(userQuery, {
+      ...data,
+      moment_creation: data.moment_creation / 1000
+    })
     if (user.constructor.name !== 'OkPacket' || typeof user.insertId === 'undefined' || !(user.insertId > 0)) {
       throw new Error(`Operation [user] didn't result in a new record`)
     }
     const device = await req.db(deviceQuery, { 
       ...data, 
-      userId: user.insertId, 
-      device_expiration: deviceExpiry
+      userId: user.insertId,
+      moment_creation: data.moment_creation / 1000,
+      device_expiration: deviceExpiry / 1000
     })
     if (device.constructor.name !== 'OkPacket' || typeof device.insertId === 'undefined' || !(device.insertId > 0)) {
       throw new Error(`Operation [device] didn't result in a new record`)

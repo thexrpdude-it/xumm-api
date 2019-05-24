@@ -1,4 +1,5 @@
 module.exports = {
+  LANGUAGE_CODE: 'en',
   ERROR: `Error`,
   ERROR_404_BODY: `Sorry, the page you requested could not be found.`,
   ERROR_500_BODY: `Sorry, your request couldn't be processed at this moment.`,
@@ -44,5 +45,7 @@ module.exports = {
   DIDNT_RECEIVE_PUSH_TEXT: `Didn't receive the push message?`,
   SHOW_QR: `Scan a QR code instead`,
   PLEASE_INSTALL_APP: `Please install <b class="font-logo">xign</b>`,
-  TITLE_TX_SCANNED: `Opened in <b class="font-logo">xign</b>`
+  TITLE_TX_SCANNED: `Opened in <b class="font-logo">xign</b>`,
+  PAYLOAD_ALREADY_OPENED: `Sign request has been opened`,
+  NEED_QR_PAYLOAD_QR: `You can reopen the sign request. The sign request expires <span class="ts-moment">__in_x_time_expire__</span>.`,
 }

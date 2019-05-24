@@ -16,9 +16,19 @@
   {% if mobile %}
     <!-- No script, showing "please download app" page -->
   {% else %}
+    <script crossorigin="anonymous" src="https://polyfill.io/v3/polyfill.min.js?flags=gated&features=Array.prototype.forEach%2CArray.prototype.reduce%2CArray.prototype.indexOf%2CArray.prototype.map%2CArray.prototype.filter%2CArray.prototype.keys%2CArray.prototype.values%2Cfetch"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-json-pretty@1.6.0/vue-json-pretty.min.js"></script>
     <script src="/assets/js/sign_vue.js?{{ uuid }}"></script>
     <script src="/assets/js/sweetalert.min.js"></script>
+
+    <script src="/assets/js/moment-with-locales.min.js"></script>
+    <script src="/assets/js/moment-timezone-with-data.min.js"></script>
+    <script>
+      document.querySelectorAll('.ts-moment').forEach(function (m) {
+        var t = moment(m.innerHTML.trim() + 'Z')
+        m.innerHTML = t.locale('{{ 'LANGUAGE_CODE'|i18n }}').fromNow()
+      })
+    </script>
   {% endif %}
 {% endblock %}
 

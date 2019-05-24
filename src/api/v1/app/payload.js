@@ -192,8 +192,8 @@ module.exports = async (req, res) => {
                       tokens
                     SET 
                       user_id = :user_id,
-                      token_issued = :token_issued,
-                      token_expiration = :token_expiration,
+                      token_issued = FROM_UNIXTIME(:token_issued),
+                      token_expiration = FROM_UNIXTIME(:token_expiration),
                       token_accesstoken = :token_accesstoken,
                       call_uuidv4 = :call_uuidv4,
                       payload_uuidv4 = :payload_uuidv4,
@@ -201,11 +201,15 @@ module.exports = async (req, res) => {
                       token_days_valid = :token_days_valid,
                       token_hidden = 0
                     ON DUPLICATE KEY UPDATE
-                      token_expiration = DATE_ADD(:token_issued, INTERVAL token_days_valid DAY),
+                      token_expiration = DATE_ADD(FROM_UNIXTIME(:token_issued), INTERVAL token_days_valid DAY),
                       call_uuidv4 = :call_uuidv4,
                       payload_uuidv4 = :payload_uuidv4,
                       token_hidden = 0
-                  `, generatedAccessToken)
+                  `, { 
+                    ...generatedAccessToken,
+                    token_issued: generatedAccessToken.token_issued / 1000,
+                    token_expiration: generatedAccessToken.token_expiration / 1000
+                  })
 
                   if (accessTokenInsert.constructor.name !== 'OkPacket' || typeof accessTokenInsert.insertId === 'undefined' || !(accessTokenInsert.insertId > 0)) {
                     const e = new Error(`Could not persist access token`)
@@ -229,12 +233,12 @@ module.exports = async (req, res) => {
                 WHERE
                   token_hidden = 0
                 AND
-                  token_expiration > :now
+                  token_expiration > FROM_UNIXTIME(:now)
                 AND
                   application_id = (SELECT application_id FROM applications WHERE application_uuidv4 = :application_uuidv4 LIMIT 1)
                 LIMIT 1
               `, {
-                now: new Date(),
+                now: new Date() / 1000,
                 application_uuidv4: payload.application_uuidv4
               })
 
@@ -260,13 +264,16 @@ module.exports = async (req, res) => {
                   UPDATE
                     tokens
                   SET 
-                    token_expiration = :token_expiration,
+                    token_expiration = FROM_UNIXTIME(:token_expiration),
                     call_uuidv4 = :call_uuidv4,
                     payload_uuidv4 = :payload_uuidv4,
                     token_hidden = 0
                   WHERE
                     token_accesstoken = :token_accesstoken
-                `, generatedAccessToken)
+                `, { 
+                  ...generatedAccessToken,
+                  token_expiration: generatedAccessToken.token_expiration
+                })
 
                 if (accessTokenUpdate.constructor.name !== 'OkPacket' || typeof accessTokenUpdate.changedRows === 'undefined' || !(accessTokenUpdate.changedRows > 0)) {
                   const e = new Error(`Could not persist (updated) access token`)
@@ -317,7 +324,7 @@ module.exports = async (req, res) => {
                 payloads.payload_response_txid = :payload_response_txid,
                 payloads.payload_response_multisign_account = :multisign_account,
                 payloads.payload_tx_account = :payload_tx_account,
-                payloads.payload_resolved = :payload_resolved,
+                payloads.payload_resolved = FROM_UNIXTIME(:payload_resolved),
                 payloads.payload_dispatched_to = :payload_dispatched_to,
                 payloads.payload_dispatched_result = :payload_dispatched_result,
                 payloads.payload_response_account = :response_account,
@@ -333,7 +340,7 @@ module.exports = async (req, res) => {
               payload_response_txid: payloadUpdate.response_txid,
               multisign_account: payloadUpdate.multisign_account,
               payload_tx_account: payloadUpdate.tx_account,
-              payload_resolved: payloadUpdate.resolved,
+              payload_resolved: payloadUpdate.resolved / 1000,
               payload_dispatched_to: payloadUpdate.dispatched_to,
               payload_dispatched_result: payloadUpdate.dispatched_result,
               response_account: payloadUpdate.response_account,
