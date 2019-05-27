@@ -5,6 +5,12 @@ module.exports = (db, account, _options) => {
     retryAfter: typeof _options === 'object' && _options !== null && typeof _options.retryAfter === 'number' ? _options.retryAfter : 0
   }
 
+  /**
+   * TODO: add xrplns: 
+   *   https://xrplns.com/api/v1/resolve/social/github/WietseWind
+   *   https://xrplns.com/api/v1/resolve/xrplaccount/rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY/495
+   */
+
   return new Promise(async (resolve, reject) => {
     let retried = false
 
