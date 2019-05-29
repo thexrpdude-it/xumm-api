@@ -2,8 +2,8 @@
 
 docker stop xrpl-sign
 docker rm xrpl-sign
-#docker rmi xrpl-sign
-#docker build -t xign/xrpl-sign .
+# docker rmi xrpl-sign
+# docker build -t xign/xrpl-sign .
 docker run \
   --name xrpl-sign \
   -d \

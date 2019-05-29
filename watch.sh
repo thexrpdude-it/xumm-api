@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ssh xrparrot "docker logs --tail 30 -f xrpl-sign"
+ssh xign "docker logs --tail 30 -f xrpl-sign"
