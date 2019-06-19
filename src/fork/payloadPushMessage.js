@@ -23,7 +23,6 @@ const main = async (data) => {
 
   try {
     log('PUSHDATA', data.transaction)
-    // TODO: Actual Push Delivery
     const url = 'https://fcm.googleapis.com/fcm/send'
     const response = await fetch(url, {
       method: 'post',
