@@ -98,6 +98,7 @@ module.exports = async function (expressApp) {
           },
           { method: 'post', path: 'activate-device', disableAuth: true },
           { method: 'post', path: 'ping' },
+          { method: 'post', path: 'dev/push/raw', module: 'dev-push-raw' },
           { method: 'post', path: 'update-device' },
           { method: 'post', path: 'add-device' },
           { method: [ 'get', 'patch', 'delete' ], path: 'pending-devices' },
