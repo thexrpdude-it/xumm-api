@@ -100,10 +100,10 @@ module.exports = (expressApp, req, res, apiDetails) => {
               call_uuidv4: call_uuidv4
             }))
           } else {
-            _reject(`Invalid bearer idempotency or signature`, 802)
+            _reject(`Invalid bearer idempotency or signature`, 830)
           }
         } else {
-          _reject(`Invalid credentials`, 801)
+          _reject(`Invalid credentials`, 831)
         }
       } else {
         // NoAuth
@@ -112,7 +112,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         }))
       }
     } else {
-      _reject(`No auth 'bearer' present or header incomplete`, 800, 401)
+      _reject(`No auth 'bearer' present or header incomplete`, 832, 401)
     }
 
     let extRef = null

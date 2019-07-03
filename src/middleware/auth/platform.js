@@ -80,10 +80,10 @@ module.exports = (expressApp, req, res, apiDetails) => {
               call_uuidv4: call_uuidv4
             }))
           } else {
-            _reject(`Application disabled`, 802, 401)
+            _reject(`Application disabled`, 810, 401)
           }
         } else {
-          _reject(`Invalid 'X-API-Key' / 'X-API-Secret' credentials`, 801)
+          _reject(`Invalid 'X-API-Key' / 'X-API-Secret' credentials`, 811)
         }
       } else {
         // NoAuth
@@ -92,7 +92,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         }))
       }
     } else {
-      _reject(`No auth 'X-API-Key' / 'X-API-Secret' headers present or malformed`, 800, 401)
+      _reject(`No auth 'X-API-Key' / 'X-API-Secret' headers present or malformed`, 812, 401)
     }
 
     let extRef = null
