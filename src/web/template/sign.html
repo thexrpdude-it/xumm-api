@@ -25,7 +25,9 @@
     <script src="/assets/js/moment-timezone-with-data.min.js"></script>
     <script>
       document.querySelectorAll('.ts-moment').forEach(function (m) {
-        var t = moment(m.innerHTML.trim() + 'Z')
+        var n = m.innerHTML.trim()
+        if (!n.match(/[a-zA-Z\+\-0-9 ]{1,}$/)) n += 'Z'
+        var t = moment(n)
         m.innerHTML = t.locale('{{ 'LANGUAGE_CODE'|i18n }}').fromNow()
       })
     </script>
