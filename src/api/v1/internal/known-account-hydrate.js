@@ -15,13 +15,13 @@ module.exports = (db, account) => {
     source: 'none'
   }
 
-  const persist = async (data) => {
+  const persist = (data) => {
     /**
      * Remove potential existing (prefixed) 'internal:' result
      */
     data.source = data.source.split(':').reverse()[0]
 
-    db(`
+    return db(`
       INSERT INTO knownaccounts (
         knownaccount_account,
         knownaccount_name,
@@ -57,6 +57,31 @@ module.exports = (db, account) => {
           domain: bithompResponse.domain || null,
           blocked: false,
           source: 'bithomp.com'
+        }
+      }
+      if (response.name === null || response.name === '') {
+        resolve()
+      } else {
+        resolve(response)
+      }
+    })
+  }
+
+  const lookupXrpScan = () => {
+    return new Promise(async (resolve, reject) => {
+      /**
+       * Lookup @ Bithomp API
+       */
+      log(`  --> Fetching accountinfo @ XRPScan [ ${account} ]`)
+      const xrpscan = await fetch('https://api.xrpscan.com/api/v1/account/' + account, { follow: 1, timeout: 1500 })
+      const xrpscanResponse = await xrpscan.json()
+      if (typeof xrpscanResponse === 'object' && xrpscanResponse !== null && typeof xrpscanResponse.accountName === 'object' && xrpscanResponse.accountName !== null && typeof xrpscanResponse.accountName.name === 'string') {
+        response = {
+          account: account,
+          name: xrpscanResponse.accountName.name,
+          domain: xrpscanResponse.accountName.domain || null,
+          blocked: false,
+          source: 'xrpscan.com'
         }
       }
       if (response.name === null || response.name === '') {
@@ -123,7 +148,7 @@ module.exports = (db, account) => {
   }
 
   const lookup = () => {
-    const lookups = [ lookupBithomp, lookupXrpl ]
+    const lookups = [ lookupBithomp, lookupXrpScan, lookupXrpl ]
     let resolved = false
 
     return new Promise((resolve, reject) => {
