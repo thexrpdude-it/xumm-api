@@ -29,16 +29,18 @@ module.exports = async (req, res) => {
     `)
 
     if (match.length > 0) {
-      res.json(match.reduce((a, b) => {
+      let currencies = []
+      const iou_details = match.reduce((a, b) => {
         if (typeof a[b.issuer_name] === 'undefined') {
           a[b.issuer_name] = {
-            issuer: {
-              name: b.issuer_name,
-              domain: b.issuer_domain,
-              avatar: b.issuer_avatar
-            },
+            name: b.issuer_name,
+            domain: b.issuer_domain,
+            avatar: b.issuer_avatar,
             currencies: {}
           }
+        }
+        if (currencies.indexOf(b.iou_currency) < 0) {
+          currencies.push(b.iou_currency)
         }
         a[b.issuer_name].currencies[b.iou_currency] = {
           issuer: b.iou_issuer,
@@ -47,7 +49,12 @@ module.exports = async (req, res) => {
           avatar: b.iou_avatar
         }
         return a
-      }, {}))
+      }, {})
+      res.json({
+        issuers: Object.keys(iou_details),
+        currencies: currencies,
+        details: iou_details
+      })
     } else {
       const e = new Error(`Couldn't fetch IOU's`)
       e.code = 500
