@@ -1,6 +1,6 @@
 // const log = require('debug')('app:web')
 
-const fs = require('fs')
+const translations = require('@src/global/translations')
 const express = require('express')
 const nunjucks = require('nunjucks')
 const locale = require('express-locale')
@@ -98,18 +98,11 @@ module.exports = async function (expressApp) {
    * Add translations i18n, read from folder with
    * translation js files.
    */
-  fs.readdir('./src/web/translations/', (err, files) => {
-    let translations = []
-    files.filter(f => {
-      return f.match(/^([a-z]{2}|[a-z]{2}_[a-z]{2})\.js$/i)
-    }).forEach(f => {
-      translations[f.slice(0, -3).toLowerCase()] = require('../web/translations/' + f.slice(0, -3))
-    })
-    env.addFilter('i18n', new I18nFilter({
-      default: 'en',
-      translations: translations
-    }))
-  })
+  
+  env.addFilter('i18n', new I18nFilter({
+    default: 'en',
+    translations: translations.raw
+  }))
 
   // /**
   //  * Testing.
