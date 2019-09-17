@@ -48,4 +48,6 @@ module.exports = {
   TITLE_TX_SCANNED: `Opened in <b class="font-logo">xumm</b>`,
   PAYLOAD_ALREADY_OPENED: `Sign request has been opened`,
   NEED_QR_PAYLOAD_QR: `You can reopen the sign request. The sign request expires <span class="ts-moment">__in_x_time_expire__</span>.`,
+  PUSH_MSG_SIGN_REQUEST: `Sign request`,
+  PUSH_MSG_TXTYPE_TO_DEST: `__type__ to __destination__`
 }

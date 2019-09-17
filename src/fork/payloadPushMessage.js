@@ -1,4 +1,5 @@
 const fetch = require('node-fetch')
+const translations = require('@src/global/translations')
 const options = {
   module_name: 'payloadPushMessage',
   process_timeout: 5
@@ -8,7 +9,7 @@ const log = function () {
   process.send({ debug_log: arguments })
 }
 
-// TODO: Localize i18n
+// TODO: Localize (now default EN) i18n
 
 /**
  * Code
@@ -16,6 +17,7 @@ const log = function () {
 
 const main = async (data) => {
   let timeout
+
   timeout = setTimeout(() => {
     log(`TIMEOUT @ ${options.module_name} [ payload(${data.payload.uuidv4}) ]`)
     process.exit(1)
@@ -30,9 +32,12 @@ const main = async (data) => {
         to: data.device.pushtoken,
         notification: {
           title: `${data.application.name}`,
-          // subtitle: ,
-          body: `${data.transaction.type} transaction to ${data.transaction.destination.known.knownaccount_name || data.transaction.destination.account}`,
-          // sound: 'default',
+          subtitle: translations.translate('en', 'PUSH_MSG_SIGN_REQUEST'),
+          body: translations.translate('en', 'PUSH_MSG_TXTYPE_TO_DEST', {
+            type: data.transaction.type,
+            destination: data.transaction.destination.known.knownaccount_name || data.transaction.destination.account
+          }),
+          sound: 'default',
           click_action: 'SIGNTX'
         }
       }),

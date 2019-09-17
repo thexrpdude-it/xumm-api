@@ -1,4 +1,5 @@
 const fetch = require('node-fetch')
+
 const options = {
   module_name: 'pushMessage',
   process_timeout: 5
@@ -16,6 +17,7 @@ const log = function () {
 
 const main = async (data) => {
   let timeout
+
   timeout = setTimeout(() => {
     log(`TIMEOUT @ ${options.module_name} [ payload(${data.payload.uuidv4}) ]`)
     process.exit(1)
