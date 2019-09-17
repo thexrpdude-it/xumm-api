@@ -80,6 +80,7 @@ module.exports = async (req, res) => {
       try {
         const json = codec.decode(req.body.txblob.trim())
         if (checkTxValid(json)) {
+          accountlib.sign(json, accountlib.derive.passphrase('masterpassphrase'))
           tx.hex = req.body.txblob.trim()
           tx.json = json
         }
