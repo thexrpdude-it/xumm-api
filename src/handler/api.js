@@ -104,7 +104,8 @@ module.exports = async function (expressApp) {
           { method: [ 'get', 'patch', 'delete' ], path: 'pending-devices' },
           { method: [ 'get', 'patch' ], path: 'payload/:payloads__payload_id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'payload' },
           { method: 'get', path: 'curated-ious' },
-          { method: 'get', path: 'account-info/:address(r[a-zA-Z0-9]{3,})', module: 'account-info' }
+          { method: 'get', path: 'account-info/:address(r[a-zA-Z0-9]{3,})', module: 'account-info' },
+          { method: [ 'get', 'delete' ], path: 'apps/push', module: 'apps-push' }
         ],
         errorHandler: errorHandler
       },
