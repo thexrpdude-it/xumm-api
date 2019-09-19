@@ -48,21 +48,25 @@ module.exports = (db, account) => {
        * Lookup @ Bithomp API
        */
       log(`  --> Fetching accountinfo @ Bithomp [ ${account} ]`)
-      const bithomp = await fetch('https://bithomp.com/api/v1/userinfo/' + account, { follow: 1, timeout: 1500 })
-      const bithompResponse = await bithomp.json()
-      if (typeof bithompResponse === 'object' && bithompResponse !== null && typeof bithompResponse.name !== 'undefined') {
-        response = {
-          account: account,
-          name: bithompResponse.name,
-          domain: bithompResponse.domain || null,
-          blocked: false,
-          source: 'bithomp.com'
+      try {
+        const bithomp = await fetch('https://bithomp.com/api/v1/userinfo/' + account, { follow: 1, timeout: 1500 })
+        const bithompResponse = await bithomp.json()
+        if (typeof bithompResponse === 'object' && bithompResponse !== null && typeof bithompResponse.name !== 'undefined') {
+          response = {
+            account: account,
+            name: bithompResponse.name,
+            domain: bithompResponse.domain || null,
+            blocked: false,
+            source: 'bithomp.com'
+          }
         }
-      }
-      if (response.name === null || response.name === '') {
+        if (response.name === null || response.name === '') {
+          resolve()
+        } else {
+          resolve(response)
+        }
+      } catch (e) {
         resolve()
-      } else {
-        resolve(response)
       }
     })
   }
@@ -73,21 +77,25 @@ module.exports = (db, account) => {
        * Lookup @ Bithomp API
        */
       log(`  --> Fetching accountinfo @ XRPScan [ ${account} ]`)
-      const xrpscan = await fetch('https://api.xrpscan.com/api/v1/account/' + account, { follow: 1, timeout: 1500 })
-      const xrpscanResponse = await xrpscan.json()
-      if (typeof xrpscanResponse === 'object' && xrpscanResponse !== null && typeof xrpscanResponse.accountName === 'object' && xrpscanResponse.accountName !== null && typeof xrpscanResponse.accountName.name === 'string') {
-        response = {
-          account: account,
-          name: xrpscanResponse.accountName.name,
-          domain: xrpscanResponse.accountName.domain || null,
-          blocked: false,
-          source: 'xrpscan.com'
+      try {
+        const xrpscan = await fetch('https://api.xrpscan.com/api/v1/account/' + account, { follow: 1, timeout: 1500 })
+        const xrpscanResponse = await xrpscan.json()
+        if (typeof xrpscanResponse === 'object' && xrpscanResponse !== null && typeof xrpscanResponse.accountName === 'object' && xrpscanResponse.accountName !== null && typeof xrpscanResponse.accountName.name === 'string') {
+          response = {
+            account: account,
+            name: xrpscanResponse.accountName.name,
+            domain: xrpscanResponse.accountName.domain || null,
+            blocked: false,
+            source: 'xrpscan.com'
+          }
         }
-      }
-      if (response.name === null || response.name === '') {
+        if (response.name === null || response.name === '') {
+          resolve()
+        } else {
+          resolve(response)
+        }
+      } catch (e) {
         resolve()
-      } else {
-        resolve(response)
       }
     })
   }
@@ -100,49 +108,53 @@ module.exports = (db, account) => {
       let source = 's1.ripple.com'
 
       log(`  --> Fetching accountinfo @ XRPL [ ${account} ]`)
-      const rippled = await fetch('https://s1.ripple.com:51234/', { 
-        method: 'post', 
-        body: JSON.stringify({
-          method: 'account_info',
-          params: [ { account: account } ]
-        }), 
-        follow: 0, 
-        timeout: 2500 
-      })
-      const rippledResponse = await rippled.json()
+      try {
+        const rippled = await fetch('https://s1.ripple.com:51234/', { 
+          method: 'post', 
+          body: JSON.stringify({
+            method: 'account_info',
+            params: [ { account: account } ]
+          }), 
+          follow: 0, 
+          timeout: 2500 
+        })
+        const rippledResponse = await rippled.json()
 
-      if (typeof rippledResponse === 'object' && rippledResponse !== null && typeof rippledResponse.result === 'object' && typeof rippledResponse.result.account_data === 'object') {
-        let domain = null
-        if (typeof rippledResponse.result.account_data.Domain !== 'undefined' && rippledResponse.result.account_data.Domain.match(/^[A-F0-9]+$/)) {
-          domain = Buffer.from(rippledResponse.result.account_data.Domain, 'hex').toString('utf-8')
-        }
-        if (typeof rippledResponse.result.account_data.EmailHash !== 'undefined' && rippledResponse.result.account_data.EmailHash.match(/^[A-F0-9]{32}$/i)) {
-          const gravatar = await fetch('https://nl.gravatar.com/' + rippledResponse.result.account_data.EmailHash.toLowerCase() + '.json', { follow: 1, timeout: 1500 })
-          const gravatarResponse = await gravatar.json()
-          if (typeof gravatarResponse === 'object' && gravatarResponse !== null && typeof gravatarResponse.entry !== 'undefined' && gravatarResponse.entry.length > 0) {
-            const gravatsWithNames = gravatarResponse.entry.filter(r => {
-              return typeof r.displayName === 'string'
-            })
-            if (gravatsWithNames.length > 0) {
-              if (response.name === null) {
-                response.name = gravatsWithNames[0].displayName
-                source += ',gravatar'
+        if (typeof rippledResponse === 'object' && rippledResponse !== null && typeof rippledResponse.result === 'object' && typeof rippledResponse.result.account_data === 'object') {
+          let domain = null
+          if (typeof rippledResponse.result.account_data.Domain !== 'undefined' && rippledResponse.result.account_data.Domain.match(/^[A-F0-9]+$/)) {
+            domain = Buffer.from(rippledResponse.result.account_data.Domain, 'hex').toString('utf-8')
+          }
+          if (typeof rippledResponse.result.account_data.EmailHash !== 'undefined' && rippledResponse.result.account_data.EmailHash.match(/^[A-F0-9]{32}$/i)) {
+            const gravatar = await fetch('https://nl.gravatar.com/' + rippledResponse.result.account_data.EmailHash.toLowerCase() + '.json', { follow: 1, timeout: 1500 })
+            const gravatarResponse = await gravatar.json()
+            if (typeof gravatarResponse === 'object' && gravatarResponse !== null && typeof gravatarResponse.entry !== 'undefined' && gravatarResponse.entry.length > 0) {
+              const gravatsWithNames = gravatarResponse.entry.filter(r => {
+                return typeof r.displayName === 'string'
+              })
+              if (gravatsWithNames.length > 0) {
+                if (response.name === null) {
+                  response.name = gravatsWithNames[0].displayName
+                  source += ',gravatar'
+                }
               }
-            }
-          }    
+            }    
+          }
+          response = {
+            account: rippledResponse.result.account_data.Account || '',
+            name: response.name,
+            domain: domain,
+            blocked: false,
+            source: source
+          }
         }
-        response = {
-          account: rippledResponse.result.account_data.Account || '',
-          name: response.name,
-          domain: domain,
-          blocked: false,
-          source: source
+        if (response.name === null || response.name === '') {
+          resolve()
+        } else {
+          resolve(response)
         }
-      }
-      if (response.name === null || response.name === '') {
-        resolve()
-      } else {
-        resolve(response)
+      } catch (e) {
+        resolve(e)
       }
     })
   }
