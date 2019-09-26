@@ -9,9 +9,9 @@ const uuid = require('uuid/v4')
 const { fork } = require('child_process')
 
 module.exports = async (req, res) => {
-  const payload = await getPayloadData(req.params.payloads__payload_id, req.app, 'app')
-
   try {
+    const payload = await getPayloadData(req.params.payloads__payload_id, req.app, 'app')
+
     switch (req.method) {
       case 'GET':
         /**
@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
             if (payload) {
               req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, { opened: true })
     
-              formatPayloadData(payload, response)
+              response = formatPayloadData(payload, response)
             }
     
             return res.json(response)
