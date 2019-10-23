@@ -8,8 +8,6 @@ module.exports = (expressApp, req, res, apiDetails) => {
     res.set('X-Call-Ref', call_uuidv4)
 
     let e
-    let userDetails
-    let validAuthHash = false
 
     const _reject = (message, code, httpCode) => {
       e = new Error(message)

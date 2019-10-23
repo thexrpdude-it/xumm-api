@@ -40,7 +40,7 @@
     "qrcode-svg": "^1.0.0",
     "ripple-binary-codec": "^0.2.4",
     "uuid": "^3.3.3",
-    "xrpl-accountlib": "git+https://github.com/WietseWind/xrpl-accountlib.git"
+    "xrpl-accountlib": "^0.3.3"
   },
   "scripts": {
     "dev": "clear; DEBUG=app:* nodemon .",
