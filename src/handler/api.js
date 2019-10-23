@@ -124,6 +124,15 @@ module.exports = async function (expressApp) {
         ],
         errorHandler: errorHandler
       },
+      console: {
+        middleware: 'auth/devconsole-jwt',
+        routes: [
+          { method: [ 'get', 'post' ], path: 'ping' }
+          // { method: [ 'get' ], path: 'payload/:payloads__payload_id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'payload-get' },
+          // { method: [ 'post' ], path: 'payload', module: 'payload-post' },
+        ],
+        errorHandler: errorHandler
+      },
       /**
        * Platform: OAuth2 for 3rd party Developers
        */
