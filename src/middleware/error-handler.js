@@ -19,10 +19,10 @@ module.exports = async function (expressApp) {
     } else {
       res.status(500).render('500', { 
         error: error.toString()
-                    .split('Error:')
-                    .slice(1)
-                    .join(' ')
-                    .trim() 
+          .split('Error:')
+          .slice(1)
+          .join(' ')
+          .trim() 
       })
     }
   })
