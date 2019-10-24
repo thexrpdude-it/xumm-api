@@ -3,10 +3,10 @@ const log = require('debug')('app:error-handler')
 
 module.exports = async function (expressApp) {
   expressApp.use ((error, req, res, next) => {
-    log(' >> ExpressError', error.toString())
-    log(req.routeType)
+    log(` >> ExpressError @ RouteType[${req.routeType}]`, error.toString())
+    log(error)
     const errorUuid = res.get('X-Call-Ref') || uuid()
-    if (req.routeType === 'api') {
+    if (req.routeType === 'api' || (req.get('content-type') || '').match(/json/)) {
       log(`FATAL ERROR [ ${errorUuid} ]`, error.toString())
       res.status(500).json({
         error: true,
