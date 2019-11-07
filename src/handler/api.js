@@ -6,6 +6,7 @@ const uuid = require('uuid/v4')
 
 module.exports = async function (expressApp) {
   expressApp.use(bodyParser.json())
+  expressApp.use(bodyParser.raw())
   
   /**
    * API Error handler
@@ -127,7 +128,10 @@ module.exports = async function (expressApp) {
       console: {
         middleware: 'auth/devconsole-jwt',
         routes: [
-          { method: [ 'get', 'post' ], path: 'ping' }
+          { method: [ 'get', 'post' ], path: 'ping' },
+          { method: [ 'get' ], path: 'apps' },
+          { method: [ 'post' ], path: 'app', module: 'create-app' },
+          { method: [ 'post' ], path: 'store-logo' }
           // { method: [ 'get' ], path: 'payload/:payloads__payload_id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'payload-get' },
           // { method: [ 'post' ], path: 'payload', module: 'payload-post' },
         ],

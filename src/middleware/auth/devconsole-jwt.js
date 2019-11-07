@@ -41,11 +41,13 @@ module.exports = async (expressApp, req, res, apiDetails) => {
     })
 
     const now = Math.round(new Date() / 1000)
-    log('user', req.user)
-    log('now', now)
-    if (req.user) {
-      log('now > iat', req.user.iat < now, now - req.user.iat)
-      log('now < exp', req.user.exp > now, req.user.exp - now)
+    if (typeof req.config.devconsole.logJwt === 'undefined' || req.config.devconsole.logJwt) {
+      log('user', req.user)
+      log('now', now)
+      if (req.user) {
+        log('now > iat', req.user.iat < now, now - req.user.iat)
+        log('now < exp', req.user.exp > now, req.user.exp - now)
+      }
     }
 
     const insertCallLogQuery = `
@@ -71,8 +73,9 @@ module.exports = async (expressApp, req, res, apiDetails) => {
     if (req.user) {
       resolve(Object.assign({}, {
         call_uuidv4: call_uuidv4,
-        config_jwt: req.config.devconsole.jwt,
-        ...(Object.keys(req.user).reduce((a, b) => {
+        ...(Object.keys(req.user).filter(a => {
+          return a !== 'azp'
+        }).reduce((a, b) => {
           Object.assign(a, {
             ['jwt_' + b]: req.user[b]
           })
@@ -95,7 +98,7 @@ module.exports = async (expressApp, req, res, apiDetails) => {
       application_id: typeof appDetails !== 'undefined' && appDetails.length > 0 ? appDetails[0].application_id : null,
       call_ip: req.remoteAddress,
       call_method: req.method,
-      call_contenttype: req.headers['content-type'] || null,
+      call_contenttype: req.headers['content-type'] ? req.headers['content-type'].split(';')[0] : null,
       call_endpoint: (apiDetails.route.path || req.url).split('/')[0],
       call_url: req.url,
       call_type: apiDetails.type,
