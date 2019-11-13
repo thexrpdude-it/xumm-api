@@ -135,14 +135,26 @@ module.exports = async (req, res) => {
       }      
 
       if (Object.keys(req.body).indexOf('options') > -1 && typeof req.body.options === 'object' && req.body.options !== null) {
-        if (typeof req.body.options.submit !== 'undefined') {
-          if (typeof req.body.options.submit === 'boolean') {
-            req.body.options.submit = req.body.options.submit ? 1 : 0
+        ['submit', 'multisign'].forEach(optionBoolType => {
+          if (typeof req.body.options[optionBoolType] !== 'undefined') {
+            if (typeof req.body.options[optionBoolType] === 'boolean') {
+              req.body.options[optionBoolType] = req.body.options[optionBoolType] ? 1 : 0
+            }
+            if (typeof req.body.options[optionBoolType] === 'number') {
+              options[optionBoolType] = parseInt(req.body.options[optionBoolType]) > 0 ? 1 : 0
+            }
+            if (typeof req.body.options[optionBoolType] === 'string') {
+              if (req.body.options[optionBoolType].toLowerCase().trim() === 'true') {
+                options[optionBoolType] = 1
+              } else if (req.body.options[optionBoolType].toLowerCase().trim() === 'false') {
+                options[optionBoolType] = 0
+              } else {
+                options[optionBoolType] = parseInt(req.body.options[optionBoolType]) > 0 ? 1 : 0
+              }
+            }
           }
-          if (typeof req.body.options.submit === 'number' || typeof req.body.options.submit === 'string') {
-            options.submit = parseInt(req.body.options.submit) > 0 ? 1 : 0
-          }
-        }
+        })
+
         if (typeof req.body.options.expire !== 'undefined') {
           if (typeof req.body.options.expire === 'number' || typeof req.body.options.expire === 'string') {
             options.expire = parseInt(req.body.options.expire) > 0 ? parseInt(req.body.options.expire) : 24
