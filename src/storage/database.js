@@ -12,6 +12,7 @@ module.exports = (app) => {
     user: app.config.db.user || 'db',
     password: app.config.db.password || 'db',
     database: app.config.db.database || 'db',
+    charset : 'utf8mb4',
     queryFormat (query, values) {
       if (!values) return query
       return query.replace(/\:(\w+)/g, ((txt, key) => {
