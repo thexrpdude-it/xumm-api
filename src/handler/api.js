@@ -130,9 +130,9 @@ module.exports = async function (expressApp) {
         routes: [
           { method: [ 'get', 'post' ], path: 'ping' },
           { method: [ 'get' ], path: 'apps' },
-          { method: [ 'post' ], path: 'app', module: 'create-app' },
+          { method: [ 'post' ], path: 'app', module: 'persist-app' },
+          { method: [ 'post' ], path: 'app/:appId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'persist-app' },
           { method: [ 'post' ], path: 'store-logo' }
-          // { method: [ 'get' ], path: 'payload/:payloads__payload_id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'payload-get' },
           // { method: [ 'post' ], path: 'payload', module: 'payload-post' },
         ],
         errorHandler: errorHandler
