@@ -20,22 +20,38 @@ module.exports = async (expressApp, req, res, apiDetails) => {
       reject(e)
     }
 
+    // log(req.headers)
+
     await new Promise((resolve, reject) => {
       try {
-        jwt({
-          secret: jwksRsa.expressJwtSecret({
-            cache: true,
-            rateLimit: true,
-            jwksRequestsPerMinute: 60,
-            jwksUri: `https://${req.config.devconsole.jwt.domain}/.well-known/jwks.json`
-          }),
+        const secretData = {
+          cache: true,
+          rateLimit: true,
+          jwksRequestsPerMinute: 60,
+          jwksUri: `https://${req.config.devconsole.jwt.domain}/.well-known/jwks.json`
+        }
+
+        const jwtData = {
           audience: req.config.devconsole.jwt.audience,
           issuer: `https://${req.config.devconsole.jwt.domain}/`,
           algorithm: ['RS256']
-        })(req, res, () => {
+        }
+
+        // log(jwtData)
+        // log(secretData)
+
+        jwt({
+          secret: jwksRsa.expressJwtSecret(secretData),
+          ...jwtData
+        })(req, res, (a, b) => {
+          // console.log(req.user)
           resolve(req.user)
+          // Todo: JWT error is in b
+          // log('a', a)
+          // log('b', b)
         })
       } catch (e) {
+        // log(e)
         _reject(e.message, 403)
       }
     })
