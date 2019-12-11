@@ -130,6 +130,9 @@ module.exports = async function (expressApp) {
         routes: [
           { method: [ 'get', 'post' ], path: 'ping' },
           { method: [ 'get' ], path: 'apps' },
+          { method: [ 'get' ], module: 'calls', path: 'calls/:appId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/:selectedRecord([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})?' },
+          { method: [ 'get' ], module: 'payloads', path: 'payloads/:appId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/:selectedRecord([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})?' },
+          { method: [ 'get' ], module: 'user-tokens', path: 'user-tokens/:appId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/:selectedRecord([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})?' },
           { method: [ 'post' ], path: 'app', module: 'persist-app' },
           { method: [ 'post', 'delete', 'patch' ], path: 'app/:appId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'persist-app' },
           { method: [ 'post' ], path: 'store-logo' }
