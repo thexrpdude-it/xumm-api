@@ -4,12 +4,20 @@ module.exports = async (req, res) => {
   try {
     const data = await req.db(`
       SELECT
-        payloads.*
+        payloads.*,
+        tokens.token_issued,
+        tokens.token_expiration,
+        tokens.token_accesstoken,
+        tokens.token_days_valid
       FROM
         applications
       LEFT JOIN
         payloads ON (
           payloads.application_id = applications.application_id
+        )
+      LEFT JOIN
+        tokens ON (
+          tokens.call_uuidv4 = payloads.call_uuidv4
         )
       WHERE
         application_uuidv4 = :app
@@ -18,7 +26,7 @@ module.exports = async (req, res) => {
       AND
         application_disabled = 0
       AND
-        call_uuidv4 IS NOT NULL
+        payloads.call_uuidv4 IS NOT NULL
       ORDER BY
         FIELD(payloads.call_uuidv4, :record) DESC,
         payloads.payload_id DESC
