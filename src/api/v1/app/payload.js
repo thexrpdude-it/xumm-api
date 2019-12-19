@@ -272,7 +272,7 @@ module.exports = async (req, res) => {
                     token_accesstoken = :token_accesstoken
                 `, { 
                   ...generatedAccessToken,
-                  token_expiration: generatedAccessToken.token_expiration
+                  token_expiration: generatedAccessToken.token_expiration / 1000
                 })
 
                 if (accessTokenUpdate.constructor.name !== 'OkPacket' || typeof accessTokenUpdate.changedRows === 'undefined' || !(accessTokenUpdate.changedRows > 0)) {
