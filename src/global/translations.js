@@ -19,6 +19,9 @@ module.exports = {
 
     return filter.call({
       ctx: {
+        opts: {
+          autoescape: false // No auto escape when called using custom node code, as this is a proxy module
+        },
         locale: {
           language: language.split('_')[0],
           region: language.split('_')[1]

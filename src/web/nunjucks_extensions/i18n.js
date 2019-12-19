@@ -21,6 +21,11 @@ class I18nFilter {
       const language = typeof env.ctx.locale === 'object' && typeof env.ctx.locale.language === 'string' ? env.ctx.locale.language.toLowerCase() : this.options.default
       const region = typeof env.ctx.locale === 'object' && typeof env.ctx.locale.region === 'string' ? '_' + env.ctx.locale.region.toLowerCase() : ''
 
+      let autoescape = true
+      if (typeof env.ctx !== 'undefined' && typeof env.ctx.opts !== 'undefined' && typeof env.ctx.opts.autoescape !== 'undefined') {
+        autoescape = Boolean(env.ctx.opts.autoescape)
+      }
+
       replacements = Object.assign(env.ctx._locals || {}, replacements)
       
       let baseText = translationKey || ''
@@ -35,7 +40,7 @@ class I18nFilter {
       if (typeof baseText === 'string') {
         baseText = baseText.replace(/__([a-z_]+)__/g, ($, m) => {
           if (Object.keys(replacements).indexOf(m) > -1) {
-            return nunjucks.runtime.suppressValue(replacements[m], true)
+            return nunjucks.runtime.suppressValue(replacements[m], autoescape)
           }
           return ''
         })
