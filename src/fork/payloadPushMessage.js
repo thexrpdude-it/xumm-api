@@ -26,6 +26,17 @@ const main = async (data) => {
   try {
     log('PUSHDATA', data.transaction)
     const url = 'https://fcm.googleapis.com/fcm/send'
+    let body = translations.translate('en', 'PUSH_MSG_TXTYPE_TO_DEST', {
+      type: data.transaction.type,
+      destination: data.transaction.destination.known.knownaccount_name || data.transaction.destination.account
+    })
+
+    if (data.transaction.type.toLowerCase() === 'signin') {
+      body = translations.translate('en', 'PUSH_MSG_SIGNIN_REQ', {
+        appname: data.application.name
+      })
+    }
+
     const response = await fetch(url, {
       method: 'post',
       body: JSON.stringify({
@@ -33,10 +44,7 @@ const main = async (data) => {
         notification: {
           title: `${data.application.name}`,
           subtitle: translations.translate('en', 'PUSH_MSG_SIGN_REQUEST'),
-          body: translations.translate('en', 'PUSH_MSG_TXTYPE_TO_DEST', {
-            type: data.transaction.type,
-            destination: data.transaction.destination.known.knownaccount_name || data.transaction.destination.account
-          }),
+          body: body,
           sound: 'default',
           click_action: 'SIGNTX'
         }
