@@ -46,7 +46,9 @@ module.exports = async (req, res) => {
         'SignerListSet',
         'TrustSet',
         'EnableAmendment',
-        'SetFee'
+        'SetFee',
+        // Pseudo Types
+        'SignIn'
       ],
       Channel: []
     }
@@ -92,7 +94,15 @@ module.exports = async (req, res) => {
     } else if (typeof req.body.txjson === 'object') {
       if (checkTxValid(req.body.txjson)) {
         try {
-          const signed = accountlib.sign(req.body.txjson, accountlib.derive.passphrase('masterpassphrase'))
+          const txjson = {}
+          if (Object.keys(req.body.txjson).indexOf('TransactionType') > -1 && req.body.txjson.TransactionType.toLowerCase() === 'signin') {
+            Object.assign(txjson, {
+              SignIn: true
+            })
+          } else {
+            Object.assign(txjson, req.body.txjson)
+          }
+          const signed = accountlib.sign(txjson, accountlib.derive.passphrase('masterpassphrase'))
           tx.hex = signed.signedTransaction
           tx.json = req.body.txjson
         } catch (e) {
