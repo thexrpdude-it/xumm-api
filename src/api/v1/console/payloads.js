@@ -5,6 +5,7 @@ module.exports = async (req, res) => {
     const data = await req.db(`
       SELECT
         payloads.*,
+        UNIX_TIMESTAMP(payloads.payload_created) as payload_created_ts,
         tokens.token_issued,
         tokens.token_expiration,
         tokens.token_accesstoken,
