@@ -42,7 +42,8 @@ module.exports = async (uuid, expressApp, invoker) => {
         payloads.payload_dispatched_to as response_dispatched_to,
         payloads.payload_dispatched_result as response_dispatched_result,
         payloads.payload_response_multisign_account as response_multisign_account,
-        payloads.payload_response_account as response_account
+        payloads.payload_response_account as response_account,
+        tokens.token_accesstoken as application_issued_user_token
       FROM 
         payloads
       JOIN
@@ -52,6 +53,10 @@ module.exports = async (uuid, expressApp, invoker) => {
       LEFT JOIN
         knownaccounts ON (
           payloads.payload_tx_destination = knownaccounts.knownaccount_account
+        )
+      LEFT JOIN
+        tokens ON (
+          tokens.payload_uuidv4 = payloads.call_uuidv4
         )
       WHERE 
         payloads.call_uuidv4 = :call_uuidv4
