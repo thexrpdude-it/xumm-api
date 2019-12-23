@@ -37,6 +37,7 @@ const main = async (data) => {
       })
     }
 
+    const payload = (data.payload || {}).uuidv4 || {}
     const response = await fetch(url, {
       method: 'post',
       body: JSON.stringify({
@@ -46,8 +47,9 @@ const main = async (data) => {
           subtitle: translations.translate('en', 'PUSH_MSG_SIGN_REQUEST'),
           body: body,
           sound: 'default',
-          click_action: 'SIGNTX'
-        }
+          click_action: 'SIGNTX',
+          payload: typeof payload === 'string' ? payload : null
+        },
       }),
       headers: {
         'Content-Type': 'application/json',
