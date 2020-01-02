@@ -74,6 +74,14 @@ module.exports = (expressApp, req, res, apiDetails) => {
           if (appDetails[0].application_disabled < 1) {
             req.db(updateAppActivityQuery, { api_key: apiKey[0] })
 
+            // console.log('publish redis', `app:${apiKey[0]}`)
+            req.app.redis.publish(`app:${apiKey[0]}`, {
+              call: call_uuidv4,
+              endpoint: (apiDetails.route.path || req.url).split('/')[0],
+              type: apiDetails.type,
+              method: req.method
+            })
+
             resolve(Object.assign(appDetails[0], {
               call_uuidv4: call_uuidv4
             }))
