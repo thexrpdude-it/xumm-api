@@ -42,6 +42,14 @@ module.exports = (expressApp, req, res, apiDetails) => {
     
     const apiKey = (req.headers['x-api-key'] || '').trim().match(/^([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})$/i)
     const apiSecret = (req.headers['x-api-secret'] || '').trim().match(/^([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})$/i)
+
+    let extRef = null
+    if (typeof req.params === 'object' && req.params !== null && Object.keys(req.params).length > 0) {
+      if (Object.keys(req.params)[0].match(/^[a-zA-Z0-9_]+__[a-zA-Z0-9_]+$/)) {
+        extRef = Object.keys(req.params)[0].split('__')[0] + '(' + req.params[Object.keys(req.params)[0]] + ')'
+      }
+    }
+
     if ((apiKey && apiSecret) || !apiDetails.auth) {
       const findAppDetailsQuery = `
         SELECT
@@ -60,7 +68,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
 
       const updateAppActivityQuery = `
         UPDATE
-        applications
+          applications
         SET
           application_lastcall = CURRENT_TIMESTAMP
         WHERE
@@ -77,6 +85,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
             // console.log('publish redis', `app:${apiKey[0]}`)
             req.app.redis.publish(`app:${apiKey[0]}`, {
               call: call_uuidv4,
+              extRef: extRef,
               endpoint: (apiDetails.route.path || req.url).split('/')[0],
               type: apiDetails.type,
               method: req.method
@@ -99,13 +108,6 @@ module.exports = (expressApp, req, res, apiDetails) => {
       }
     } else {
       _reject(`No auth 'X-API-Key' / 'X-API-Secret' headers present or malformed`, 812, 401)
-    }
-
-    let extRef = null
-    if (typeof req.params === 'object' && req.params !== null && Object.keys(req.params).length > 0) {
-      if (Object.keys(req.params)[0].match(/^[a-zA-Z0-9_]+__[a-zA-Z0-9_]+$/)) {
-        extRef = Object.keys(req.params)[0].split('__')[0] + '(' + req.params[Object.keys(req.params)[0]] + ')'
-      }
     }
 
     res.dbLogLine = req.db(insertCallLogQuery, { 
