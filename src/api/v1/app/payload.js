@@ -31,7 +31,8 @@ module.exports = async (req, res) => {
               WHERE
                 devices.device_id = payloads.payload_handler
               LIMIT 1
-            )) as __payload_handler_user_id
+            )) as __payload_handler_user_id,
+            (SELECT application_uuidv4 FROM applications WHERE applications.application_id = payloads.application_id) as application_uuidv4
           FROM 
             payloads
           WHERE
@@ -55,6 +56,13 @@ module.exports = async (req, res) => {
     
             if (payload) {
               req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, { opened: true })
+
+              req.app.redis.publish(`app:${payloadAuthInfo[0].application_uuidv4}`, {
+                call: req.params.payloads__payload_id,
+                endpoint: 'payload',
+                type: 'app',
+                method: req.method
+              })
     
               response = formatPayloadData(payload, response)
             }
@@ -315,6 +323,13 @@ module.exports = async (req, res) => {
             }
 
             req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, response)
+            
+            req.app.redis.publish(`app:${payload.application_uuidv4}`, {
+              call: req.params.payloads__payload_id,
+              endpoint: 'payload',
+              type: 'app',
+              method: req.method
+            })
 
             const update = await req.db(`
               UPDATE
