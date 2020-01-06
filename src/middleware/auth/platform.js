@@ -71,9 +71,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
           applications a
         WHERE
           a.application_uuidv4 = :api_key
-        -- Moved to non-SQL check post query for Readme.io
-        -- AND
-        --   a.application_secret = :api_secret
+        -- Moved to non-SQL check post query for Readme.io, so no a.application_secret = : api_secret
       `
 
       const updateAppActivityQuery = `
@@ -86,7 +84,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         LIMIT 1
       `
       if (apiDetails.auth) {
-        appDetails = await req.db(findAppDetailsQuery, { api_key: apiKey[0], api_secret: apiSecret[0] })
+        appDetails = await req.db(findAppDetailsQuery, { api_key: apiKey[0] })
 
         if (appDetails.length > 0) {
           const readmeJwtHash = crypto.createHash('md5').update(JSON.stringify({
@@ -97,8 +95,17 @@ module.exports = (expressApp, req, res, apiDetails) => {
 
           if (apiSecret && apiSecret[0] !== appDetails[0].application_secret) {
             _reject(`Invalid 'X-API-Key' / 'X-API-Secret' credentials`, 813)
-          } else if (readmeTryConditions && readmeTryHash !== readmeJwtHash) {
+          } else if (readmeTryConditions && readmeTryHash && readmeTryHash[0].slice(1) !== readmeJwtHash) {
             _reject(`Invalid ReadmeIO credentials`, 814)
+            log('ReadMeIo', {
+              hashBasedOn: {
+                visitorIp: (req.headers['x-forwarded-for'] || '').split(',')[0],
+                host: req.headers['host'] || '',
+                secret: '<someUuidv4>'
+              },
+              gotHash: readmeTryHash[0].slice(1),
+              calculatedHash: readmeJwtHash
+            })
           } else if (appDetails[0].application_disabled < 1) {
             req.db(updateAppActivityQuery, { api_key: apiKey[0] })
 
