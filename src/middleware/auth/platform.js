@@ -90,7 +90,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
           const readmeJwtHash = crypto.createHash('md5').update(JSON.stringify({
             visitorIp: (req.headers['x-forwarded-for'] || '').split(',')[0],
             host: req.headers['host'] || '',
-            secret: apiSecret[0]
+            secret: appDetails[0].application_secret
           })).digest('hex').slice(0, 12)
 
           if (apiSecret && apiSecret[0] !== appDetails[0].application_secret) {
