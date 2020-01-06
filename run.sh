@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 
-docker stop xrpl-sign
-docker rm xrpl-sign
-# docker rmi xrpl-sign
-# docker build -t xign/xrpl-sign .
+docker stop xumm
+docker rm xumm
+
+# git pull
+# npm install
+# docker rmi xumm/xumm-backend
+# docker build -t xumm/xumm-backend .
+
 docker run \
-  --name xrpl-sign \
+  --name xumm \
   -d \
   --restart=always \
   -p 3000:3000 \
   -v $(pwd):/usr/src/app \
   --link mysql \
   --link redis \
-  xign/xrpl-sign --env production
+  xumm/xumm-backend --env production
