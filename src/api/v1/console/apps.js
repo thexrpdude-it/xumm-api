@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
       return res.json({ applications })
     }
     return res.json({ applications: [] })
-} catch (e) {
+  } catch (e) {
     e.httpCode = e.code = 404
     return res.handleError(e)
   }
