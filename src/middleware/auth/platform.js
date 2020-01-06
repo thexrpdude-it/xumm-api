@@ -1,5 +1,6 @@
 const uuid = require('uuid/v4')
 const log = require('debug')('app:platform')
+const crypto = require('crypto')
 
 module.exports = (expressApp, req, res, apiDetails) => {
   // log('<< API: APP AUTH (CUSTOM, TOKEN, HEADERS) MIDDLEWARE >>')
@@ -42,6 +43,13 @@ module.exports = (expressApp, req, res, apiDetails) => {
     
     const apiKey = (req.headers['x-api-key'] || '').trim().match(/^([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})$/i)
     const apiSecret = (req.headers['x-api-secret'] || '').trim().match(/^([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})$/i)
+    
+    const readmeTryHash = (req.headers['x-api-secret'] || '').trim().match(/@[a-f0-9]{12}$/i)
+    const readmeTryConditions = (req.headers['x-forwarded-for'] || '').split(',').reverse()[0] === (req.headers['cf-connecting-ip'] || '')
+      && (req.headers['referer'] || '').match(/^https:\/\/xumm\.readme\.io/)
+      && (req.headers['origin'] || '').match(/^https:\/\/xumm\.readme\.io/)
+      && readmeTryHash
+      && !apiSecret
 
     let extRef = null
     if (typeof req.params === 'object' && req.params !== null && Object.keys(req.params).length > 0) {
@@ -50,20 +58,22 @@ module.exports = (expressApp, req, res, apiDetails) => {
       }
     }
 
-    if ((apiKey && apiSecret) || !apiDetails.auth) {
+    if ((apiKey && apiSecret) || (apiKey && readmeTryConditions) || !apiDetails.auth) {
       const findAppDetailsQuery = `
         SELECT
           a.application_id,
           a.application_uuidv4,
           a.application_name,
           a.application_webhookurl,
-          a.application_disabled
+          a.application_disabled,
+          a.application_secret
         FROM 
           applications a
         WHERE
           a.application_uuidv4 = :api_key
-        AND
-          a.application_secret = :api_secret
+        -- Moved to non-SQL check post query for Readme.io
+        -- AND
+        --   a.application_secret = :api_secret
       `
 
       const updateAppActivityQuery = `
@@ -79,7 +89,17 @@ module.exports = (expressApp, req, res, apiDetails) => {
         appDetails = await req.db(findAppDetailsQuery, { api_key: apiKey[0], api_secret: apiSecret[0] })
 
         if (appDetails.length > 0) {
-          if (appDetails[0].application_disabled < 1) {
+          const readmeJwtHash = crypto.createHash('md5').update(JSON.stringify({
+            visitorIp: (req.headers['x-forwarded-for'] || '').split(',')[0],
+            host: req.headers['host'] || '',
+            secret: apiSecret[0]
+          })).digest('hex').slice(0, 12)
+
+          if (apiSecret && apiSecret[0] !== appDetails[0].application_secret) {
+            _reject(`Invalid 'X-API-Key' / 'X-API-Secret' credentials`, 813)
+          } else if (readmeTryConditions && readmeTryHash !== readmeJwtHash) {
+            _reject(`Invalid ReadmeIO credentials`, 814)
+          } else if (appDetails[0].application_disabled < 1) {
             req.db(updateAppActivityQuery, { api_key: apiKey[0] })
 
             // console.log('publish redis', `app:${apiKey[0]}`)
@@ -107,7 +127,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         }))
       }
     } else {
-      _reject(`No auth 'X-API-Key' / 'X-API-Secret' headers present or malformed`, 812, 401)
+      _reject(`No auth 'X-API-Key' / 'X-API-Secret' headers present or malformed content`, 812, 401)
     }
 
     res.dbLogLine = req.db(insertCallLogQuery, { 
