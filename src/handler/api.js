@@ -107,6 +107,8 @@ module.exports = async function (expressApp) {
           { method: 'get', path: 'pending-payloads' },
           { method: 'get', path: 'curated-ious' },
           { method: 'get', path: 'account-info/:address(r[a-zA-Z0-9]{3,})', module: 'account-info' },
+          { method: 'get', path: 'handle-lookup/:handle(.+)', module: 'handle-lookup' },
+          { method: 'get', path: 'account-advisory/:address(r[a-zA-Z0-9]{3,})', module: 'account-advisory' },
           { method: [ 'get', 'delete' ], path: 'apps/push', module: 'apps-push' }
         ],
         errorHandler: errorHandler
