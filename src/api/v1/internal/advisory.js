@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 const log = require('debug')('app:advisory')
 
-const ttlSeconds = 10
+const ttlSeconds = 60 * 15 // Update every 15 minutes
 
 const advisoryData = {
   levels: {
