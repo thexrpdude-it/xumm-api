@@ -2,9 +2,7 @@ const fetch = require('node-fetch')
 const log = require('debug')('app:known-account-hydrate')
 
 const recordMaxDays = 3
-
-// TODO: Check scammmers etc. for account block: 
-//   https://xrpforensics.org/api/advisory/advisory.json
+const recordMaxDaysUnknown = 1
 
 module.exports = (db, account) => {
   let response = {
@@ -19,7 +17,9 @@ module.exports = (db, account) => {
     /**
      * Remove potential existing (prefixed) 'internal:' result
      */
-    data.source = data.source.split(':').reverse()[0]
+    if (typeof data.source === 'string') {
+      data.source = data.source.split(':').reverse()[0]
+    }
 
     return db(`
       INSERT INTO knownaccounts (
@@ -162,6 +162,7 @@ module.exports = (db, account) => {
   const lookup = () => {
     const lookups = [ lookupBithomp, lookupXrpScan, lookupXrpl ]
     let resolved = false
+    let persisted = false
 
     return new Promise((resolve, reject) => {
       let lookupPromises = []
@@ -172,7 +173,8 @@ module.exports = (db, account) => {
           if (r) {
             log(`    # [ ${account} ] @ ${l.name}    >`, response.name)
             resolve(response)
-            if (!resolved) {
+            if (!resolved && !persisted) {
+              persisted = true
               persist(response)
             }
             resolved = true
@@ -183,6 +185,11 @@ module.exports = (db, account) => {
       })
       Promise.all(lookupPromises).then(r => {
         resolve(response)
+        if (!persisted) {
+          persist(Object.assign(response, {
+            source: ''
+          }))
+        }
       })
     })
   }
@@ -207,15 +214,25 @@ module.exports = (db, account) => {
     })
 
     if (existing.length > 0) {
+      const source = (existing[0].knownaccount_source !== '' ? 'internal:' + existing[0].knownaccount_source : null)
+
       response = {
         account: account,
         name: existing[0].knownaccount_name,
         domain: existing[0].knownaccount_domain,
         blocked: existing[0].knownaccount_blacklist > 0,
-        source: 'internal:' + existing[0].knownaccount_source
+        source
       }
       // Background data refresh
-      if (existing[0]._age >= recordMaxDays) lookup()
+      if (source === null) {
+        if (existing[0]._age >= recordMaxDaysUnknown) {
+          response = await lookup()
+        }
+      } else {
+        if (existing[0]._age >= recordMaxDays) {
+          lookup()
+        }
+      }
     } else {
       response = await lookup()
     }
