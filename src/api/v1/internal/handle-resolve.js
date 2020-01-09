@@ -1,6 +1,7 @@
 const fetch = require('node-fetch')
 const log = require('debug')('app:handle-resolve')
 const knownAccount = require('@api/v1/internal/known-account-hydrate')
+const utf8 = require('utf8')
 
 const cacheSeconds = 60 * 15 // 15 minutes
 // const cacheSeconds = 1
@@ -65,16 +66,17 @@ const xrplns = {
   },
   sanitizeQuery (query, network) {
     if (network === 'local' || network === 'twitter') {
-      return query.replace(/^@/, '')
+      return utf8.encode(query.replace(/^@/, ''))
     }
-    return query
+    return utf8.encode(query)
   },
   async get (query) {
     const source = 'xrplns'
     try {
       const results = await (async () => {
         if (is.validEmailAccount(query)) {
-          const callResults = await this.call('resolve/social/email/' + query)
+          const callResults = await this.call('resolve/social/email/' + utf8.encode(query))
+          log(utf8.encode(query))
           return [Object.assign(callResults || {}, { network: 'email' })]
         } else {
           return Promise.all(this.networks.map(async n => {
@@ -123,7 +125,7 @@ const bithomp = {
   async get (query) {
     const source = 'bithomp.com'
     try {
-      const call = await fetch('https://bithomp.com/api/v1/user/' + query, {
+      const call = await fetch('https://bithomp.com/api/v1/user/' + utf8.encode(query), {
         method: 'get',
         timeout: 2000
       })
@@ -150,7 +152,7 @@ const xrpscan = {
     const source = 'xrpscan.com'
     if (is.possibleXrplAccount(query)) {
       try {
-        const call = await fetch('https://api.xrpscan.com/api/v1/account/' + query, {
+        const call = await fetch('https://api.xrpscan.com/api/v1/account/' + utf8.encode(query), {
           method: 'get',
           timeout: 2000
         })
@@ -209,7 +211,7 @@ const ripple = {
   async get (query) {
     const source = 'id.ripple.com'
     try {
-      const call = await fetch('https://id.ripple.com/v1/user/' + query, {
+      const call = await fetch('https://id.ripple.com/v1/user/' + utf8.encode(query), {
         method: 'get',
         timeout: 2000
       })
