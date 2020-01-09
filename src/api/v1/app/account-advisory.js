@@ -10,5 +10,5 @@ const advisory = require('@api/v1/internal/advisory')
 module.exports = async (req, res) => {
   const address = (req.params.address || '').trim()
 
-  res.json(await advisory(address.trim()))
+  res.json(await advisory(address))
 }
