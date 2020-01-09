@@ -1,15 +1,9 @@
 const fetch = require('node-fetch')
 const log = require('debug')('app:handle-resolve')
+const knownAccount = require('@api/v1/internal/known-account-hydrate')
 
 const cacheSeconds = 60 * 15 // 15 minutes
-
-/**
- * Data sources:
- *  Bithomp API
- *  Ripple Data API
- *  XRPLNS
- *  Internal database ^r....
- */
+// const cacheSeconds = 1
 
 /**
  * Todo: add XUMM hashed address book function lookup
@@ -115,7 +109,7 @@ const xrplns = {
           alias: r.data.slug || query,
           account: r.data.xrplAccount,
           tag: r.data.destinationTag === '' ? null : Number(r.data.destinationTag),
-          description: r.data.label,
+          description: r.data.label || ''
         }
       })
     } catch (e) {
@@ -146,6 +140,66 @@ const bithomp = {
       }
     } catch (e) {
       log('Query @' + source + ' for [' + query + ']', e.message)
+    }
+    return []
+  }
+}
+
+const xrpscan = {
+  async get (query) {
+    const source = 'xrpscan.com'
+    if (is.possibleXrplAccount(query)) {
+      try {
+        const call = await fetch('https://api.xrpscan.com/api/v1/account/' + query, {
+          method: 'get',
+          timeout: 2000
+        })
+        const response = await call.json()
+        if (typeof response === 'object' && response !== null && typeof response.account === 'string' && typeof response.accountName === 'object' && response.accountName !== null) {
+          return [{
+            source,
+            network: null,
+            alias: response.accountName.name || query,
+            account: response.account,
+            tag: null,
+            description: response.accountName.desc || ''
+          }]
+        }
+      } catch (e) {
+        log('Query @' + source + ' for [' + query + ']', e.message)
+      }
+    }
+    return []
+  }
+}
+
+const xrpl = {
+  async get (query) {
+    const source = 'xrpl'
+    if (is.possibleXrplAccount(query)) {
+      try {
+        const call = await fetch('https://s1.ripple.com:51234', {
+          method: 'post',
+          timeout: 2000,
+          body: JSON.stringify({
+            method: 'account_info',
+            params: [ { account: query } ]
+          }),
+        })
+        const response = await call.json()
+        if (typeof response === 'object' && response !== null && typeof response.result === 'object' && response.result !== null && typeof response.result.account_data === 'object') {
+          return [{
+            source,
+            network: null,
+            alias: typeof response.result.account_data.Domain === 'string' && response.result.account_data.Domain !== '' ? Buffer.from(response.result.account_data.Domain, 'hex').toString('utf-8') : query,
+            account: response.result.account_data.Account,
+            tag: null,
+            description: ''
+          }]
+        }
+      } catch (e) {
+        log('Query @' + source + ' for [' + query + ']', e.message)
+      }
     }
     return []
   }
@@ -213,11 +267,12 @@ const internalAccounts = {
         log('Query @' + source + ' for [' + query + ']', e.message)
       }
     }
+
     return []
   }
 }
 
-const activeApps = [ bithomp, ripple, internalAccounts, xrplns ]
+const activeApps = [ bithomp, ripple, xrpscan, internalAccounts, xrplns, xrpl ]
 
 const app = {
   config: {},
@@ -271,6 +326,11 @@ const resolver = {
           return stack
         }, [])
       })
+    }
+
+    if (is.possibleXrplAccount(query) && query.length >= 20) {
+      // Populate backend cache
+      knownAccount(app.db, query)
     }
 
     return Object.assign({
