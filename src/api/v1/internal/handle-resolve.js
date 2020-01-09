@@ -91,7 +91,7 @@ const xrplns = {
             if (callResults !== null &&
               typeof callResults === 'object' &&
               typeof callResults.data === 'object' &&
-              allResults.data !== null &&
+              callResults.data !== null &&
               typeof callResults.data.xrplAccounts === 'object'
             ) {
               const data = callResults.data.xrplAccounts
