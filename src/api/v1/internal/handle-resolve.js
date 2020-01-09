@@ -69,6 +69,12 @@ const xrplns = {
     this.networks = await this.call('social-networks')
     log('Initialized XRPLNS social networks', this.networks)
   },
+  sanitizeQuery (query, network) {
+    if (network === 'local' || network === 'twitter') {
+      return query.replace(/^@/, '')
+    }
+    return query
+  },
   async get (query) {
     const source = 'xrplns'
     try {
@@ -78,10 +84,10 @@ const xrplns = {
           return [Object.assign(callResults || {}, { network: 'email' })]
         } else {
           return Promise.all(this.networks.map(async n => {
-            const callResults = await this.call('resolve/social/' + n + '/' + query)
+            const callResults = await this.call('resolve/social/' + n + '/' + this.sanitizeQuery(query, n))
             return Object.assign(callResults || {}, { network: n })
           }).concat(await (async () => {
-            const callResults = await this.call('resolve/user/' + query)
+            const callResults = await this.call('resolve/user/' + this.sanitizeQuery(query, 'local'))
             if (callResults !== null &&
               typeof callResults === 'object' &&
               typeof callResults.data === 'object' &&
