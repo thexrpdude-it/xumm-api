@@ -301,7 +301,7 @@ module.exports = async (req, res) => {
               }
             }
             if (typeof req.body.multisigned === 'string' && req.body.multisigned.match(/^r[a-zA-Z0-9]{20,35}$/)) {
-              if (addressCodec.isValidAddress(req.body.multisigned)) {
+              if (addressCodec.isValidClassicAddress(req.body.multisigned)) {
                 payloadUpdate.multisign_account = req.body.multisigned
               } else {
                 const e = new Error(`Invalid MultiSign account (multisigned)`)
