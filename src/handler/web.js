@@ -13,6 +13,9 @@ const apiExtension = require('@web/nunjucks_extensions/api')
 const qrExtension = require('@web/nunjucks_extensions/qr')
 const I18nFilter = require('@web/nunjucks_extensions/i18n')
 
+const sharp = require('sharp')
+const QRCode = require('qrcode')
+
 module.exports = async function (expressApp) {
   expressApp.use(bodyParser.urlencoded({ extended: true }))
   expressApp.use(locale({
@@ -61,6 +64,58 @@ module.exports = async function (expressApp) {
       mode: req.config.mode
     })
     return res.render('sign.html')
+  })
+  
+  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):level(_[mqh])?.png', async (req, res, next) => {
+    res.setHeader('Content-Type', 'image/png')
+    res.setHeader('Content-Disposition', 'inline; filename=' + req.params.uuid + '.png')
+    
+    const qrParams = {
+      _m: {
+        level: 'M',
+        width: 289
+      },
+      _q: {
+        level: 'Q',
+        width: 292
+      },
+      _h: {
+        level: 'H',
+        width: 318
+      }
+    }
+    const qrimage = await new Promise((resolve, reject) => {
+      QRCode.toDataURL(req.config.baselocation + '/sign/' + req.params.uuid, {
+        errorCorrectionLevel: qrParams[req.params.level || '_q'].level,
+        type: 'png',
+        margin: 1,
+        width: qrParams[req.params.level || '_q'].width,
+        color: {
+          light: '#ffffffff',
+          dark: '#00000000'
+        }
+      }, (err, url) => {
+        if (err) reject(err)
+        resolve(Buffer.from(url.split(',')[1], 'base64'))
+        // resolve(url)
+      })
+    }).catch(r => {
+      res.send(Buffer.from(req.config.qrpng, 'base64'))
+    })
+
+    // res.setHeader('Content-Disposition', 'attachment; filename=' + req.params.uuid + '.png')
+    // res.setHeader('Content-Transfer-Encoding', 'binary')
+    // res.setHeader('Content-Type', 'application/octet-stream')
+
+    if (qrimage) {
+      const output = await sharp(qrimage)
+        .composite([{input: Buffer.from(req.config.qrpng, 'base64'), gravity: 'centre' }])
+        .png()
+        .toBuffer()
+      
+      res.send(Buffer.from(output, 'binary'))
+    }
+    // return res.json({qr: true, image: output })
   })
 
   // WEBROUTER WILDCARD - FALLBACK
