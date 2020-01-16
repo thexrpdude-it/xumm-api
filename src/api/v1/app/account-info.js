@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   try {
     // log(req.params.address)
     let accountInfo
-    if (AddressCodec.isValidAddress(req.params.address)) {
+    if (AddressCodec.isValidClassicAddress(req.params.address)) {
       log('knownAccount lookup', req.params.address)
       accountInfo = await knownAccount(req.db, req.params.address)
     } else {
