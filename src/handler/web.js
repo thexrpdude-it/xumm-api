@@ -92,7 +92,7 @@ module.exports = async function (expressApp) {
         width: qrParams[req.params.level || '_q'].width,
         color: {
           light: '#ffffffff',
-          dark: '#00000000'
+          dark: '#000000ff'
         }
       }, (err, url) => {
         if (err) reject(err)
