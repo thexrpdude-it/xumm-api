@@ -3,7 +3,7 @@ module.exports = async function (expressApp) {
     const ValidOrigins = expressApp.config.AccessControlAllowOrigins || []
     const ValidOrigin = ValidOrigins.filter(o => {
       return o === (req.get('origin') || '').split('/').slice(0, 3).join('/')
-    })[0] || 'http://localhost'
+    })[0] || (expressApp.config.defaultCorsOrigin || 'http://localhost')
     
     res.header('Access-Control-Allow-Origin', ValidOrigin) // TODO
     res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, PATCH, DELETE, OPTIONS')
