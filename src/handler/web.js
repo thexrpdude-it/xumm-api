@@ -120,7 +120,8 @@ module.exports = async function (expressApp) {
 
     const qrcontents = await new Promise((resolve, reject) => {
       QRCode.toString(req.config.baselocation + '/sign/' + req.params.uuid, {
-        type: 'utf8'
+        type: 'utf8',
+        errorCorrectionLevel: (req.params.level || '_q').slice(1)
       }, (err, data) => {
         if (err) {
           reject(err)
@@ -128,7 +129,7 @@ module.exports = async function (expressApp) {
           resolve(data.split('\n').filter(r => {
             return !r.match(/^[ ]+$/)
           }).reduce((x, r) => {
-            const chars = r.trim().split('')
+            const chars = r.slice(4, -4).split('')
             let a = []
             let b = []
             for (c in chars) {
