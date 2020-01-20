@@ -294,6 +294,7 @@ module.exports = async (req, res) => {
         },
         refs: {
           qr_png: `${req.config.baselocation}/sign/${uuid}_q.png`,
+          qr_matrix: `${req.config.baselocation}/sign/${uuid}_q.json`,
           qr_png_quality_opts: ['m','q','h'],
           websocket_status: `${req.config.baselocation.replace(/^http/, 'ws')}/sign/${uuid}`
         },
