@@ -11,7 +11,9 @@ module.exports = async (req, res) => {
         currency.knownaccount_account as iou_issuer,
         currency.knownaccount_currency as iou_currency,
         currency.knownaccount_name as iou_name,
-        currency.knownaccount_currency_avatar_url as iou_avatar
+        currency.knownaccount_currency_avatar_url as iou_avatar,
+        issuer.knownaccount_id as issuer_id,
+        currency.knownaccount_id as currency_id
       FROM 
         knownaccounts as currency
       JOIN
@@ -33,6 +35,7 @@ module.exports = async (req, res) => {
       const iou_details = match.reduce((a, b) => {
         if (typeof a[b.issuer_name] === 'undefined') {
           a[b.issuer_name] = {
+            id: b.issuer_id,
             name: b.issuer_name,
             domain: b.issuer_domain,
             avatar: b.issuer_avatar,
@@ -43,6 +46,8 @@ module.exports = async (req, res) => {
           currencies.push(b.iou_currency)
         }
         a[b.issuer_name].currencies[b.iou_currency] = {
+          id: b.currency_id,
+          issuer_id: b.issuer_id,
           issuer: b.iou_issuer,
           currency: b.iou_currency,
           name: b.iou_name,
