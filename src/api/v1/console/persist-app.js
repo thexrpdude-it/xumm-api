@@ -1,5 +1,7 @@
-const log = require('debug')('app:devconsole:appcreate')
+// const log = require('debug')('app:devconsole:persist')
 const uuid = require('uuid/v4')
+const getAuth0User = require('@src/api/v1/internal/getAuth0User')
+const checkDea = require('@src/api/v1/internal/checkDea')
 
 module.exports = async (req, res) => {
   let auditTrailType = ''
@@ -95,6 +97,16 @@ module.exports = async (req, res) => {
       }
     } else {
       auditTrailType = 'create'
+
+      const userDetails = await getAuth0User(req.config.auth0management, data.application_auth0_owner)
+      if (typeof userDetails.email_verified !== 'undefined' && !userDetails.email_verified) {
+        throw new Error('User email account not verified')
+      }
+     
+      const isDea = await checkDea(userDetails.email)
+      if (isDea) {
+        throw new Error('User email account is disposable')
+      }
 
       const db = await req.db(`
         INSERT INTO
