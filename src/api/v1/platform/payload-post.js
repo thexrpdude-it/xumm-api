@@ -2,6 +2,7 @@ const codec = require('ripple-binary-codec')
 const accountlib = require('xrpl-accountlib')
 const knownAccount = require('@api/v1/internal/known-account-hydrate')
 const resolveAccount = require('@api/v1/internal/known-account-resolve')
+const accountAdvisory = require('@api/v1/internal/advisory')
 const log = require('debug')('app:payload:post')
 const logChild = log.extend('child')
 const { fork } = require('child_process')
@@ -118,6 +119,20 @@ module.exports = async (req, res) => {
   } else {
     tx.error = new Error('Payload body invalid')
     tx.error.code = 599
+  }
+
+  /**
+   * Check for advisory listing
+   */
+  if (typeof tx.json.Destination !== 'undefined') {
+    const advisoryResults = await accountAdvisory(tx.json.Destination)
+    if (typeof advisoryResults.danger === 'string') {
+      if (['HIGH_PROBABILITY', 'CONFIRMED'].indexOf(advisoryResults.danger.toUpperCase()) > -1) {
+        tx.error = new Error('Destination account blacklisted')
+        tx.error.code = 609
+        tx.error.causingError = new Error('XRPL account advisory @ ' + Object.keys(advisoryResults.confirmations).filter(a => advisoryResults.confirmations[a]).join(', ') + ': ' + advisoryResults.danger)
+      }
+    }
   }
 
   /**
