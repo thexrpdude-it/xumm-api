@@ -127,7 +127,7 @@ module.exports = async (req, res) => {
   if (typeof tx.json.Destination !== 'undefined') {
     const advisoryResults = await accountAdvisory(tx.json.Destination)
     if (typeof advisoryResults.danger === 'string') {
-      if (['CONFIRMED'].indexOf(advisoryResults.danger.toUpperCase()) > -1) {
+      if (['HIGH_PROBABILITY', 'CONFIRMED'].indexOf(advisoryResults.danger.toUpperCase()) > -1) {
         tx.error = new Error('Destination account blacklisted')
         tx.error.code = 609
         tx.error.causingError = new Error('XRPL account advisory @ ' + Object.keys(advisoryResults.confirmations).filter(a => advisoryResults.confirmations[a]).join(', ') + ': ' + advisoryResults.danger)
