@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
     let accountInfo
     if (AddressCodec.isValidClassicAddress(req.params.address)) {
       log('knownAccount lookup', req.params.address)
-      accountInfo = await knownAccount(req.db, req.params.address)
+      accountInfo = await knownAccount(req.db, req.params.address, req.config)
     } else {
       // Wildcard search
       log('Wildcard search', req.params.address)

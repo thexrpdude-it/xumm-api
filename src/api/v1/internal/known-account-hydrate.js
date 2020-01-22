@@ -4,7 +4,7 @@ const log = require('debug')('app:known-account-hydrate')
 const recordMaxDays = 3
 const recordMaxDaysUnknown = 1
 
-module.exports = (db, account) => {
+module.exports = (db, account, config) => {
   let response = {
     account: account,
     name: null,
@@ -49,16 +49,23 @@ module.exports = (db, account) => {
        */
       log(`  --> Fetching accountinfo @ Bithomp [ ${account} ]`)
       try {
-        const bithomp = await fetch('https://bithomp.com/api/v1/userinfo/' + account, { follow: 1, timeout: 1500 })
+        const bithomp = await fetch('https://bithomp.com/api/v2/address/' + account + '?service=true&username=true&verifiedDomain=true&blacklisted=true', { 
+          follow: 1,
+          timeout: 2500,
+          headers: {
+            'x-bithomp-token': config.bithompToken
+          }
+        })
         const bithompResponse = await bithomp.json()
-        if (typeof bithompResponse === 'object' && bithompResponse !== null && typeof bithompResponse.name !== 'undefined') {
+        if (typeof bithompResponse === 'object' && bithompResponse !== null && ((typeof bithompResponse.service !== 'undefined' && bithompResponse.service.name !== 'undefined') || (typeof bithompResponse.username !== 'undefined'))) {
           response = {
             account: account,
-            name: bithompResponse.name,
-            domain: bithompResponse.domain || null,
+            name: bithompResponse.service ? bithompResponse.service.name : (bithompResponse.username || null),
+            domain: bithompResponse.verifiedDomain || (bithompResponse.service ? bithompResponse.service.domain : (bithompResponse.username || null)),
             blocked: false,
             source: 'bithomp.com'
           }
+          log(response)
         }
         if (response.name === null || response.name === '') {
           resolve()

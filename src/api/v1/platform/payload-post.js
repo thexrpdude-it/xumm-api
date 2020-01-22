@@ -233,7 +233,7 @@ module.exports = async (req, res) => {
 
       if (typeof tx.json.Destination === 'string') {
         try {
-          knownAccount(req.db, tx.json.Destination)
+          knownAccount(req.db, tx.json.Destination, req.config)
         } catch (e) {
           log('PAYLOAD <Destination lookup error>', e)
         }

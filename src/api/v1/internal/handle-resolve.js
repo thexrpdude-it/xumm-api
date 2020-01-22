@@ -125,19 +125,23 @@ const bithomp = {
   async get (query) {
     const source = 'bithomp.com'
     try {
-      const call = await fetch('https://bithomp.com/api/v1/user/' + utf8.encode(query), {
+      const method = is.possibleXrplAccount(query) && query.length >= 20 ? 'address' : 'username'
+      const call = await fetch('https://bithomp.com/api/v2/' + method + '/' + utf8.encode(query) + '?service=true&username=true&verifiedDomain=true&blacklisted=true', {
         method: 'get',
-        timeout: 2000
+        timeout: 2500,
+        headers: {
+          'x-bithomp-token': app.config.bithompToken
+        }
       })
       const response = await call.json()
       if (typeof response === 'object' && response !== null && typeof response.address === 'string') {
         return [{
           source,
           network: null,
-          alias: response.username || query,
+          alias: response.service ? (response.service.name || (response.username || query)) : (response.username || query),
           account: response.address,
           tag: null,
-          description: ''
+          description: response.verifiedDomain || (response.service ? (response.service.domain || '') : '')
         }]
       }
     } catch (e) {
@@ -332,7 +336,7 @@ const resolver = {
 
     if (is.possibleXrplAccount(query) && query.length >= 20) {
       // Populate backend cache
-      knownAccount(app.db, query)
+      knownAccount(app.db, query, app.config)
     }
 
     return Object.assign({
