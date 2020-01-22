@@ -400,10 +400,10 @@ module.exports = async (req, res) => {
                   payload_uuidv4: req.params.payloads__payload_id
                 },
                 payloadResponse: response,
-                accessToken: !response.user_token ? null : { 
+                userToken: !response.user_token ? null : { 
+                  user_token: appDetails[0].token_accesstoken || generatedAccessToken.token_accesstoken,
                   token_issued: generatedAccessToken.token_issued,
-                  token_expiration: generatedAccessToken.token_expiration,
-                  token_accesstoken: appDetails[0].token_accesstoken || generatedAccessToken.token_accesstoken
+                  token_expiration: generatedAccessToken.token_expiration
                 }
               }
 
