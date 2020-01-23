@@ -4,7 +4,7 @@ module.exports = async (req, res) => {
   const data = {
     user_uuidv4: uuid(),
     device_uuidv4: uuid(),
-    request_ip: req.ip,
+    request_ip: req.remoteAddress || req.ip,
     moment_creation: new Date()
   }
 

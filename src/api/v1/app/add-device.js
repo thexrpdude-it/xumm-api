@@ -4,7 +4,7 @@ const uuid = require('uuid/v4')
 module.exports = async (req, res) => {
   const data = {
     device_uuidv4: uuid(),
-    request_ip: req.ip,
+    request_ip: req.remoteAddress || req.ip,
     moment_creation: new Date()
   }
 
