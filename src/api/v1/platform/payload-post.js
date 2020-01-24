@@ -200,7 +200,8 @@ module.exports = async (req, res) => {
             SELECT 
               devices.device_pushtoken,
               applications.application_name,
-              tokens.token_id
+              tokens.token_id,
+              (SELECT count(1) FROM payloads WHERE payloads.token_id = tokens.token_id AND payloads.payload_handler IS NULL AND payloads.payload_expiration > FROM_UNIXTIME(:token_expiration)) AS open_sign_requests
             FROM 
               tokens
             JOIN
@@ -329,7 +330,8 @@ module.exports = async (req, res) => {
               uuidv4: uuid
             },
             device: {
-              pushtoken: r.device_pushtoken
+              pushtoken: r.device_pushtoken,
+              open_sign_requests: r.open_sign_requests + 1
             },
             application: {
               name: r.application_name

@@ -46,6 +46,7 @@ const main = async (data) => {
           title: `${data.application.name}`,
           subtitle: translations.translate('en', 'PUSH_MSG_SIGN_REQUEST'),
           body: body,
+          badge: data.device.open_sign_requests || 0,
           sound: 'default',
           click_action: 'SIGNTX',
           payload: typeof payload === 'string' ? payload : null
