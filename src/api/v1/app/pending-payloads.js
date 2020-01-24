@@ -22,11 +22,11 @@ module.exports = async (req, res) => {
       AND 
         tokens.token_reported = 0
       AND
-        tokens.token_expiration > :now
+        tokens.token_expiration > FROM_UNIXTIME(:now)
       AND
         payloads.payload_handler IS NULL
       AND
-        payloads.payload_expiration > :now
+        payloads.payload_expiration > FROM_UNIXTIME(:now)
     `, {
       user_id: req.__auth.user.id,
       now: new Date() / 1000
