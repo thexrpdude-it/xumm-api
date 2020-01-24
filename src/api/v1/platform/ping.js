@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
     auth: Object.keys(req.__auth).reduce((a, b) => {
       return Object.assign(a, { 
         [b]: Object.keys(req.__auth[b]).filter(e => {
-          return e !== 'id'
+          return e !== 'id' && e !== 'secret'
         }).reduce((c, d) => {
           return Object.assign(c, {
             [d]: req.__auth[b][d]
