@@ -22,10 +22,11 @@ module.exports = async function (expressApp) {
         WHERE
           call_uuidv4 = :call_uuidv4
         LIMIT 1
-      `, { call_uuidv4: req.params.uuid }).then(r => {
+      `, { call_uuidv4: req.params.uuid }).then(async r => {
         if (r.constructor.name === 'OkPacket' && typeof r.changedRows !== undefined && r.changedRows > 0) {
           logws('Websocket connected:', req.params.uuid)
           const pubSubChannel = `sign:${req.params.uuid}`
+          let payloadTimeoutTimer
     
           ws.sendJson = (data) => {
             const json = JSON.stringify(data)
@@ -45,14 +46,34 @@ module.exports = async function (expressApp) {
           })
     
           ws.sendJson({ message: `Welcome ` + req.params.uuid })
+
           ws.on('close', () => {
             logws('Bye', req.params.uuid)
             redisMessageHandler.destroy()
+            clearTimeout(payloadTimeoutTimer)
           })
           ws.on('message', (msg) => {
             logws(`Got WebSocket message from [ ${req.params.uuid} ] `, msg)
             ws.sendJson({ message: `Right back at you!` })
           })
+
+          const payloadExpired = () => {
+            ws.sendJson({ expired: true })
+            logws(`Payload ${req.params.uuid} expired`)
+            ws.close()
+          }
+
+          const payloadExpiration = await req.db(`SELECT (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payload_expiration)) as timediff FROM payloads WHERE call_uuidv4 = :call_uuidv4 LIMIT 1`, { call_uuidv4: req.params.uuid })
+          if (payloadExpiration.length === 1 && payloadExpiration[0].timediff >= 0) {
+            payloadExpired()
+          } else if (payloadExpiration.length < 1) {
+            ws.sendJson({ message: `Invalid payload!` })
+            ws.close()
+          } else if (payloadExpiration.length === 1 && payloadExpiration[0].timediff < 0) {
+            logws(`Payload ${req.params.uuid} expires in ${payloadExpiration[0].timediff * -1} seconds, set timer`)
+            ws.sendJson({ expires_in_seconds: payloadExpiration[0].timediff * -1 })
+            payloadTimeoutTimer = setTimeout(payloadExpired, payloadExpiration[0].timediff * -1 * 1000)
+          }
         }
       })
     }

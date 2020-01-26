@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
   let options = {
     multisign: false,
     submit: true,
-    expire: 24,
+    expire: 60 * 24,
     return_url_app: null,
     return_url_web: null
   }
@@ -182,7 +182,9 @@ module.exports = async (req, res) => {
 
         if (typeof req.body.options.expire !== 'undefined') {
           if (typeof req.body.options.expire === 'number' || typeof req.body.options.expire === 'string') {
-            options.expire = parseInt(req.body.options.expire) > 0 ? parseInt(req.body.options.expire) : 24
+            if (parseInt(req.body.options.expire) > 0) {
+              options.expire = parseInt(req.body.options.expire)
+            }
           }
         }
         if (typeof req.body.options.return_url === 'object' && req.body.options.return_url !== null) {
@@ -245,7 +247,7 @@ module.exports = async (req, res) => {
 
       const payloadMoment = new Date()
       let payloadExpiry = new Date()
-      payloadExpiry.setTime(payloadMoment.getTime() + 60 * 60 * options.expire * 1000)
+      payloadExpiry.setTime(payloadMoment.getTime() + 60 * options.expire * 1000)
 
       if (typeof tx.json.Destination === 'string') {
         try {
