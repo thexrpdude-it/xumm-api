@@ -28,6 +28,7 @@ module.exports = async function (expressApp) {
           const pubSubChannel = `sign:${req.params.uuid}`
           let payloadTimeoutTimer
           let payloadKeepaliveInterval
+          const connectedTs = new Date() / 1000
     
           ws.sendJson = (data) => {
             const json = JSON.stringify(data)
@@ -67,7 +68,7 @@ module.exports = async function (expressApp) {
 
           const setKeepaliveInterval = (timediff) => {
             payloadKeepaliveInterval = setInterval(() => {
-              ws.sendJson({ expires_in_seconds: timediff * -1 })
+              ws.sendJson({ expires_in_seconds: (timediff * -1) - ((new Date() / 1000) - connectedTs) })
             }, 15 * 1000)
           }
 
