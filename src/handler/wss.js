@@ -65,10 +65,11 @@ module.exports = async function (expressApp) {
           const payloadExpiration = await req.db(`SELECT (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payload_expiration)) as timediff FROM payloads WHERE call_uuidv4 = :call_uuidv4 LIMIT 1`, { call_uuidv4: req.params.uuid })
           if (payloadExpiration.length === 1 && payloadExpiration[0].timediff >= 0) {
             payloadExpired()
-            ws.close()
           } else if (payloadExpiration.length < 1) {
             ws.sendJson({ message: `Invalid payload!` })
-            ws.close()
+            setTimeout(() => {
+              ws.close()
+            }, 100)
           } else if (payloadExpiration.length === 1 && payloadExpiration[0].timediff < 0) {
             logws(`Payload ${req.params.uuid} expires in ${payloadExpiration[0].timediff * -1} seconds, set timer`)
             ws.sendJson({ expires_in_seconds: payloadExpiration[0].timediff * -1 })
