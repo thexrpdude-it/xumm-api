@@ -68,7 +68,7 @@ module.exports = async function (expressApp) {
 
           const setKeepaliveInterval = (timediff) => {
             payloadKeepaliveInterval = setInterval(() => {
-              ws.sendJson({ expires_in_seconds: (timediff * -1) - ((new Date() / 1000) - connectedTs) })
+              ws.sendJson({ expires_in_seconds: (timediff * -1) - Math.round((new Date() / 1000) - connectedTs) })
             }, 15 * 1000)
           }
 
