@@ -65,9 +65,16 @@ module.exports = async function (expressApp) {
             logws(`Payload ${req.params.uuid} expired`)
           }
 
+          const setKeepaliveInterval = () => {
+            payloadKeepaliveInterval = setInterval(() => {
+              ws.sendJson({ expires_in_seconds: payloadExpiration[0].timediff * -1 })
+            }, 15 * 1000)
+          }
+
           const payloadExpiration = await req.db(`SELECT (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payload_expiration)) as timediff FROM payloads WHERE call_uuidv4 = :call_uuidv4 LIMIT 1`, { call_uuidv4: req.params.uuid })
           if (payloadExpiration.length === 1 && payloadExpiration[0].timediff >= 0) {
             payloadExpired()
+            setKeepaliveInterval()
           } else if (payloadExpiration.length < 1) {
             ws.sendJson({ message: `Invalid payload!` })
             setTimeout(() => {
@@ -79,9 +86,7 @@ module.exports = async function (expressApp) {
 
             payloadTimeoutTimer = setTimeout(payloadExpired, payloadExpiration[0].timediff * -1 * 1000)
 
-            payloadKeepaliveInterval = setInterval(() => {
-              ws.sendJson({ expires_in_seconds: payloadExpiration[0].timediff * -1 })
-            }, 15 * 1000)  
+            setKeepaliveInterval()
           }
         }
       })
