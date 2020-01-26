@@ -27,6 +27,7 @@ module.exports = async function (expressApp) {
           logws('Websocket connected:', req.params.uuid)
           const pubSubChannel = `sign:${req.params.uuid}`
           let payloadTimeoutTimer
+          let payloadKeepaliveInterval
     
           ws.sendJson = (data) => {
             const json = JSON.stringify(data)
@@ -51,7 +52,9 @@ module.exports = async function (expressApp) {
             logws('Bye', req.params.uuid)
             redisMessageHandler.destroy()
             clearTimeout(payloadTimeoutTimer)
+            clearInterval(payloadKeepaliveInterval)
           })
+
           ws.on('message', (msg) => {
             logws(`Got WebSocket message from [ ${req.params.uuid} ] `, msg)
             ws.sendJson({ message: `Right back at you!` })
@@ -73,7 +76,12 @@ module.exports = async function (expressApp) {
           } else if (payloadExpiration.length === 1 && payloadExpiration[0].timediff < 0) {
             logws(`Payload ${req.params.uuid} expires in ${payloadExpiration[0].timediff * -1} seconds, set timer`)
             ws.sendJson({ expires_in_seconds: payloadExpiration[0].timediff * -1 })
+
             payloadTimeoutTimer = setTimeout(payloadExpired, payloadExpiration[0].timediff * -1 * 1000)
+
+            payloadKeepaliveInterval = setInterval(() => {
+              ws.sendJson({ expires_in_seconds: payloadExpiration[0].timediff * -1 })
+            }, 15 * 1000)  
           }
         }
       })
