@@ -197,51 +197,52 @@ module.exports = async (req, res) => {
             //.replace(/{id}/, uuid)
           }
         }
-        if (typeof req.body.user_token !== 'undefined' && req.body.user_token.match(uuidv4_format)) {
-          pushToken = await req.db(`
-            SELECT 
-              devices.device_pushtoken,
-              applications.application_name,
-              tokens.token_id,
-              (SELECT count(1) FROM payloads WHERE payloads.token_id = tokens.token_id AND payloads.payload_handler IS NULL AND payloads.payload_expiration > FROM_UNIXTIME(:token_expiration)) AS open_sign_requests
-            FROM 
-              tokens
-            JOIN
-              users ON (
-                tokens.user_id = users.user_id
-              )
-            JOIN
-              devices ON (
-                devices.user_id = users.user_id
-              )
-            JOIN
-              applications ON (
-                applications.application_id = tokens.application_id
-              )
-            WHERE
-              token_accesstoken = :token_accesstoken
-            AND
-              token_hidden = 0
-            AND
-              token_expiration >= FROM_UNIXTIME(:token_expiration)
-            AND
-              devices.device_disabled IS NULL
-            AND
-              devices.device_accesstoken IS NOT NULL
-            AND
-              devices.device_pushtoken IS NOT NULL
-            AND
-              devices.device_lockedbydeviceid IS NULL
-            ORDER BY
-              devices.device_lastcall DESC
-          `, {
-            token_accesstoken: req.body.user_token,
-            token_expiration: new Date() / 1000
-          })
+      }
 
-          if (pushToken.constructor.name === 'Array' && pushToken.length > 0 && pushToken[0].constructor.name === 'RowDataPacket') {
-            pushed = true
-          }
+      if (typeof req.body.user_token !== 'undefined' && req.body.user_token.match(uuidv4_format)) {
+        pushToken = await req.db(`
+          SELECT 
+            devices.device_pushtoken,
+            applications.application_name,
+            tokens.token_id,
+            (SELECT count(1) FROM payloads WHERE payloads.token_id = tokens.token_id AND payloads.payload_handler IS NULL AND payloads.payload_expiration > FROM_UNIXTIME(:token_expiration)) AS open_sign_requests
+          FROM 
+            tokens
+          JOIN
+            users ON (
+              tokens.user_id = users.user_id
+            )
+          JOIN
+            devices ON (
+              devices.user_id = users.user_id
+            )
+          JOIN
+            applications ON (
+              applications.application_id = tokens.application_id
+            )
+          WHERE
+            token_accesstoken = :token_accesstoken
+          AND
+            token_hidden = 0
+          AND
+            token_expiration >= FROM_UNIXTIME(:token_expiration)
+          AND
+            devices.device_disabled IS NULL
+          AND
+            devices.device_accesstoken IS NOT NULL
+          AND
+            devices.device_pushtoken IS NOT NULL
+          AND
+            devices.device_lockedbydeviceid IS NULL
+          ORDER BY
+            devices.device_lastcall DESC
+        `, {
+          token_accesstoken: req.body.user_token,
+          token_expiration: new Date() / 1000
+        })
+
+        if (pushToken.constructor.name === 'Array' && pushToken.length > 0 && pushToken[0].constructor.name === 'RowDataPacket') {
+          pushed = true
         }
       }
 
