@@ -1,6 +1,6 @@
 {% if results %}
 
-  <div class="row">
+  <div class="row pb-4">
     <div class="col-12 col-lg-8 offset-lg-2 pt-md-5 pb-md-5">
       <div class="card shadow-sm">
 
@@ -47,20 +47,22 @@
               <i class="fas fa-mobile-alt"></i>
               {{ 'PLEASE_INSTALL_APP'|i18n }}
             </div>
-            {% if is.ios %}
-              {% set download_link_displayed = true %}
-              <a href="{{ appstorelinks.iOS }}" class="mb-4 btn btn-primary btn btn-block">
-                <i class="fab fa-app-store-ios"></i>
-                {{ 'GET_APP_IOS_MODAL_VISIT'|i18n }}
-              </a>
-            {% endif %}
-            {% if is.android %}
-              {% set download_link_displayed = true %}
-              <a href="{{ appstorelinks.Android }}" class="mb-4 btn btn-primary btn-block">
-                <i class="fab fa-google-play"></i>
-                {{ 'GET_APP_ANDROID_MODAL_VISIT'|i18n }}
-              </a>
-            {% endif %}
+            <div class="text-center">
+              {% if is.ios %}
+                {% set download_link_displayed = true %}
+                <a href="{{ appstorelinks.iOS }}" class="mb-4 btn btn-primary btn">
+                  <i class="fab fa-app-store-ios"></i>
+                  {{ 'GET_APP_IOS_MODAL_VISIT'|i18n }}
+                </a>
+              {% endif %}
+              {% if is.android %}
+                {% set download_link_displayed = true %}
+                <a href="{{ appstorelinks.Android }}" class="mb-4 btn btn-primary">
+                  <i class="fab fa-google-play"></i>
+                  {{ 'GET_APP_ANDROID_MODAL_VISIT'|i18n }}
+                </a>
+              {% endif %}
+            </div>
           {% elseif results._app_opened > 0 and not params.qr %}
             {#
               Opened before. No need to show the QR, but if

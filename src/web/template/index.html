@@ -1,10 +1,37 @@
 {% extends "template.html" %}
 
 {% block content %}
-  <div class="content">
+  <section name="head" class="bg-white">
+
     {% block header %}
+      <section name="menu" class="py-5">
+        <div class="container d-flex flex-wrap text-center">
+          <a href="/" class="pt-2 mb-3 mr-4"><img src="/assets/images/logo-xumm.svg" class="float-left mr-3" alt="XRPL Labs" /></a>
+          <div class="mb-3 text-left flex-fill">
+            <div class="menu d-flex">
+              {# <a href="/" class="text-dark px-2 mr-2 mx-0 py-2"><b>Home</b></a> #}
+              {# <a href="/features" class="text-dark px-2 mr-2 mx-0 py-2"><b>Developer Console</b></a> #}
+              {# <a href="https://" class="text-dark px-2 mr-2 mx-0 py-2"><b>Devel</b></a> #}
+            </div>
+          </div>
+
+          <div class="flex-fill text-right" style="padding-top: 2px;">
+            {# <a href="/pro" class="shadow-sm btn border-2 border-primary btn-info btn-sm">
+              Pro Subscription
+              <i class="fad fa-rocket"></i>
+            </a> #}
+            {% block button %}
+              <a target="_blank" href="https://xumm.readme.io" class="shadow-sm btn border-2 border-primary btn-info btn-sm">
+                Developer documentation
+                <i class="fad fa-rocket"></i>
+              </a>
+            {% endblock %}
+          </div>
+        </div>
+      </section>
+
       {# <img class="mb-4" src="/assets/icons/xrplsign.png" alt="" width="100" height="100"> #}
-      <div class="row">
+      {# <div class="row">
         <div class="col-12">
           <h1 class="font-logo h1 py-0 my-0">
             <a class="text-dark" href="/">xumm<small class="pl-1"><i class="fa fa-check text-primary"></i></small></a>
@@ -16,11 +43,71 @@
             </small>
           </h6>
         </div>
-      </div>
+      </div> #}
     {% endblock %}
 
     {% block main %}
-      <div class="row mb-4">
+      <section name="intro" class="py-5">
+        <div class="container">
+          <div class="row">
+            <div class="mb-4 col-12 col-md-7 col-lg-7">
+              <h1>Signed, Sent, Delivered</h1>
+              <div class="py-5">
+                The xumm platform allows developers and app users to "meet up". While users can simply use the xumm application to track their accounts, balances and transactions, the true power of xumm is the platform available for developers and app users.
+                <br /><br />
+                XRP transactions are usually user initiated: open your wallet, enter the destination, amount, etc. and then you submit your transaction. In retail / e-commerce (and many other) scenario's, by "reversing" this process, the payment flow will become less prone to mistakes and much more user friendly.
+              </div>
+              {# <a href="#" class="btn btn-success">Some button</a> #}
+            </div>
+            <div class="d-none d-md-block col-md-5 col-lg-5 m0a0a">
+              <img src="/assets/images/visual.png" alt="XUMM App" class="img-fluid">
+            </div>
+            {# <div class="col-12">
+              <button class="btn btn-outline-dark store btn-icon-text">
+                <i class="fab fa-apple btn-icon-prepend mdi-36px" aria-hidden="true"></i>
+                <span class="d-inline-block text-left">
+                  <small class="font-weight-light d-block">Available on the</small>
+                  App Store
+                </span>
+              </button>
+              <button class="btn btn-outline-dark store btn-icon-text">
+                <i class="fab fa-google-play mdi-36px" aria-hidden="true"></i>
+                <span class="d-inline-block text-left">
+                  <small class="font-weight-light d-block">Get it on</small>
+                  Google Play
+                </span>
+              </button>
+            </div> #}
+          </div>
+        </div>
+      </section>
+      <section name="app" class="bg-primary text-white py-5">
+        <div class="container" style="min-height: 375px;">
+          <div class="row">
+            <div class="mb-5 col-12 col-md-7 col-lg-7">
+              <h2>XUMM API <span class="font-xlight">for developers</span></h2>
+              <div class="pt-3 pb-4">
+                An XRPL transaction "template" can be posted to the xumm platform API. Your sign request will be stored (called a payload), so the xumm app (iOS/Android) user can open the sign request (by scanning a QR, deeplink or push notification) and resolve (reject/sign) on their own device.
+                <br /><br />
+                When a user signs your sign request, he or she can trust your application. In this case an app specific user token will be generated for your application, and future payloads will be delivered straight to the end user with a push notification.
+                <br /><br />
+                As the xumm platform offers different status update options with all information you need to verify the signed transaction on the XRP ledger, you can, but don't have to rely on transaction callback information or transaction submission by xumm.
+              </div>
+              <a href="https://xumm.readme.io" target="_blank" class="btn mr-2 mb-2 btn-light"><i class="fas fa-book"></i> Read the docs</a>
+              <a href="https://xumm.readme.io" target="_blank" class="btn mr-2 mb-2 btn-success"><i class="fad fa-terminal"></i> Developer Console</a>
+            </div>
+            <div class="col-12 d-none d-md-block col-md-5 col-lg-5 m0a0a">
+              <div class="inline-visual">
+                <img class="" src="/assets/images/app-screenshot-01.png" alt="XUMM App" style="max-height: 500px; max-width: 110%;">
+              </div>
+            </div>
+            <div class="col-12 d-block d-md-none col-md-5 col-lg-5 m0a0a">
+              <img class="img-fluid" src="/assets/images/app-screenshot-01.png" alt="XUMM App">
+            </div>
+          </div>
+        </div>
+      </section>
+      {# <div class="row mb-4">
         <div class="col-12 col-md-6">
           <h3 class="h6 text-primary font-weight-normal">For users</h3>
           <p>
@@ -35,20 +122,32 @@
             sharing their secrets. Push <code>Sign Requests</code> directly to your user's devices.
           </p>
         </div>
-      </div>
+      </div> #}
     {% endblock %}
-  </div>
 
-  {% block button %}
+  </section>
+
+  {# {% block button %}
     <div class="text-right pb-4">
       <a target="_blank" href="https://xrpl-labs.com" class="btn btn-primary"><i class="fas fa-caret-square-right"></i> About XRPL Labs</a>
     </div>
-  {% endblock %}
+  {% endblock %} #}
 
   {% block foot %}
-    <hr class="d-none d-md-block" />
-    <div class="d-block d-md-none mt-4"></div>
-    
-    <p class="text-muted">&copy; {{ year }} XRPL Labs <small>&bull; The Netherlands</small></p>
+    {# <hr class="d-none d-md-block" /> #}
+    {# <div class="d-block d-md-none mt-4"></div> #}
+    {# <p class="mt-2 pb-3 text-muted text-center footer">
+      <a class="text-muted" target="_blank" href="https://xumm.app"><b>XUMM</b></a> &bull;
+      &copy; {{ year }} <a class="text-muted" target="_blank" href="https://xrpl-labs.com">XRPL Labs</a> <small>&bull; The Netherlands</small>
+    </p> #}
+    <section name="footer" class="py-4 border-top border-light">
+      <div class="container text-muted">
+        <a href="https://xrpl-labs.com/"><img src="/assets/images/logo-xrpl.svg" class="float-left mr-3" alt="XRPL Labs" /></a>
+        <div class="footer-text text-right">
+          &copy; <a href="https://xrpl-labs.com/" class="text-muted"><u>XRPL Labs</u></a> {{ year }}
+        </div>
+      </div>
+    </section>
   {% endblock %}
+  
 {% endblock %}
