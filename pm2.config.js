@@ -3,7 +3,7 @@ module.exports = {
     name: 'XRPLSIGN',
     script: 'index.js',
     watch: false,
-    instances: 1,
+    instances: 2,
     exec_mode: 'cluster',
     ignore_watch: ["node_modules", "db", ".git"],
     env: {
