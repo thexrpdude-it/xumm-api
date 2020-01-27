@@ -115,6 +115,42 @@ module.exports = async function (expressApp) {
     }
   })
 
+  router.get('/tx/:hash([0-9a-fA-F]{64}).json', async (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json')
+
+    const qrcontents = await new Promise((resolve, reject) => {
+      QRCode.toString(req.config.baselocation + '/sign/' + req.params.hash, {
+        type: 'utf8', errorCorrectionLevel: 'Q'
+      }, (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data.split('\n').filter(r => {
+            return !r.match(/^[ ]+$/)
+          }).reduce((x, r) => {
+            const chars = r.slice(4, -4).split('')
+            let a = []
+            let b = []
+            for (c in chars) {
+              a.push(chars[c] === '▀' || chars[c] === '█')
+              b.push(chars[c] === '▄' || chars[c] === '█')
+            }
+            x.push(a)
+            x.push(b)
+            
+            return x
+          }, []))
+        }
+      })
+    }).catch(r => {
+      res.json({ matrix: [] })
+    })
+
+    if (qrcontents) {
+      res.json({ matrix: qrcontents })
+    }
+  })
+
   router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):level(_[mqh])?.json', async (req, res, next) => {
     res.setHeader('Content-Type', 'application/json')
 
