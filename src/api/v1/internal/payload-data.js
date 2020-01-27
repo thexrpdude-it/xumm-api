@@ -43,7 +43,8 @@ module.exports = async (uuid, expressApp, invoker) => {
         payloads.payload_dispatched_result as response_dispatched_result,
         payloads.payload_response_multisign_account as response_multisign_account,
         payloads.payload_response_account as response_account,
-        tokens.token_accesstoken as application_issued_user_token
+        tokens.token_accesstoken as application_issued_user_token,
+        (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payloads.payload_expiration)) * -1 as payload_expires_in_seconds
       FROM 
         payloads
       JOIN
