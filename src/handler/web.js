@@ -119,7 +119,7 @@ module.exports = async function (expressApp) {
     res.setHeader('Content-Type', 'application/json')
 
     const qrcontents = await new Promise((resolve, reject) => {
-      QRCode.toString(req.config.baselocation + '/sign/' + req.params.hash, {
+      QRCode.toString(req.params.hash, {
         type: 'utf8', errorCorrectionLevel: 'Q'
       }, (err, data) => {
         if (err) {
