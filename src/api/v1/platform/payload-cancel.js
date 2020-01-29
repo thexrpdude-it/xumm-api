@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
     let reason = 'UNKNOWN'
 
     if (potentialPayload.meta.finished) {
-      reason = 'ALREADY_FINISHED'
+      reason = 'ALREADY_RESOLVED'
     } else if (potentialPayload.meta.expired) {
       reason = 'ALREADY_EXPIRED'
     } else if (potentialPayload.meta.app_opened) {
