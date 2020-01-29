@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
               response = formatPayloadData(payload, response)
 
               ;['return_url_app', 'return_url_web'].forEach(metaKey => {
-                if (typeof response.meta[metaKey] !== 'undefined') {
+                if (typeof response.meta[metaKey] === 'string') {
                   response.meta[metaKey] = response.meta[metaKey].replace(/\{id\}/ig, response.meta.uuid)
                 }
               })
@@ -324,8 +324,8 @@ module.exports = async (req, res) => {
           } else {
             response.signed = !payloadUpdate.rejected
             response.return_url = {
-              app: payload.payload_return_url_app === null ? null : payload.payload_return_url_app.replace(/\{id\}/, req.params.payloads__payload_id),
-              web: payload.payload_return_url_web === null ? null : payload.payload_return_url_web.replace(/\{id\}/, req.params.payloads__payload_id)
+              app: payload.payload_return_url_app === null ? null : payload.payload_return_url_app.replace(/\{id\}/i, req.params.payloads__payload_id),
+              web: payload.payload_return_url_web === null ? null : payload.payload_return_url_web.replace(/\{id\}/i, req.params.payloads__payload_id)
             }
 
             req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, response)
