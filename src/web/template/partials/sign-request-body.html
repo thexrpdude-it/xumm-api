@@ -34,7 +34,7 @@
 
             {% if not params.deeplink %}
               {% if deeplinkRedirectLocation == hostname %}
-                <a href="https://{{ baselocation }}/sign/{{ uuid }}/deeplink" class="mt-2 mb-2 btn btn-primary">
+                <a href="{{ baselocation }}/sign/{{ uuid }}/deeplink" class="mt-2 mb-2 btn btn-primary">
                   <i class="fad fa-rocket-launch"></i>
                   {{ 'OPEN_IN_XUMM'|i18n }}
                 </a>
