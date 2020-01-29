@@ -33,10 +33,16 @@
             {{ 'PAYLOAD_PAGE_FOR_MOBILE'|i18n }}
 
             {% if not params.deeplink %}
-              <a href="https://{{ deeplinkRedirectLocation }}/sign/{{ uuid }}" class="mt-2 mb-2 btn btn-primary">
-                <i class="fad fa-rocket-launch"></i>
-                {{ 'OPEN_IN_XUMM'|i18n }}
-              </a>
+              {% if deeplinkRedirectLocation == hostname %}
+                <a href="https://{{ deeplinkRedirectLocation }}/sign/{{ uuid }}" class="mt-2 mb-2 btn btn-primary">
+                  <i class="fad fa-rocket-launch"></i>
+                  {{ 'OPEN_IN_XUMM'|i18n }}
+                </a>
+              {% else %}
+                <script>
+                  document.location.href = 'https://{{ deeplinkRedirectLocation }}/sign/{{ uuid }}'
+                </script>
+              {% endif %}
             {% endif %}
           </div>
         {% endif %}
