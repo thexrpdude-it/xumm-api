@@ -41,10 +41,23 @@ module.exports = async function (expressApp) {
       baselocation: req.config.baselocation,
       mode: req.config.mode,
       appstorelinks: req.config.AppStoreLinks,
-      trusted: req.ipTrusted
+      trusted: req.ipTrusted,
+      hostname: req.hostname,
+      deeplinkRedirectLocation: req.config.deeplinkRedirectLocation
     })
     next()
   }, express.static('public_html'))
+
+  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', (req, res, next) => {
+    /**
+     * Deeplink from same domain hack
+     */
+    if (req.hostname === (req.config.deeplinkRedirectLocation || '')) {
+      res.redirect(301, req.config.baselocation + '/sign/' + req.params.uuid + '/deeplink')
+    } else {
+      next()
+    }
+  })
 
   router.get('/about', (req, res, next) => {
     // throw new Error("BROKEN")
