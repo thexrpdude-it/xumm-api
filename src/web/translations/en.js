@@ -6,22 +6,22 @@ module.exports = {
   LIPSUM: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin maximus sem ante, sit amet semper mauris venenatis non. Fusce posuere, libero ut volutpat ornare, massa ipsum hendrerit ipsum, sed finibus ipsum augue a nisl. Etiam at tempus ante, sit amet tristique leo. Vestibulum lobortis nisl a volutpat rhoncus. Ut facilisis ante a iaculis sollicitudin. Ut consectetur magna at libero vulputate, id pulvinar dui rutrum. Etiam facilisis finibus tincidunt.`,
   BY_NAME: `XPRL Labs`,
   XRPL_SIGNPLATFORM: `XRPL Signing Platform (BETA)`,
-  TITLE_SIGNTX: `Sign transaction`,
+  TITLE_SIGNTX: `Sign request`,
   ALREADY_SIGNED: `Already resolved`,
-  PAYLOAD_RESOLVED: `This transaction has already been signed or rejected.`,
+  PAYLOAD_RESOLVED: `This request has already been resolved (signed or rejected).`,
   SCAN_WITH_APP: `Scan this QR with <b class="font-logo">xumm</b>`,
   PAYLOAD_NOT_FOUND: `Sign request not found.`,
   PAYLOAD_EXPIRED: `Sign request expired.`,
   PAYLOAD_BACKEND_ERROR: `Sorry, an error occurred while fetching the data to be signed.`,
-  PAYLOAD_PAGE_FOR_MOBILE: `To sign a transaction, make sure you have the <b class="font-logo">xumm</b> app installed.`,
+  PAYLOAD_PAGE_FOR_MOBILE: `To sign a request, make sure you have the <b class="font-logo">xumm</b> app installed.`,
   APPLICATION_DISABLED: `The application <q><b>__appname__</b></q> is disabled.`,
   WAIT_CONNECT_PLATFORM: `Connecting to the Signing Platform.`,
   WAIT_OPEN: `Waiting for you to open the 
                   <code class="text-primary"><b class="text-primary"><q>__txtype__</q></b></code>
-                transaction with the XUMM app.`,
+                  request with the XUMM app.`,
   WAIT_SCAN_QR: `Waiting for you to scan the 
                   <code class="text-primary"><b class="text-primary"><q>__txtype__</q></b></code>
-                transaction with the XUMM app.`,
+                  request with the XUMM app.`,
   WAIT_SCAN_QR_DETAILED: `Waiting for you to scan and open the 
                             <code class="text-primary"><b class="text-primary">__txtype__</b></code>
                           to 
@@ -29,11 +29,11 @@ module.exports = {
                           with the XUMM app.`,
   WAIT_FOR_RESOLVE: `Waiting for you to resolve (accept / deny) the 
                       <code class="text-primary"><b class="text-primary"><q>__txtype__</q></b></code>
-                    transaction in XUMM app.`,
-  SHOW_TRANSACTION: `Show proposed transaction`,
-  RESOLVED: `The transaction has been signed succesfully.`,
+                      request in XUMM app.`,
+  SHOW_TRANSACTION: `Show sign request`,
+  RESOLVED: `The sign request has been signed succesfully.`,
   RESOLVED_NEXT_RETURN: `You will return to <q><b>__appname__</b></q> in a few seconds`,
-  REJECTED: `The transaction has been rejected.`,
+  REJECTED: `The sign request has been rejected.`,
   REJECTED_NEXT_RETURN: `You will return to <q><b>__appname__</b></q> in a few seconds`,
   GET_APP_IOS_TITLE: `Get 𝘅𝗶𝗴𝗻 for iOS at the Apple App Store`,
   GET_APP_ANDROID_TITLE: `Get 𝘅𝗶𝗴𝗻 for Android at the Google Play Store`,
