@@ -23,5 +23,11 @@ module.exports = (payload, response) => {
     }
   })
 
+  ;['return_url_app', 'return_url_web'].forEach(metaKey => {
+    if (typeof response.meta[metaKey] === 'string') {
+      response.meta[metaKey] = response.meta[metaKey].replace(/\{id\}/ig, response.meta.uuid)
+    }
+  })
+
   return response
 }
