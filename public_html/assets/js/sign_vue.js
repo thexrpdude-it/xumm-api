@@ -22,6 +22,15 @@ if (typeof payload !== 'undefined') {
         rawTxDom: null
       }
     },
+    watch: {
+      'opened': function () {
+        if (typeof window.parseRelativeTime !== 'undefined') {
+          Vue.nextTick(function () {
+            window.parseRelativeTime()
+          })
+        }
+      }
+    },
     methods: {
       showRawTx: function () {
         swal({ content: this.rawTxDom, buttons: {} })

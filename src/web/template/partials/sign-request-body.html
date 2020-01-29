@@ -64,42 +64,13 @@
               {% endif %}
             </div>
           {% elseif results._app_opened > 0 and not params.qr %}
-            {#
-              Opened before. No need to show the QR, but if
-              you want to show it again: of course (button).
-            #}
-
-            <div class="h5 text-center py-3 text-primary">
-              <i class="far fa-envelope-open"></i>
-              {{ 'PAYLOAD_ALREADY_OPENED'|i18n }}
-            </div>
-            <div class="text-center pb-3">
-              <div class="">{{ 'NEED_QR_PAYLOAD_QR'|i18n({
-                in_x_time_expire: results.payload_expires_at
-              }) }}</div>
-              <a href="{{ baselocation }}/sign/{{ uuid }}/qr" class="btn btn-warning mt-2">
-                <i class="fas fa-qrcode"></i>
-                {{ 'SHOW_QR'|i18n }}
-              </a>
-            </div>
+            {% set stateOpenedBefore = true %}
+            {% set onlyMonitorSigning = true %}
+            {% include 'partials/sign-request-body-qr-vdom.html' %}
           {% elseif results._pushed > 0 and not params.qr %}
-            {#
-              Pushed, not forced to show the QR. Inform
-              the user a push notification has been sent,
-              optionally show the QR.
-            #}
-
-            <div class="h5 text-center py-3 text-primary">
-              <i class="far fa-bell"></i>
-              {{ 'PAYLOAD_PUSH_NOTIFICATION_SENT'|i18n }}
-            </div>
-            <div class="text-center pb-3">
-              <div class="">{{ 'DIDNT_RECEIVE_PUSH_TEXT'|i18n }}</div>
-              <a href="{{ baselocation }}/sign/{{ uuid }}/qr" class="btn btn-warning mt-2">
-                <i class="fas fa-qrcode"></i>
-                {{ 'SHOW_QR'|i18n }}
-              </a>
-            </div>
+            {% set statePushedBefore = true %}
+            {% set onlyMonitorSigning = true %}
+            {% include 'partials/sign-request-body-qr-vdom.html' %}
           {% else %}
 
             {#

@@ -16,17 +16,20 @@ module.exports = {
   PAYLOAD_PAGE_FOR_MOBILE: `To sign a transaction, make sure you have the <b class="font-logo">xumm</b> app installed.`,
   APPLICATION_DISABLED: `The application <q><b>__appname__</b></q> is disabled.`,
   WAIT_CONNECT_PLATFORM: `Connecting to the Signing Platform.`,
+  WAIT_OPEN: `Waiting for you to open the 
+                  <code class="text-primary"><b class="text-primary"><q>__txtype__</q></b></code>
+                transaction with the XUMM app.`,
   WAIT_SCAN_QR: `Waiting for you to scan the 
                   <code class="text-primary"><b class="text-primary"><q>__txtype__</q></b></code>
-                transaction with the Signing App.`,
+                transaction with the XUMM app.`,
   WAIT_SCAN_QR_DETAILED: `Waiting for you to scan and open the 
                             <code class="text-primary"><b class="text-primary">__txtype__</b></code>
                           to 
                             <code class="text-primary"><b>__txdestination__</b></code>
-                          with the Signing App.`,
+                          with the XUMM app.`,
   WAIT_FOR_RESOLVE: `Waiting for you to resolve (accept / deny) the 
                       <code class="text-primary"><b class="text-primary"><q>__txtype__</q></b></code>
-                    transaction in the Signing App.`,
+                    transaction in XUMM app.`,
   SHOW_TRANSACTION: `Show proposed transaction`,
   RESOLVED: `The transaction has been signed succesfully.`,
   RESOLVED_NEXT_RETURN: `You will return to <q><b>__appname__</b></q> in a few seconds`,
