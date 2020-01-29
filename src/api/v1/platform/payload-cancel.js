@@ -33,7 +33,9 @@ module.exports = async (req, res) => {
         cancelled,
         reason
       },
-      meta: potentialPayload.meta
+      meta: Object.assign(potentialPayload.meta, {
+        expired: true
+      })
     })
 
     if (cancelled === true) {
