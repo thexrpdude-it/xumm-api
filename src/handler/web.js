@@ -37,6 +37,10 @@ module.exports = async function (expressApp) {
     }
   })
 
+  router.get('/app/webviews/:type([a-zA-Z0-9-]+)/:language([a-zA-Z_-]+)?', (req, res, next) => {
+    return res.render('webviews/' + req.params.type + '/index.html', { module: 'webviews', ...(req.params) })
+  })
+
   router.get('/*', (req, res, next) => {
     if (req.url.match(/\.(css|png|jpg|gif|js|ico|svg)$/)) {
       res.setHeader('Cache-Control', 'max-age=2592000, public')
