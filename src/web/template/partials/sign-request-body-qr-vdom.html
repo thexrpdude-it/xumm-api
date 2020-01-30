@@ -18,23 +18,20 @@
     <div class="row" v-if="resolved">
       <div class="col-12">
         <div class="alert h5 text-center px-4 py-4 mb-0" :class="{ 'alert-danger': rejected, 'alert-success': !rejected }" v-if="resolved">
-          <span v-if="!returnUrl">
-            <i class="fa fa-check"></i>
-          </span>
-          <div v-if="rejected">
+          <span v-if="rejected">
             <div class="pb-1 h4 font-weight-bold">{{ 'REJECTED'|i18n }}</div>
             <div v-if="returnUrl" class="mt-3 h5">
               {{ 'REJECTED_NEXT_RETURN'|i18n({ appname: results.application_name }) }}
               <i class="fas fa-circle-notch fa-spin"></i>
             </div>
-          </div>
-          <div v-if="!rejected">
+          </span>
+          <span v-if="!rejected">
             <div class="pb-1 h4 font-weight-bold"><i class="fa fa-check"></i> {{ 'RESOLVED'|i18n }}</div>
             <div v-if="returnUrl" class="mt-3 h5">
               {{ 'RESOLVED_NEXT_RETURN'|i18n({ appname: results.application_name }) }}
               <i class="fas fa-circle-notch fa-spin"></i>
             </div>
-          </div>
+          </span>
         </div>
       </div>
     </div>
