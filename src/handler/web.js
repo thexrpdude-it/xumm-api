@@ -29,7 +29,12 @@ module.exports = async function (expressApp) {
   const router = express.Router()
 
   router.get(['/', '/index.html'], (req, res, next) => {
-    return res.render('index.html', { module: 'index' })
+    if (req.hostname === (req.config.deeplinkRedirectLocation || '')) {
+      // Do nothing, will be handled. redirectLocation doesn't serve homepage.
+      return next()
+    } else{
+      return res.render('index.html', { module: 'index' })
+    }
   })
 
   router.get('/*', (req, res, next) => {
@@ -48,23 +53,7 @@ module.exports = async function (expressApp) {
     next()
   }, express.static('public_html'))
 
-  // router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', (req, res, next) => {
-  //   /**
-  //    * Deeplink from same domain hack
-  //    */
-  //   if (req.hostname === (req.config.deeplinkRedirectLocation || '')) {
-  //     res.redirect(301, req.config.baselocation + '/sign/' + req.params.uuid + '/deeplink')
-  //   } else {
-  //     next()
-  //   }
-  // })
-
-  router.get('/about', (req, res, next) => {
-    // throw new Error("BROKEN")
-    return res.render('about.html')
-  })
-
-  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):qr(/qr)?:deeplink(/deeplink)?', (req, res, next) => {
+  const handleSignPage = (req, res, next) => {
     Object.assign(res.locals, {
       uuid: req.params.uuid || '',
       params: req.params,
@@ -77,7 +66,32 @@ module.exports = async function (expressApp) {
       mode: req.config.mode
     })
     return res.render('sign.html')
+  }
+
+  /**
+   * Serve sign page for deeplinkRedirection domain no matter the path, or redirect to primary domain
+   */
+  router.get('*', (req, res, next) => {
+    if (req.hostname === (req.config.deeplinkRedirectLocation || '')) {
+      // res.redirect(301, req.config.baselocation + '/sign/' + req.params.uuid + '/deeplink')
+      const uuid = req.params[0].match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/)
+      if (uuid && uuid.length > 0) {
+        req.params.uuid = uuid[0]
+        // OK, skip and next()
+        return next()
+      } else {
+        return res.redirect(301, req.config.baselocation + (req.params[0] || ''))
+      }
+    }
+    return next('route')
+  }, handleSignPage)
+
+  router.get('/about', (req, res, next) => {
+    // throw new Error("BROKEN")
+    return res.render('about.html')
   })
+
+  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):qr(/qr)?:deeplink(/deeplink)?', handleSignPage)
   
   router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):level(_[mqh])?.png', async (req, res, next) => {
     res.setHeader('Content-Type', 'image/png')
