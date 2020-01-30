@@ -20,7 +20,8 @@ module.exports = async (req, res) => {
         )
       LEFT JOIN
         payloads ON (
-          payloads.call_uuidv4 = calls.call_uuidv4
+          -- payloads.call_uuidv4 = calls.call_uuidv4
+          payloads.call_uuidv4_bin = calls.call_uuidv4_bin
         )
       LEFT JOIN
         tokens ON (

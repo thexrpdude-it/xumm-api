@@ -13,7 +13,8 @@ module.exports = async (req, res) => {
     FROM 
       payloads
     WHERE
-      call_uuidv4 = :call_uuidv4
+      -- call_uuidv4 = :call_uuidv4
+      call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
     AND
       application_id = :application_id
     LIMIT 1

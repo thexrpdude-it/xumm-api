@@ -35,7 +35,8 @@ module.exports = async (req, res) => {
           FROM 
             payloads
           WHERE
-            call_uuidv4 = :call_uuidv4
+            -- call_uuidv4 = :call_uuidv4
+            call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
           LIMIT 1
         `, {
           call_uuidv4: req.params.payloads__payload_id || ''
@@ -211,6 +212,7 @@ module.exports = async (req, res) => {
                     ON DUPLICATE KEY UPDATE
                       token_expiration = DATE_ADD(FROM_UNIXTIME(:token_issued), INTERVAL token_days_valid DAY),
                       call_uuidv4 = :call_uuidv4,
+                      -- call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
                       payload_uuidv4 = :payload_uuidv4,
                       token_hidden = 0
                   `, { 
@@ -345,7 +347,8 @@ module.exports = async (req, res) => {
                 payloads.payload_response_account = :response_account,
                 payloads.payload_handler = :payload_handler
               WHERE
-                payloads.call_uuidv4 = :payload_uuidv4
+                -- payloads.call_uuidv4 = :payload_uuidv4
+                payloads.call_uuidv4_bin = UNHEX(REPLACE(:payload_uuidv4, '-', ''))
               AND
                 payloads.payload_resolved IS NULL
               LIMIT 1

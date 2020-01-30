@@ -45,7 +45,8 @@ module.exports = async (req, res) => {
         SET
           payload_expiration = FROM_UNIXTIME(:now)
         WHERE
-          call_uuidv4 = :call_uuidv4
+          -- call_uuidv4 = :call_uuidv4
+          call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
         LIMIT 1
       `, {
         call_uuidv4: potentialPayload.meta.uuid,

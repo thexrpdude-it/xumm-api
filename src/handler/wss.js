@@ -20,7 +20,8 @@ module.exports = async function (expressApp) {
         SET
           payload_ws_opencount = payload_ws_opencount + 1
         WHERE
-          call_uuidv4 = :call_uuidv4
+          -- call_uuidv4 = :call_uuidv4
+          call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
         LIMIT 1
       `, { call_uuidv4: req.params.uuid }).then(async r => {
         if (r.constructor.name === 'OkPacket' && typeof r.changedRows !== undefined && r.changedRows > 0) {
@@ -72,7 +73,16 @@ module.exports = async function (expressApp) {
             }, 15 * 1000)
           }
 
-          const payloadExpiration = await req.db(`SELECT (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payload_expiration)) as timediff FROM payloads WHERE call_uuidv4 = :call_uuidv4 LIMIT 1`, { call_uuidv4: req.params.uuid })
+          const payloadExpiration = await req.db(`
+            SELECT
+              (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payload_expiration)) as timediff
+            FROM
+              payloads
+            WHERE
+              -- call_uuidv4 = :call_uuidv4
+              call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
+            LIMIT 1
+          `, { call_uuidv4: req.params.uuid })
           if (payloadExpiration.length === 1 && payloadExpiration[0].timediff >= 0) {
             payloadExpired()
             setKeepaliveInterval(payloadExpiration[0].timediff)

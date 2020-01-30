@@ -61,7 +61,8 @@ module.exports = async (uuid, expressApp, invoker) => {
           tokens.payload_uuidv4 = payloads.call_uuidv4
         )
       WHERE 
-        payloads.call_uuidv4 = :call_uuidv4
+        -- payloads.call_uuidv4 = :call_uuidv4
+        payloads.call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
       ORDER BY 
         payload_id DESC
       LIMIT 1
@@ -79,7 +80,8 @@ module.exports = async (uuid, expressApp, invoker) => {
           SET
             payload_${invoker}_opencount = payload_${invoker}_opencount + 1
           WHERE 
-            call_uuidv4 = :call_uuidv4
+            -- call_uuidv4 = :call_uuidv4
+            call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
           LIMIT 1
         `, {
           call_uuidv4: payloadUuid

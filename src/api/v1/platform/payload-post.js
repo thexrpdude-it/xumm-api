@@ -264,6 +264,7 @@ module.exports = async (req, res) => {
         SET 
           application_id = :application_id,
           call_uuidv4 = :call_uuidv4,
+          call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
           -- payload_request_hex = :payload_request_hex,
           payload_request_json = :payload_request_json,
           payload_tx_type = :payload_tx_type,

@@ -26,6 +26,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
       SET
         application_id = :application_id,
         call_uuidv4 = :call_uuidv4,
+        call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
         call_moment = CURRENT_TIMESTAMP,
         call_ip = :call_ip,
         call_method = :call_method,
