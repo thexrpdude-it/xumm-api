@@ -24,6 +24,7 @@ module.exports = async (req, res) => {
 
   res.json({ 
     pong: true,
+    tosAndPrivacyPolicyVersion: Number(req.config.TosAndPrivacyPolicyVersion) || 0,
     badge: badge.length === 1 ? badge[0].c : 0,
     auth: Object.keys(req.__auth).reduce((a, b) => {
       return Object.assign(a, { 
