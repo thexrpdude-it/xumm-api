@@ -60,9 +60,11 @@
     "stop": "docker-compose down",
     "logs": "docker-compose logs --tail 30 -f",
     "preinstall": "command -v link-module-alias && link-module-alias clean || true",
-    "postinstall": "link-module-alias"
+    "postinstall": "link-module-alias",
+    "test": "jest --ci --verbose --runInBand"
   },
   "devDependencies": {
+    "jest": "^25.1.0",
     "link-module-alias": "^1.2.0",
     "nodemon": "^1.19.4",
     "pm2": "^3.5.2"
