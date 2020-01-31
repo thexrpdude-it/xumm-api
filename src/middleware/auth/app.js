@@ -25,7 +25,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
       SET
         user_id = :user_id,
         device_id = :device_id,
-        call_uuidv4 = :call_uuidv4,
+        call_uuidv4_txt = :call_uuidv4,
         call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
         call_moment = CURRENT_TIMESTAMP,
         call_ip = :call_ip,
@@ -48,21 +48,23 @@ module.exports = (expressApp, req, res, apiDetails) => {
     if (bearer || !apiDetails.auth) {
       const findUserDetailsQuery = `
         SELECT
-          u.user_uuidv4,
+          u.user_uuidv4_txt as user_uuidv4,
+          u.user_uuidv4_txt,
           u.user_id,
           u.user_slug,
           u.user_name,
-          d.device_uuidv4,
+          d.device_uuidv4_txt as device_uuidv4,
+          d.device_uuidv4_txt,
           d.device_id,
           d.device_idempotence,
-          SHA2(CONCAT(d.device_accesstoken, d.device_extuniqueid, :device_idempotence), 256) as __call_hash,
+          SHA2(CONCAT(d.device_accesstoken_txt, d.device_extuniqueid, :device_idempotence), 256) as __call_hash,
           IF(:device_idempotence > d.device_idempotence, 1, 0) as __call_idempotence_valid
         FROM 
           devices d
         LEFT JOIN
           users u ON (d.user_id = u.user_id)
         WHERE
-          d.device_accesstoken = :device_accesstoken
+          d.device_accesstoken_txt = :device_accesstoken
         AND
           (d.device_disabled IS NULL OR d.device_disabled > NOW())
       `
@@ -74,7 +76,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
           device_lastcall = CURRENT_TIMESTAMP,
           device_idempotence = :device_idempotence
         WHERE
-          device_accesstoken = :device_accesstoken
+          device_accesstoken_txt = :device_accesstoken
         LIMIT 1
       `
 

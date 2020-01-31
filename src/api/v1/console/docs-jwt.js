@@ -6,13 +6,13 @@ module.exports = async (req, res) => {
     const app = await req.db(`
       SELECT
         application_name,
-        application_secret
+        application_secret_txt as application_secret
       FROM 
         applications
       WHERE
         applications.application_auth0_owner = :user
         AND
-        application_uuidv4 = :appId
+        application_uuidv4_txt = :appId
         AND
         application_disabled = 0
       LIMIT 1

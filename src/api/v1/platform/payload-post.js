@@ -221,7 +221,7 @@ module.exports = async (req, res) => {
               applications.application_id = tokens.application_id
             )
           WHERE
-            token_accesstoken = :token_accesstoken
+            token_accesstoken_txt = :token_accesstoken
           AND
             token_hidden = 0
           AND
@@ -229,7 +229,7 @@ module.exports = async (req, res) => {
           AND
             devices.device_disabled IS NULL
           AND
-            devices.device_accesstoken IS NOT NULL
+            devices.device_accesstoken_txt IS NOT NULL
           AND
             devices.device_pushtoken IS NOT NULL
           AND
@@ -263,7 +263,7 @@ module.exports = async (req, res) => {
           payloads 
         SET 
           application_id = :application_id,
-          call_uuidv4 = :call_uuidv4,
+          call_uuidv4_txt = :call_uuidv4,
           call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
           -- payload_request_hex = :payload_request_hex,
           payload_request_json = :payload_request_json,

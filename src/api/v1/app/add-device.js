@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
       SET 
         user_id = :userId,
         device_lockedbydeviceid = :deviceId,
-        device_uuidv4 = :device_uuidv4,
+        device_uuidv4_txt = :device_uuidv4,
         device_created = FROM_UNIXTIME(:moment_creation),
         device_created_ip = :request_ip,
         device_disabled = FROM_UNIXTIME(:device_expiration)
@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
         expire: deviceExpiry
       },
       qr: {
-        text: `https://xrpl-labs.com/pair/${req.__auth.user.uuidv4}.${data.device_uuidv4}`
+        text: `${req.config.baselocation}/pair/${req.__auth.user.uuidv4}.${data.device_uuidv4}`
       }
     })
   } catch (e) {

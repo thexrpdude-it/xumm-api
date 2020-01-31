@@ -2,7 +2,7 @@ module.exports = async (req, res) => {
   try {
     const applications = await req.db(`
       SELECT
-        application_uuidv4,
+        application_uuidv4_txt as application_uuidv4,
         application_name,
         application_description,
         application_webhookurl,
@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
         applications
       WHERE
         applications.application_auth0_owner = :user
-        AND
+      AND
         application_disabled = 0
     `, {
       user: req.__auth.jwt.sub

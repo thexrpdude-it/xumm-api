@@ -4,7 +4,7 @@ module.exports = async (req, res) => {
   try {
     const authorizations = await req.db(`
       SELECT 
-        tokens.call_uuidv4 as authorization_uuidv4,
+        tokens.call_uuidv4_txt as authorization_uuidv4,
         tokens.token_issued as authorization_issued,
         tokens.token_expiration as authorization_expiration,
         tokens.token_days_valid as authorization_days_valid,
@@ -73,7 +73,7 @@ module.exports = async (req, res) => {
             AND
               tokens.token_reported < 1
             AND
-              tokens.call_uuidv4 = :uuidv4
+              tokens.call_uuidv4_txt = :uuidv4
             LIMIT 1
           `, {
             userId: req.__auth.user.id,

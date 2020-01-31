@@ -20,7 +20,7 @@ module.exports = async function (expressApp) {
         SET
           payload_ws_opencount = payload_ws_opencount + 1
         WHERE
-          -- call_uuidv4 = :call_uuidv4
+          -- call_uuidv4_txt = :call_uuidv4
           call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
         LIMIT 1
       `, { call_uuidv4: req.params.uuid }).then(async r => {
@@ -79,7 +79,7 @@ module.exports = async function (expressApp) {
             FROM
               payloads
             WHERE
-              -- call_uuidv4 = :call_uuidv4
+              -- call_uuidv4_txt = :call_uuidv4
               call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
             LIMIT 1
           `, { call_uuidv4: req.params.uuid })

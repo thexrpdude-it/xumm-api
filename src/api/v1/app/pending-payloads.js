@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
     // res.json(req.__auth)
     const payloads = await req.db(`
       SELECT
-        payloads.call_uuidv4
+        payloads.call_uuidv4_txt as call_uuidv4
       FROM
         users
       LEFT JOIN

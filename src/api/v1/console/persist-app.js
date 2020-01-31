@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   const data = {
     application_auth0_owner: req.__auth.jwt.sub,
     application_uuidv4: appId,
-    application_secret: appSecret,
+    application_secret_txt: appSecret,
   }
 
   try {
@@ -25,11 +25,11 @@ module.exports = async (req, res) => {
 
     if (typeof req.body.regenerateSecret === 'boolean' && req.method.toLowerCase() === 'patch') {
       updateFields = [
-        'application_secret',
+        'application_secret_txt',
       ]
 
       Object.assign(data, {
-        application_secret: appSecret
+        application_secret_txt: appSecret
       })
 
       auditTrailType = 'regen_resecret'
@@ -85,7 +85,7 @@ module.exports = async (req, res) => {
         WHERE
           application_auth0_owner = :application_auth0_owner
         AND
-          application_uuidv4 = :application_uuidv4
+          application_uuidv4_txt = :application_uuidv4
         AND
           application_disabled = 0
         LIMIT 1
@@ -112,9 +112,9 @@ module.exports = async (req, res) => {
         INSERT INTO
           applications
         SET
-          application_uuidv4 = :application_uuidv4,
+          application_uuidv4_txt = :application_uuidv4,
           application_name = :application_name,
-          application_secret = :application_secret,
+          application_secret_txt = :application_secret_txt,
           application_description = :application_description,
           application_webhookurl = :application_webhookurl,
           application_icon_url = :application_icon_url,
@@ -133,8 +133,8 @@ module.exports = async (req, res) => {
       INSERT INTO
         auditinfo
       SET
-        call_uuidv4 = :call_uuidv4,
-        application_uuidv4 = :application_uuidv4,
+        call_uuidv4_txt = :call_uuidv4,
+        application_uuidv4_txt = :application_uuidv4,
         auditinfo_type = :auditinfo_type,
         auditinfo_data = :auditinfo_data
     `, {
@@ -163,7 +163,7 @@ module.exports = async (req, res) => {
       })
     }
 
-    if (!(req.params.appId) || updateFields.indexOf('application_secret') > -1) {
+    if (!(req.params.appId) || updateFields.indexOf('application_secret_txt') > -1) {
       // Secret created or updated
       responseJson.credentials.secret = appSecret
     }

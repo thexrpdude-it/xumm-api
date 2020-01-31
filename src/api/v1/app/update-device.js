@@ -11,11 +11,11 @@ module.exports = async (req, res) => {
         SET
           device_pushtoken = :device_pushtoken
         WHERE
-          device_uuidv4 = :device_uuidv4
+          device_uuidv4_txt = :device_uuidv4
         AND
           (device_disabled IS NULL OR device_disabled > NOW())
         AND
-          device_accesstoken IS NOT NULL
+          device_accesstoken_txt IS NOT NULL
         LIMIT 1
       `, { 
         device_pushtoken: req.body.devicePushToken,

@@ -5,11 +5,12 @@ module.exports = async (req, res) => {
     const data = await req.db(`
       SELECT
         calls.*,
+        calls.call_uuidv4_txt as call_uuidv4,
         UNIX_TIMESTAMP(calls.call_moment) as call_moment_ts,
-        payloads.call_uuidv4 as payload_uuidv4,
+        payloads.call_uuidv4_txt as payload_uuidv4,
         tokens.token_issued,
         tokens.token_expiration,
-        tokens.token_accesstoken,
+        tokens.token_accesstoken_txt as token_accesstoken,
         tokens.token_days_valid,
         tokens.token_hidden
       FROM
@@ -20,15 +21,15 @@ module.exports = async (req, res) => {
         )
       LEFT JOIN
         payloads ON (
-          -- payloads.call_uuidv4 = calls.call_uuidv4
+          -- payloads.call_uuidv4_txt = calls.call_uuidv4_txt
           payloads.call_uuidv4_bin = calls.call_uuidv4_bin
         )
       LEFT JOIN
         tokens ON (
-          tokens.call_uuidv4 = calls.call_uuidv4
+          tokens.call_uuidv4_txt = calls.call_uuidv4_txt
         )
       WHERE
-        application_uuidv4 = :app
+        application_uuidv4_txt = :app
       AND
         application_auth0_owner = :user
       AND
@@ -36,7 +37,7 @@ module.exports = async (req, res) => {
       AND
       	calls.call_type = 'platform'
       ORDER BY
-        FIELD(calls.call_uuidv4, :record) DESC,
+        FIELD(calls.call_uuidv4_txt, :record) DESC,
         calls.call_id DESC
       LIMIT :skip, :take
     `, {

@@ -25,7 +25,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         calls
       SET
         application_id = :application_id,
-        call_uuidv4 = :call_uuidv4,
+        call_uuidv4_txt = :call_uuidv4,
         call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
         call_moment = CURRENT_TIMESTAMP,
         call_ip = :call_ip,
@@ -63,16 +63,17 @@ module.exports = (expressApp, req, res, apiDetails) => {
       const findAppDetailsQuery = `
         SELECT
           a.application_id,
-          a.application_uuidv4,
+          a.application_uuidv4_txt,
+          a.application_uuidv4_txt as application_uuidv4,
           a.application_name,
           a.application_webhookurl,
           a.application_disabled,
-          a.application_secret
+          a.application_secret_txt
         FROM 
           applications a
         WHERE
-          a.application_uuidv4 = :api_key
-        -- Moved to non-SQL check post query for Readme.io, so no a.application_secret = : api_secret
+          a.application_uuidv4_txt = :api_key
+        -- Moved to non-SQL check post query for Readme.io, so no a.application_secret_txt = : api_secret
       `
 
       const updateAppActivityQuery = `
@@ -81,7 +82,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         SET
           application_lastcall = CURRENT_TIMESTAMP
         WHERE
-          application_uuidv4 = :api_key
+          application_uuidv4_txt = :api_key
         LIMIT 1
       `
       if (apiDetails.auth) {
@@ -91,10 +92,10 @@ module.exports = (expressApp, req, res, apiDetails) => {
           const readmeJwtHash = crypto.createHash('md5').update(JSON.stringify({
             visitorIp: (req.headers['x-forwarded-for'] || '').split(',')[0],
             host: req.headers['host'] || '',
-            secret: appDetails[0].application_secret
+            secret: appDetails[0].application_secret_txt
           })).digest('hex').slice(0, 12)
 
-          if (apiSecret && apiSecret[0] !== appDetails[0].application_secret) {
+          if (apiSecret && apiSecret[0] !== appDetails[0].application_secret_txt) {
             _reject(`Invalid 'X-API-Key' / 'X-API-Secret' credentials`, 813)
           } else if (readmeTryConditions && readmeTryHash && readmeTryHash[0].slice(1) !== readmeJwtHash) {
             _reject(`Invalid ReadmeIO credentials`, 814)

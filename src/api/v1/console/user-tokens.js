@@ -4,7 +4,10 @@ module.exports = async (req, res) => {
   try {
     const data = await req.db(`
       SELECT
-        tokens.*
+        tokens.*,
+        tokens.token_accesstoken_txt as token_accesstoken,
+        tokens.call_uuidv4_txt as call_uuidv4,
+        tokens.payload_uuidv4_txt as payload_uuidv4
       FROM
         applications
       LEFT JOIN
@@ -12,13 +15,13 @@ module.exports = async (req, res) => {
           tokens.application_id = applications.application_id
         )
       WHERE
-        application_uuidv4 = :app
+        application_uuidv4_txt = :app
       AND
         application_auth0_owner = :user
       AND
         application_disabled = 0
       AND
-        call_uuidv4 IS NOT NULL
+        call_uuidv4_txt IS NOT NULL
       ORDER BY
         tokens.token_id DESC
       LIMIT :skip, :take

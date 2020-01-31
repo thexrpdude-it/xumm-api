@@ -26,11 +26,11 @@ module.exports = async (req, res) => {
           LEFT JOIN
             users u ON (d.user_id = u.user_id)
           WHERE
-            d.device_uuidv4 = :device_uuidv4
+            d.device_uuidv4_txt = :device_uuidv4
           AND
-            u.user_uuidv4 = :user_uuidv4
+            u.user_uuidv4_txt = :user_uuidv4
           AND
-            d.device_accesstoken IS NULL
+            d.device_accesstoken_txt IS NULL
           AND
             d.device_disabled > NOW()
         `
@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
             device_platform = :platform,
             device_pushtoken = :pushtoken,
             device_extuniqueid = :identifier,
-            device_accesstoken = :accesstoken,
+            device_accesstoken_txt = :accesstoken,
             device_disabled = IF(device_lockedbydeviceid IS NULL, NULL, NOW())
           WHERE
             device_id = :device_id

@@ -31,11 +31,11 @@ module.exports = async (req, res) => {
                 devices.device_id = payloads.payload_handler
               LIMIT 1
             )) as __payload_handler_user_id,
-            (SELECT application_uuidv4 FROM applications WHERE applications.application_id = payloads.application_id) as application_uuidv4
+            (SELECT application_uuidv4_txt FROM applications WHERE applications.application_id = payloads.application_id) as application_uuidv4
           FROM 
             payloads
           WHERE
-            -- call_uuidv4 = :call_uuidv4
+            -- call_uuidv4_txt = :call_uuidv4
             call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
           LIMIT 1
         `, {
@@ -204,17 +204,17 @@ module.exports = async (req, res) => {
                       user_id = :user_id,
                       token_issued = FROM_UNIXTIME(:token_issued),
                       token_expiration = FROM_UNIXTIME(:token_expiration),
-                      token_accesstoken = :token_accesstoken,
-                      call_uuidv4 = :call_uuidv4,
-                      payload_uuidv4 = :payload_uuidv4,
-                      application_id = (SELECT application_id FROM applications WHERE application_uuidv4 = :application_uuidv4 LIMIT 1),
+                      token_accesstoken_txt = :token_accesstoken,
+                      call_uuidv4_txt = :call_uuidv4,
+                      payload_uuidv4_txt = :payload_uuidv4,
+                      application_id = (SELECT application_id FROM applications WHERE application_uuidv4_txt = :application_uuidv4 LIMIT 1),
                       token_days_valid = :token_days_valid,
                       token_hidden = 0
                     ON DUPLICATE KEY UPDATE
                       token_expiration = DATE_ADD(FROM_UNIXTIME(:token_issued), INTERVAL token_days_valid DAY),
-                      call_uuidv4 = :call_uuidv4,
+                      call_uuidv4_txt = :call_uuidv4,
                       -- call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
-                      payload_uuidv4 = :payload_uuidv4,
+                      payload_uuidv4_txt = :payload_uuidv4,
                       token_hidden = 0
                   `, { 
                     ...generatedAccessToken,
@@ -246,7 +246,7 @@ module.exports = async (req, res) => {
                 AND
                   token_expiration > FROM_UNIXTIME(:now)
                 AND
-                  application_id = (SELECT application_id FROM applications WHERE application_uuidv4 = :application_uuidv4 LIMIT 1)
+                  application_id = (SELECT application_id FROM applications WHERE application_uuidv4_txt = :application_uuidv4 LIMIT 1)
                 LIMIT 1
               `, {
                 now: new Date() / 1000,
@@ -276,11 +276,11 @@ module.exports = async (req, res) => {
                     tokens
                   SET 
                     token_expiration = FROM_UNIXTIME(:token_expiration),
-                    call_uuidv4 = :call_uuidv4,
-                    payload_uuidv4 = :payload_uuidv4,
+                    call_uuidv4_txt = :call_uuidv4,
+                    payload_uuidv4_txt = :payload_uuidv4,
                     token_hidden = 0
                   WHERE
-                    token_accesstoken = :token_accesstoken
+                    token_accesstoken_txt = :token_accesstoken
                 `, { 
                   ...generatedAccessToken,
                   token_expiration: generatedAccessToken.token_expiration / 1000
@@ -352,7 +352,7 @@ module.exports = async (req, res) => {
                 payloads.payload_response_account = :response_account,
                 payloads.payload_handler = :payload_handler
               WHERE
-                -- payloads.call_uuidv4 = :payload_uuidv4
+                -- payloads.call_uuidv4_txt = :payload_uuidv4
                 payloads.call_uuidv4_bin = UNHEX(REPLACE(:payload_uuidv4, '-', ''))
               AND
                 payloads.payload_resolved IS NULL
@@ -382,7 +382,7 @@ module.exports = async (req, res) => {
           const appDetails = await req.db(`
             SELECT
               applications.application_webhookurl,
-              tokens.token_accesstoken
+              tokens.token_accesstoken_txt as token_accesstoken
             FROM
               applications
             LEFT JOIN
@@ -392,7 +392,7 @@ module.exports = async (req, res) => {
                 tokens.application_id = applications.application_id
               )
             WHERE
-              application_uuidv4 = :application_uuidv4
+              application_uuidv4_txt = :application_uuidv4
             LIMIT 1
           `, {
             application_uuidv4: payload.application_uuidv4,

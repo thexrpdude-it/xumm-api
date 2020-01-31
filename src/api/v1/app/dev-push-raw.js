@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
     FROM 
       devices
     WHERE
-      device_uuidv4 = :device
+      device_uuidv4_txt = :device
     AND
       devices.device_disabled IS NULL
     AND
