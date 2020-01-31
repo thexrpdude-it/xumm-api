@@ -28,18 +28,8 @@ module.exports = async (req, res) => {
       reason = 'OK'
     }
 
-    res.json({
-      result: {
-        cancelled,
-        reason
-      },
-      meta: Object.assign(potentialPayload.meta, {
-        expired: true
-      })
-    })
-
     if (cancelled === true) {
-      req.db(`
+      await req.db(`
         UPDATE 
           payloads
         SET
@@ -53,6 +43,16 @@ module.exports = async (req, res) => {
         now: new Date() / 1000
       })
     }
+
+    res.json({
+      result: {
+        cancelled,
+        reason
+      },
+      meta: Object.assign(potentialPayload.meta, {
+        expired: true
+      })
+    })
 
     return
   } catch (e) {
