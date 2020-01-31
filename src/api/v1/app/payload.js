@@ -128,6 +128,7 @@ module.exports = async (req, res) => {
             resolved: new Date(),
             dispatched_to: '',
             dispatched_result: '',
+            dispatched_nodetype: '',
             rejected: false
           }
           
@@ -301,6 +302,9 @@ module.exports = async (req, res) => {
               if (typeof req.body.dispatched.result === 'string' && req.body.dispatched.result.match(/[a-zA-Z0-9]+/)) {
                 payloadUpdate.dispatched_result = req.body.dispatched.result
               }
+              if (typeof req.body.dispatched.nodetype === 'string' && req.body.dispatched.nodetype.match(/(LIVENET|TESTNET|CUSTOM)/i)) {
+                payloadUpdate.dispatched_nodetype = req.body.dispatched.nodetype
+              }
             }
             if (typeof req.body.multisigned === 'string' && req.body.multisigned.match(/^r[a-zA-Z0-9]{20,35}$/)) {
               if (addressCodec.isValidClassicAddress(req.body.multisigned)) {
@@ -344,6 +348,7 @@ module.exports = async (req, res) => {
                 payloads.payload_resolved = FROM_UNIXTIME(:payload_resolved),
                 payloads.payload_dispatched_to = :payload_dispatched_to,
                 payloads.payload_dispatched_result = :payload_dispatched_result,
+                payloads.payload_dispatched_nodetype = :payload_dispatched_nodetype,
                 payloads.payload_response_account = :response_account,
                 payloads.payload_handler = :payload_handler
               WHERE
@@ -361,6 +366,7 @@ module.exports = async (req, res) => {
               payload_resolved: payloadUpdate.resolved / 1000,
               payload_dispatched_to: payloadUpdate.dispatched_to,
               payload_dispatched_result: payloadUpdate.dispatched_result,
+              payload_dispatched_nodetype: payloadUpdate.dispatched_nodetype,
               response_account: payloadUpdate.response_account,
               payload_handler: payloadUpdate.payload_handler,
             })
