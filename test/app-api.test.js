@@ -12,18 +12,6 @@ const config = require(__dirname + '/../development.json')
 process.env.APIKEY = config.tests.developerApiKeys.APIKEY
 process.env.APISECRET = config.tests.developerApiKeys.APISECRET
 
-/**
- * Todo:
- *    - WebSocket clients:
- *    - Public Developer API
- *    - Console API
- * 
- * Test website
- *    - Payload Page
- *    - TOS
- *    - Socket
- */
-
 describe('XUMM iOS/Android APP API', () => {
   const endpoint = `http://${process.env.HOST}:${process.env.PORT}/api/v1/app/`
   let addedUser
