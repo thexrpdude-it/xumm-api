@@ -238,7 +238,10 @@ module.exports = async (req, res) => {
                */
               const accessTokenGet = await req.db(`
                 SELECT
-                  *
+                  *,
+                  token_accesstoken_txt as token_accesstoken,
+                  call_uuidv4_txt as call_uuidv4,
+                  payload_uuidv4_txt as payload_uuidv4
                 FROM
                   tokens
                 WHERE
@@ -247,10 +250,13 @@ module.exports = async (req, res) => {
                   token_expiration > FROM_UNIXTIME(:now)
                 AND
                   application_id = (SELECT application_id FROM applications WHERE application_uuidv4_txt = :application_uuidv4 LIMIT 1)
+                AND
+                  user_id = :user
                 LIMIT 1
               `, {
                 now: new Date() / 1000,
-                application_uuidv4: payload.application_uuidv4
+                application_uuidv4: payload.application_uuidv4,
+                user: req.__auth.user.id
               })
 
               /**
