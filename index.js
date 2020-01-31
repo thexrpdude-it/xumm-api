@@ -2,6 +2,16 @@ const express = require('express')
 const app = express()
 const log = require('debug')('app:main')
 
+const readyHandler = {}
+readyHandler.promise = new Promise((resolve, reject) => Object.assign(readyHandler, { resolve, reject }))
+
+module.exports = {
+  ready: readyHandler.promise,
+  async close () {
+    return await app.close()
+  }
+}
+
 async function start () {
   const middleware = [
     { type: 'middleware', module: 'config' },
@@ -27,6 +37,8 @@ async function start () {
 
   app.listen(app.config.port)
   log(`\nXRPL-SIGN ${app.config.mode} - Server running at port ${app.config.port}\n`)
+  
+  readyHandler.resolve()
 }
 
 start()
