@@ -4,7 +4,14 @@ const log = require('debug')('app:error-handler')
 module.exports = async function (expressApp) {
   expressApp.use ((error, req, res, next) => {
     log(` >> ExpressError @ RouteType[${req.routeType}]`, error.toString())
-    log(error)
+    log(error, req.__auth)
+
+    if (typeof expressApp.config.bugsnagKey !== 'undefined') {
+      expressApp.bugsnagClient.notify(error.causingError || error, {
+        metaData: req.__auth || {}
+      })
+    }
+
     const errorUuid = res.get('X-Call-Ref') || uuid()
     if (req.routeType === 'api' || (req.get('content-type') || '').match(/json/)) {
       log(`FATAL ERROR [ ${errorUuid} ]`, error.toString())

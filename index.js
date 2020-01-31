@@ -15,6 +15,7 @@ module.exports = {
 async function start () {
   const middleware = [
     { type: 'middleware', module: 'config' },
+    { type: 'middleware', module: 'bugsnag' },
     { type: 'storage', module: 'database' },
     { type: 'middleware', module: 'cors' },
     { type: 'middleware', module: 'headers' },

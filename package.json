@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/WietseWind/xrpl-sign-platform",
   "dependencies": {
+    "@bugsnag/js": "^6.5.0",
+    "@bugsnag/plugin-express": "^6.5.1",
     "aws-sdk": "^2.604.0",
     "debug": "^4.1.1",
     "express": "^4.17.1",

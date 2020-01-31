@@ -14,6 +14,12 @@ module.exports = async function (expressApp) {
 
   const errorHandler = async (e, req, res) => {
     // TODO: migrate to module
+    if (typeof expressApp.config.bugsnagKey !== 'undefined') {
+      expressApp.bugsnagClient.notify(e.causingError || e, {
+        metaData: req.__auth || {}
+      })
+    }
+
     const errorRef = res.get('X-Call-Ref') || uuid()
     const code = parseInt(((e.code || '') + '').replace(/[^0-9]/g, ''))
     log(`ERROR @ ${req.remoteAddress || req.ip} ${errorRef} - ${e.message} (${e.httpCode||'-'})`, req.config.__env === 'dev' ? e : undefined)
@@ -212,6 +218,7 @@ module.exports = async function (expressApp) {
                     /**
                      * Todo: normalize errors (per api type?)
                      */
+                    expressApp.bugsnagClient.notify(e)
                     res.status(500).json({ 
                       error: true,
                       message: `API Auth middleware rejected: [ ${e.message} ]`,
