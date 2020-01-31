@@ -302,7 +302,7 @@ module.exports = async (req, res) => {
               if (typeof req.body.dispatched.result === 'string' && req.body.dispatched.result.match(/[a-zA-Z0-9]+/)) {
                 payloadUpdate.dispatched_result = req.body.dispatched.result
               }
-              if (typeof req.body.dispatched.nodetype === 'string' && req.body.dispatched.nodetype.match(/(LIVENET|TESTNET|CUSTOM)/i)) {
+              if (typeof req.body.dispatched.nodetype === 'string' && req.body.dispatched.nodetype.trim().match(/^(LIVENET|TESTNET|CUSTOM)$/i)) {
                 payloadUpdate.dispatched_nodetype = req.body.dispatched.nodetype
               }
             }
