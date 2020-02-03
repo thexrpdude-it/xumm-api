@@ -1,0 +1,73 @@
+{
+  "__env": "dev",
+  "tests": {
+    "developerApiKeys": {
+      "APIKEY": "<uuid>",
+      "APISECRET": "<uuid>",
+      "ACCESSTOKEN": "<access-token-uuid>.<idempotency-int>.<hash>"
+    }
+  },
+  "baselocation": "http://localhost:3001",
+  "logRequestsToConsole": true,
+  "bugsnagKey": "<bugsnag-apikey-or-remove>",
+  "ips": [ "10.100.0.0/16", "192.168.0.0/16", "1.1.1.1/32" ],
+  "redis": {
+    "host": "127.0.0.1",
+    "port": 6379
+  },
+  "deeplinkRedirectLocation": "xumm.local",
+  "TosAndPrivacyPolicyVersion": 1,
+  "AppStoreLinks": {
+    "iOS": "https://xrpl-labs.com",
+    "Android": "https://xrpl-labs.com"
+  },
+  "AccessControlAllowOrigins": [
+    "http://localhost:8080",
+    "http://localhost:3001"
+  ],
+  "defaultCorsOrigin": "https://xumm.local",
+  "resources": {
+    "default": [],
+    "script": [ "polyfill.io", "cdn.jsdelivr.net", "kit.fontawesome.com" ],
+    "connect": [ "ws://localhost:3001" ],
+    "images": [ "media.giphy.com", "cdn.xumm.pro", "xumm-cdn.imgix.net", "xumm.nyc3.cdn.digitaloceanspaces.com" ],
+    "styles": [ "stackpath.bootstrapcdn.com", "use.fontawesome.com", "kit-pro.fontawesome.com", "kit-free.fontawesome.com", "fonts.googleapis.com", "use.typekit.net", "p.typekit.net" ],
+    "fonts": [ "use.fontawesome.com", "kit.fontawesome.com", "kit-free.fontawesome.com", "kit-pro.fontawesome.com", "fonts.gstatic.com", "use.typekit.net" ]
+  },
+  "devconsole": {
+    "jwt": {
+      "domain": "<some-auth0>.auth0.com",
+      "audience": "https://_backend.xumm.app",
+      "azp": "<some-auth0>"
+    },
+    "logJwt": true
+  },
+  "auth0management": {
+    "grant_type": "client_credentials",
+    "client_id": "<some-auth0>",
+    "client_secret": "<some-auth0>",
+    "audience": "https://<some-auth0>.auth0.com/api/v2/"
+  },
+  "db": {
+    "connectionLimit": 20,
+    "host": "127.0.0.1",
+    "user": "root",
+    "password": "<some-pw>",
+    "database": "<some-db>"
+  },
+  "googleFcmKey": "<some-fcm>",
+  "readmeIoJwtKey": "<some-jwt-secret>",
+  "xrplnsKey": "<some-key>",
+  "uploadStore": {
+    "endpoint": "<some-space-location>.digitaloceanspaces.com",
+    "space": "<some-space-name>",
+    "key": "<some-key>",
+    "secret": "<some-secret>",
+    "urls": {
+      "cdn": "https://<some-space-name>.<some-space-location>.cdn.digitaloceanspaces.com",
+      "default": "https://<some-name>"
+    }
+  },
+  "qrpng": "<some-base64-png-icon>",
+  "bithompToken": "<some-token>"
+}

@@ -1,0 +1,301 @@
+-- Create syntax for TABLE 'applications'
+CREATE TABLE `applications` (
+  `application_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `application_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin NOT NULL,
+  `application_secret_txt` varchar(36) COLLATE utf8mb4_bin NOT NULL,
+  `application_name` varchar(60) COLLATE utf8mb4_bin DEFAULT NULL,
+  `application_description` varchar(500) COLLATE utf8mb4_bin DEFAULT NULL,
+  `application_webhookurl` varchar(200) COLLATE utf8mb4_bin DEFAULT NULL,
+  `application_lastcall` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `application_disabled` int(1) unsigned NOT NULL DEFAULT '0',
+  `application_icon_url` varchar(200) COLLATE utf8mb4_bin DEFAULT NULL,
+  `application_auth0_owner` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`application_id`),
+  UNIQUE KEY `application_key` (`application_uuidv4_txt`),
+  KEY `uuid` (`application_uuidv4_txt`),
+  KEY `lastcall` (`application_lastcall`),
+  KEY `disabled` (`application_disabled`),
+  KEY `auth0_owner` (`application_auth0_owner`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'auditinfo'
+CREATE TABLE `auditinfo` (
+  `auditinfo_id` int(11) NOT NULL AUTO_INCREMENT,
+  `call_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin NOT NULL,
+  `application_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL,
+  `auditinfo_moment` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `auditinfo_type` varchar(128) COLLATE utf8mb4_bin NOT NULL,
+  `auditinfo_data` longtext COLLATE utf8mb4_bin,
+  PRIMARY KEY (`auditinfo_id`),
+  KEY `application_id` (`application_uuidv4_txt`),
+  KEY `call_id` (`call_uuidv4_txt`),
+  KEY `type` (`auditinfo_type`),
+  KEY `moment` (`auditinfo_moment`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'calls'
+CREATE TABLE `calls` (
+  `call_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `call_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin NOT NULL,
+  `call_uuidv4_bin` binary(16) DEFAULT NULL,
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `device_id` int(10) unsigned DEFAULT NULL,
+  `application_id` int(10) unsigned DEFAULT NULL,
+  `call_moment` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `call_ip` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_method` varchar(10) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_contenttype` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_endpoint` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_useragent` varchar(250) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_version` varchar(10) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_type` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_url` varchar(512) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_httpcode` int(10) unsigned DEFAULT NULL,
+  `call_ecode` int(10) unsigned DEFAULT NULL,
+  `call_emessage` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_emessage_debug` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_idempotence` bigint(20) unsigned DEFAULT NULL,
+  `call_validauthhash` int(1) unsigned DEFAULT NULL,
+  `call_extref` varchar(60) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`call_id`),
+  UNIQUE KEY `call_uuidv4_bin_UNIQUE` (`call_uuidv4_bin`),
+  KEY `moment` (`call_moment`),
+  KEY `user` (`user_id`),
+  KEY `uuid` (`call_uuidv4_txt`),
+  KEY `device` (`device_id`),
+  KEY `application` (`application_id`),
+  KEY `ip` (`call_ip`),
+  KEY `method` (`call_method`),
+  KEY `version` (`call_version`),
+  KEY `type` (`call_type`),
+  KEY `httpcode` (`call_httpcode`),
+  KEY `ecode` (`call_ecode`),
+  KEY `idempotence` (`call_idempotence`),
+  KEY `validauthhash` (`call_validauthhash`),
+  KEY `extref` (`call_extref`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'devices'
+CREATE TABLE `devices` (
+  `device_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `device_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin NOT NULL,
+  `device_platform` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `device_pushtoken` varchar(300) COLLATE utf8mb4_bin DEFAULT NULL,
+  `device_accesstoken_txt` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `device_lastcall` timestamp NULL DEFAULT NULL,
+  `device_disabled` timestamp NULL DEFAULT NULL,
+  `device_extuniqueid` varchar(80) COLLATE utf8mb4_bin DEFAULT NULL,
+  `device_created` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `device_created_ip` varchar(60) COLLATE utf8mb4_bin DEFAULT NULL,
+  `device_idempotence` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `device_lockedbydeviceid` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`device_id`),
+  KEY `device_platform` (`device_platform`),
+  KEY `device_accesstoken` (`device_accesstoken_txt`),
+  KEY `device_disabled` (`device_disabled`),
+  KEY `device_lastlogin` (`device_lastcall`),
+  KEY `fk_devices_users1_idx` (`user_id`),
+  KEY `device_uuidv4` (`device_uuidv4_txt`),
+  KEY `device_created_ip` (`device_created_ip`),
+  KEY `device_created` (`device_created`),
+  KEY `device_idempotence` (`device_idempotence`),
+  KEY `device_lockedbydeviceid` (`device_lockedbydeviceid`),
+  CONSTRAINT `fk_devices_users1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'knownaccounts'
+CREATE TABLE `knownaccounts` (
+  `knownaccount_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `knownaccount_account` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `knownaccount_currency` varchar(10) COLLATE utf8mb4_bin NOT NULL DEFAULT '',
+  `knownaccount_name` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `knownaccount_domain` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `knownaccount_blacklist` int(10) unsigned DEFAULT '0',
+  `knownaccount_source` varchar(45) COLLATE utf8mb4_bin NOT NULL DEFAULT 'manual',
+  `knownaccount_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `knownaccount_avatar_url` varchar(200) COLLATE utf8mb4_bin DEFAULT NULL,
+  `knownaccount_currency_avatar_url` varchar(200) COLLATE utf8mb4_bin DEFAULT NULL,
+  `knownaccounts_order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`knownaccount_id`),
+  UNIQUE KEY `account_currency_uniq` (`knownaccount_account`,`knownaccount_currency`),
+  KEY `knownaccount_account` (`knownaccount_account`),
+  KEY `knownaccount_currency` (`knownaccount_currency`),
+  KEY `knownaccount_blacklist` (`knownaccount_blacklist`),
+  KEY `source` (`knownaccount_source`),
+  KEY `domain` (`knownaccount_domain`),
+  KEY `lookup_known_account` (`knownaccount_account`,`knownaccount_currency`,`knownaccount_updated`),
+  KEY `knownaccount_order` (`knownaccounts_order`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'lookuphashses'
+CREATE TABLE `lookuphashses` (
+  `lookuphash_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `lookuphash_type` varchar(20) COLLATE utf8mb4_bin NOT NULL COMMENT 'ENUM("FQDN", "MAIL", "PHONE")',
+  `lookuphash_hash` varchar(256) COLLATE utf8mb4_bin NOT NULL,
+  `lookuphash_pairingstr` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `lookuphash_activated` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`lookuphash_id`),
+  KEY `lookuphash_type` (`lookuphash_type`),
+  KEY `lookuphash_hash` (`lookuphash_hash`),
+  KEY `fk_lookuphashses_users1_idx` (`user_id`),
+  CONSTRAINT `fk_lookuphashses_users1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'pairings'
+CREATE TABLE `pairings` (
+  `pairing_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `application_id` int(10) unsigned NOT NULL,
+  `pairing_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin NOT NULL,
+  `pairing_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `pairing_expiration` timestamp NULL DEFAULT NULL,
+  `pairing_created_ip` varchar(60) COLLATE utf8mb4_bin NOT NULL,
+  `pairing_consumed` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`pairing_id`),
+  UNIQUE KEY `pairing_token` (`pairing_uuidv4_txt`),
+  KEY `pairing_created` (`pairing_created`),
+  KEY `pairing_expiration` (`pairing_expiration`),
+  KEY `pairing_consumed` (`pairing_consumed`),
+  KEY `fk_pairings_applications1_idx` (`application_id`),
+  CONSTRAINT `fk_pairings_applications1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`application_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'payloads'
+CREATE TABLE `payloads` (
+  `payload_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `token_id` int(10) unsigned DEFAULT NULL,
+  `application_id` int(10) unsigned NOT NULL,
+  `call_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_uuidv4_bin` binary(16) DEFAULT NULL,
+  `payload_handler` int(10) unsigned DEFAULT NULL,
+  `payload_request_hex` longtext COLLATE utf8mb4_bin,
+  `payload_request_json` longtext COLLATE utf8mb4_bin,
+  `payload_response_hex` longtext COLLATE utf8mb4_bin,
+  `payload_response_txid` varchar(70) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_response_account` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_response_multisign_account` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_tx_type` varchar(35) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_tx_account` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_tx_destination` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_tx_destination_tag` int(32) unsigned DEFAULT NULL,
+  `payload_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `payload_expiration` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `payload_web_opencount` int(6) unsigned NOT NULL DEFAULT '0',
+  `payload_app_opencount` int(6) unsigned NOT NULL DEFAULT '0',
+  `payload_ws_opencount` int(6) unsigned NOT NULL DEFAULT '0',
+  `payload_api_opencount` int(6) unsigned NOT NULL DEFAULT '0',
+  `payload_multisign` int(1) unsigned DEFAULT NULL,
+  `payload_submit` int(1) unsigned DEFAULT NULL,
+  `payload_return_url_app` varchar(250) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_return_url_web` varchar(250) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_resolved` timestamp NULL DEFAULT NULL,
+  `payload_dispatched_to` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_dispatched_result` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_dispatched_nodetype` varchar(30) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`payload_id`),
+  UNIQUE KEY `call_uuidv4` (`call_uuidv4_txt`),
+  UNIQUE KEY `call_uuidv4_bin_UNIQUE` (`call_uuidv4_bin`),
+  KEY `fk_payloads_usertokens1_idx` (`token_id`),
+  KEY `fk_payloads_devices1_idx` (`payload_handler`),
+  KEY `fk_payloads_applications1_idx` (`application_id`),
+  KEY `application_id` (`application_id`),
+  KEY `tx_type` (`payload_tx_type`),
+  KEY `tx_account` (`payload_tx_account`),
+  KEY `tx_destination` (`payload_tx_destination`),
+  KEY `tx_destination_tag` (`payload_tx_destination_tag`,`payload_tx_destination`),
+  KEY `created` (`payload_created`),
+  KEY `expire` (`payload_expiration`),
+  KEY `web_opencount` (`payload_web_opencount`),
+  KEY `multisign` (`payload_multisign`),
+  KEY `submit` (`payload_submit`),
+  KEY `app_opencount` (`payload_app_opencount`),
+  KEY `ws_opencount` (`payload_ws_opencount`),
+  KEY `txid` (`payload_response_txid`),
+  KEY `api_opencount` (`payload_api_opencount`),
+  KEY `resolved_to` (`payload_dispatched_to`),
+  KEY `resolved_result` (`payload_dispatched_result`),
+  KEY `resolved_at` (`payload_resolved`),
+  KEY `ms_account` (`payload_response_multisign_account`),
+  KEY `payload_response_account` (`payload_response_account`),
+  KEY `nodetype` (`payload_dispatched_nodetype`),
+  CONSTRAINT `fk_payloads_applications` FOREIGN KEY (`application_id`) REFERENCES `applications` (`application_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_payloads_devices` FOREIGN KEY (`payload_handler`) REFERENCES `devices` (`device_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_payloads_usertokens` FOREIGN KEY (`token_id`) REFERENCES `tokens` (`token_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'payloads_external_meta'
+CREATE TABLE `payloads_external_meta` (
+  `payload_id` int(10) unsigned NOT NULL,
+  `application_id` int(10) unsigned NOT NULL,
+  `meta_string` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `meta_blob` longtext COLLATE utf8mb4_bin,
+  PRIMARY KEY (`payload_id`),
+  UNIQUE KEY `UNIQ` (`application_id`,`meta_string`),
+  KEY `meta_string` (`meta_string`),
+  KEY `fk_payloads_external_meta_payloads1_idx` (`payload_id`),
+  KEY `fk_payloads_external_meta_applications1_idx` (`application_id`),
+  CONSTRAINT `fk_payloads_external_meta_applications1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`application_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_payloads_external_meta_payloads1` FOREIGN KEY (`payload_id`) REFERENCES `payloads` (`payload_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'tokens'
+CREATE TABLE `tokens` (
+  `token_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `pairing_id` int(10) unsigned DEFAULT NULL,
+  `application_id` int(10) unsigned DEFAULT NULL,
+  `token_issued` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `token_expiration` timestamp NULL DEFAULT NULL,
+  `token_accesstoken_txt` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL,
+  `call_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL,
+  `payload_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin DEFAULT NULL,
+  `token_days_valid` int(10) unsigned NOT NULL DEFAULT '90',
+  `token_hidden` int(1) unsigned NOT NULL DEFAULT '0',
+  `token_reported` int(10) unsigned NOT NULL DEFAULT '0',
+  `token_reported_desc` longtext COLLATE utf8mb4_bin,
+  PRIMARY KEY (`token_id`),
+  UNIQUE KEY `uniq_user_app_token` (`user_id`,`application_id`),
+  KEY `fk_usertokens_users1_idx` (`user_id`),
+  KEY `token_issued` (`token_issued`),
+  KEY `token_expiration` (`token_expiration`),
+  KEY `token_accesstoken` (`token_accesstoken_txt`),
+  KEY `fk_tokens_pairings1_idx` (`pairing_id`),
+  KEY `call_uuidv4` (`call_uuidv4_txt`),
+  KEY `payload_uuidv4` (`payload_uuidv4_txt`),
+  KEY `fk_tokens_applications2_idx` (`application_id`),
+  KEY `hidden` (`token_hidden`),
+  KEY `days` (`token_days_valid`),
+  KEY `reported` (`token_reported`),
+  CONSTRAINT `fk_tokens_applications2` FOREIGN KEY (`application_id`) REFERENCES `applications` (`application_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_tokens_pairings` FOREIGN KEY (`pairing_id`) REFERENCES `pairings` (`pairing_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_usertokens_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'useraccounts'
+CREATE TABLE `useraccounts` (
+  `useraccount_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `useraccount_account` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `useraccount_allowlookup` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`useraccount_id`),
+  KEY `useraccount_account` (`useraccount_account`),
+  KEY `fk_useraccounts_users1_idx` (`user_id`),
+  CONSTRAINT `fk_useraccounts_users1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- Create syntax for TABLE 'users'
+CREATE TABLE `users` (
+  `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_uuidv4_txt` varchar(36) COLLATE utf8mb4_bin NOT NULL,
+  `user_slug` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `user_name` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `user_profilepage` int(1) unsigned NOT NULL DEFAULT '0',
+  `user_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_created_ip` varchar(60) COLLATE utf8mb4_bin NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `uuid` (`user_uuidv4_txt`),
+  KEY `user_slug` (`user_slug`),
+  KEY `created` (`user_created`),
+  KEY `created_ip` (`user_created_ip`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
