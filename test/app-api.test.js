@@ -479,7 +479,7 @@ describe('XUMM iOS/Android APP API', () => {
     expect(body).toEqual(expect.objectContaining({
       result: {
         cancelled: false,
-        reason: 'ALREADY_EXPIRED'
+        reason: 'ALREADY_CANCELLED'
       },
       meta: cancelData
     }))
@@ -519,7 +519,7 @@ describe('XUMM iOS/Android APP API', () => {
     }))
   })
 
-  it('should not sign a cancelled payload', async () => {
+  it('should sign a cancelled payload', async () => {
     await new Promise(resolve => {
       setTimeout(resolve, 500)
     })
@@ -532,18 +532,21 @@ describe('XUMM iOS/Android APP API', () => {
     const body = await call.json()
 
     expect(body).toEqual(expect.objectContaining({
-      error: {
-        code: 510,
-        reference: expect.any(String)
-      }
+      payload_uuidv4: expect.any(String),
+      reference_call_uuidv4: expect.any(String),
+      return_url: {
+        app: expect.any(String),
+        web: expect.any(String)
+      },
+      signed: true
     }))
   })
 
-  it('<Public Developer API> should be able to fetch a signed payload', async () => {
+  it('<Public Developer API> should be able to fetch a (cancelled but) signed payload', async () => {
     await new Promise(resolve => {
       setTimeout(resolve, 500)
     })
-    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/${payloads[1].uuid}`, 
+    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/${payloads[2].uuid}`, 
     {
       headers: headers.devApi
     })
@@ -563,19 +566,6 @@ describe('XUMM iOS/Android APP API', () => {
     const body = await call.json()
 
     expect(body).toEqual(require('./fixtures/devapi-pending-payload'))
-  })
-
-  it('<Public Developer API> should be able to fetch a cancelled payload', async () => {
-    await new Promise(resolve => {
-      setTimeout(resolve, 500)
-    })
-    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/${payloads[2].uuid}`, 
-    {
-      headers: headers.devApi
-    })
-    const body = await call.json()
-
-    expect(body).toEqual(require('./fixtures/devapi-cancelled-payload'))
   })
 
   /**
