@@ -87,7 +87,10 @@ module.exports = (expressApp, req, res, apiDetails) => {
         })
 
         if (userDetails.length > 0) {
-          const hashAndIdempotencyValid = userDetails[0].__call_hash.toLowerCase() === bearer[3].toLowerCase() && userDetails[0].__call_idempotence_valid > 0
+          /**
+           * DISABLED IDEMPOTENCY, TESTING WITH @ALLOY
+           */
+          const hashAndIdempotencyValid = userDetails[0].__call_hash.toLowerCase() === bearer[3].toLowerCase() /*&& userDetails[0].__call_idempotence_valid > 0*/
 
           if (hashAndIdempotencyValid || req.ipTrusted) {
             if (hashAndIdempotencyValid) {
