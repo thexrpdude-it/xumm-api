@@ -115,9 +115,15 @@ module.exports = async (req, res) => {
           //   throw e
           // }
 
-          if (payload._finished > 0) {
+          if (payload._signed > 0) {
             const e = new Error(`Payload already signed`)
             e.httpCode = e.code = 511
+            throw e
+          }
+
+          if (payload._resolved > 0) {
+            const e = new Error(`Payload already resolved`)
+            e.httpCode = e.code = 512
             throw e
           }
           
