@@ -101,11 +101,18 @@ module.exports = async (req, res) => {
             throw e
           }
 
-          if (payload._expired > 0) {
-            const e = new Error(`Payload expired`)
-            e.httpCode = e.code = 510
-            throw e
-          }
+          /**
+           * Do not reject patching when expired,
+           * a user can still be in the signing screen
+           * and sign+submit AFTER expiration, if that
+           * happens we WILL want to receive the PATCH
+           * as the tx has been processed.
+           */
+          // if (payload._expired > 0) {
+          //   const e = new Error(`Payload expired`)
+          //   e.httpCode = e.code = 510
+          //   throw e
+          // }
 
           if (payload._finished > 0) {
             const e = new Error(`Payload already signed`)
