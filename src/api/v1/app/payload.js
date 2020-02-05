@@ -9,39 +9,40 @@ const uuid = require('uuid/v4')
 const { fork } = require('child_process')
 
 module.exports = async (req, res) => {
+  /**
+   * Check if user is authorized to fetch the payload
+   * Either because it hasn't been handled yet, or
+   * becuase it has been handled by a device by the
+   * requesting user.
+   */
+  const payloadAuthInfo = await req.db(`
+    SELECT 
+      payloads.payload_id,
+      IF(payloads.payload_handler IS NULL, NULL, (
+        SELECT
+          user_id
+        FROM
+          devices
+        WHERE
+          devices.device_id = payloads.payload_handler
+        LIMIT 1
+      )) as __payload_handler_user_id,
+      (SELECT application_uuidv4_txt FROM applications WHERE applications.application_id = payloads.application_id) as application_uuidv4,
+      (SELECT application_id FROM applications WHERE applications.application_id = payloads.application_id) as application_id
+    FROM 
+      payloads
+    WHERE
+      -- call_uuidv4_txt = :call_uuidv4
+      call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
+    LIMIT 1
+  `, {
+    call_uuidv4: req.params.payloads__payload_id || ''
+  })
+
   try {
     const payload = await getPayloadData(req.params.payloads__payload_id, req.app, 'app')
     switch (req.method) {
       case 'GET':
-        /**
-         * Check if user is authorized to fetch the payload
-         * Either because it hasn't been handled yet, or
-         * becuase it has been handled by a device by the
-         * requesting user.
-         */
-        const payloadAuthInfo = await req.db(`
-          SELECT 
-            payloads.payload_id,
-            IF(payloads.payload_handler IS NULL, NULL, (
-              SELECT
-                user_id
-              FROM
-                devices
-              WHERE
-                devices.device_id = payloads.payload_handler
-              LIMIT 1
-            )) as __payload_handler_user_id,
-            (SELECT application_uuidv4_txt FROM applications WHERE applications.application_id = payloads.application_id) as application_uuidv4
-          FROM 
-            payloads
-          WHERE
-            -- call_uuidv4_txt = :call_uuidv4
-            call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
-          LIMIT 1
-        `, {
-          call_uuidv4: req.params.payloads__payload_id || ''
-        })
-      
         if (payloadAuthInfo.constructor.name === 'Array' && payloadAuthInfo.length > 0 && payloadAuthInfo[0].constructor.name === 'RowDataPacket') {
           if (payloadAuthInfo[0].__payload_handler_user_id === null || payloadAuthInfo[0].__payload_handler_user_id === req.__auth.user.id) {
             let response = {
@@ -459,6 +460,11 @@ module.exports = async (req, res) => {
         break;
     }
   } catch (e) {
+    if (payloadAuthInfo.constructor.name === 'Array' && payloadAuthInfo.length > 0 && payloadAuthInfo[0].constructor.name === 'RowDataPacket') {
+      if (payloadAuthInfo[0].application_id) {
+        e.applicationId = payloadAuthInfo[0].application_id
+      }
+    }
     res.handleError(e)
   }
 }

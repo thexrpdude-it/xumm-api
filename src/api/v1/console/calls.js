@@ -35,7 +35,11 @@ module.exports = async (req, res) => {
       AND
         application_disabled = 0
       AND
-      	calls.call_type = 'platform'
+      	(
+          calls.call_type = 'platform'
+          OR
+          (calls.call_type = 'app' AND calls.call_method = 'PATCH' AND calls.call_endpoint = 'payload' AND calls.call_httpcode != 200)
+        )
       ORDER BY
         FIELD(calls.call_uuidv4_txt, :record) DESC,
         calls.call_id DESC
