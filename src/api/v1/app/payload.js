@@ -332,7 +332,7 @@ module.exports = async (req, res) => {
 
           if (!transactionResults.valid) {
             const e = new Error(`Invalid payload result: ${transactionResults.message}`)
-            e.httpCode = e.code = 403
+            e.httpCode = e.code = 500
             throw e
           } else {
             response.signed = !payloadUpdate.rejected
