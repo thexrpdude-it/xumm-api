@@ -2,7 +2,9 @@
 <head>
   <title>XUMM TOS</title>
   <script>
-    window.postMessage({tosVersion: 1})
+    (function() {
+        window.ReactNativeWebView.postMessage(JSON.stringify({version: 1}))
+    })()
   </script>
 </head>
 <body>
