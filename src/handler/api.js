@@ -15,7 +15,7 @@ module.exports = async function (expressApp) {
   const errorHandler = async (e, req, res) => {
     // TODO: migrate to module
     if (typeof expressApp.config.bugsnagKey !== 'undefined') {
-      expressApp.bugsnagClient.notify(e, { // (e.causingError || 
+      expressApp.bugsnagClient.notify(e.causingError || e, {
         metaData: req.__auth || {}
       })
     }
