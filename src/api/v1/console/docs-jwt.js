@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
       WHERE
         applications.application_auth0_owner = :user
         AND
-        application_uuidv4_txt = :appId
+        application_uuidv4_bin = UNHEX(REPLACE(:appId,'-',''))
         AND
         application_disabled = 0
       LIMIT 1

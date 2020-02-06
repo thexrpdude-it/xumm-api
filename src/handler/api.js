@@ -47,7 +47,6 @@ module.exports = async function (expressApp) {
         call_emessage_debug = :call_emessage_debug,
         application_id = IF(application_id IS NULL, :application_id, application_id)
       WHERE
-        -- call_uuidv4_txt = :call_uuidv4
         call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
       LIMIT 1
     `

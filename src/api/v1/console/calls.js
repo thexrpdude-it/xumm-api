@@ -21,15 +21,14 @@ module.exports = async (req, res) => {
         )
       LEFT JOIN
         payloads ON (
-          -- payloads.call_uuidv4_txt = calls.call_uuidv4_txt
           payloads.call_uuidv4_bin = calls.call_uuidv4_bin
         )
       LEFT JOIN
         tokens ON (
-          tokens.call_uuidv4_txt = calls.call_uuidv4_txt
+          tokens.call_uuidv4_bin = calls.call_uuidv4_bin
         )
       WHERE
-        application_uuidv4_txt = :app
+        application_uuidv4_bin = UNHEX(REPLACE(:app,'-',''))
       AND
         application_auth0_owner = :user
       AND
@@ -41,7 +40,7 @@ module.exports = async (req, res) => {
           (calls.call_type = 'app' AND calls.call_method = 'PATCH' AND calls.call_endpoint = 'payload' AND calls.call_httpcode != 200)
         )
       ORDER BY
-        FIELD(calls.call_uuidv4_txt, :record) DESC,
+        FIELD(calls.call_uuidv4_bin, UNHEX(REPLACE(:record,'-',''))) DESC,
         calls.call_id DESC
       LIMIT :skip, :take
     `, {

@@ -19,6 +19,7 @@ module.exports = async (req, res) => {
         user_id = :userId,
         device_lockedbydeviceid = :deviceId,
         device_uuidv4_txt = :device_uuidv4,
+        device_uuidv4_bin = UNHEX(REPLACE(:device_uuidv4,'-','')),
         device_created = FROM_UNIXTIME(:moment_creation),
         device_created_ip = :request_ip,
         device_disabled = FROM_UNIXTIME(:device_expiration)

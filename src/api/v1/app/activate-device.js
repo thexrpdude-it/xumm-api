@@ -2,6 +2,7 @@ const uuid = require('uuid/v4')
 
 /**
  * TODO:
+ * When adding the "add second device" feature:
  * PUSH MESSAGE TO OTHER DEVICE UPON ACTIVATION (SEE: `/pending-devices`)
  */
 
@@ -26,11 +27,11 @@ module.exports = async (req, res) => {
           LEFT JOIN
             users u ON (d.user_id = u.user_id)
           WHERE
-            d.device_uuidv4_txt = :device_uuidv4
+            d.device_uuidv4_bin = UNHEX(REPLACE(:device_uuidv4,'-',''))
           AND
-            u.user_uuidv4_txt = :user_uuidv4
+            u.user_uuidv4_bin = UNHEX(REPLACE(:user_uuidv4,'-',''))
           AND
-            d.device_accesstoken_txt IS NULL
+            d.device_accesstoken_bin IS NULL
           AND
             d.device_disabled > NOW()
         `
@@ -43,6 +44,7 @@ module.exports = async (req, res) => {
             device_pushtoken = :pushtoken,
             device_extuniqueid = :identifier,
             device_accesstoken_txt = :accesstoken,
+            device_accesstoken_bin = UNHEX(REPLACE(:accesstoken,'-','')),
             device_disabled = IF(device_lockedbydeviceid IS NULL, NULL, NOW())
           WHERE
             device_id = :device_id

@@ -38,7 +38,6 @@ module.exports = async (req, res) => {
           payload_expiration = FROM_UNIXTIME(:now),
           payload_cancelled = 1
         WHERE
-          -- call_uuidv4_txt = :call_uuidv4
           call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
         LIMIT 1
       `, {

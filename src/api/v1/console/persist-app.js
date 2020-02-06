@@ -73,7 +73,11 @@ module.exports = async (req, res) => {
 
     if (req.params.appId) {
       const updateFieldsQueryStr = updateFields.map(u => {
-        return `${u} = :${u}`
+        let output = `${u} = :${u}`
+        if (u.match(/_txt$/)) {
+          output += `${u.replace(/_txt$/, '_bin')} = UNHEX(REPLACE(:${u},'-',''))`
+        }
+        return output
       }).join(',')
 
       // Update
@@ -113,8 +117,10 @@ module.exports = async (req, res) => {
           applications
         SET
           application_uuidv4_txt = :application_uuidv4,
+          application_uuidv4_bin = UNHEX(REPLACE(:application_uuidv4,'-','')),
           application_name = :application_name,
           application_secret_txt = :application_secret_txt,
+          application_secret_bin = UNHEX(REPLACE(:application_secret_txt,'-','')),
           application_description = :application_description,
           application_webhookurl = :application_webhookurl,
           application_icon_url = :application_icon_url,
@@ -134,7 +140,9 @@ module.exports = async (req, res) => {
         auditinfo
       SET
         call_uuidv4_txt = :call_uuidv4,
+        call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4,'-','')),
         application_uuidv4_txt = :application_uuidv4,
+        application_uuidv4_bin = UNHEX(REPLACE(:application_uuidv4,'-','')),
         auditinfo_type = :auditinfo_type,
         auditinfo_data = :auditinfo_data
     `, {

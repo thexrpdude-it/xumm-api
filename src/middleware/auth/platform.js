@@ -72,8 +72,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         FROM 
           applications a
         WHERE
-          a.application_uuidv4_txt = :api_key
-        -- Moved to non-SQL check post query for Readme.io, so no a.application_secret_txt = : api_secret
+          a.application_uuidv4_bin = UNHEX(REPLACE(:api_key,'-',''))
       `
 
       const updateAppActivityQuery = `
@@ -82,7 +81,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         SET
           application_lastcall = CURRENT_TIMESTAMP
         WHERE
-          application_uuidv4_txt = :api_key
+          application_uuidv4_bin = UNHEX(REPLACE(:api_key,'-',''))
         LIMIT 1
       `
       if (apiDetails.auth) {

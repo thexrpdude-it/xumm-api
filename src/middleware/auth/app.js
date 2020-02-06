@@ -64,7 +64,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         LEFT JOIN
           users u ON (d.user_id = u.user_id)
         WHERE
-          d.device_accesstoken_txt = :device_accesstoken
+          d.device_accesstoken_bin = UNHEX(REPLACE(:device_accesstoken,'-',''))
         AND
           (d.device_disabled IS NULL OR d.device_disabled > NOW())
       `
@@ -76,7 +76,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
           device_lastcall = CURRENT_TIMESTAMP,
           device_idempotence = :device_idempotence
         WHERE
-          device_accesstoken_txt = :device_accesstoken
+          device_accesstoken_bin = UNHEX(REPLACE(:device_accesstoken,'-',''))
         LIMIT 1
       `
 
