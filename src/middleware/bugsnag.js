@@ -1,5 +1,5 @@
 module.exports = async function (expressApp) {
-  if (typeof expressApp.config.bugsnagKey !== 'undefined') {
+  if (typeof expressApp.config.bugsnagKey !== 'undefined' && expressApp.config.__env.slice(0, 4).toLowerCase() === 'prod') {
     const bugsnagClient = require('@bugsnag/js')({
       apiKey: expressApp.config.bugsnagKey,
       releaseStage: expressApp.config.__env || 'dev',
