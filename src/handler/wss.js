@@ -57,7 +57,7 @@ module.exports = async function (expressApp) {
           })
 
           ws.on('message', (msg) => {
-            logws(`Got WebSocket message from [ ${req.params.uuid} ] `, msg)
+            logws(`<PAYLOAD> WebSocket message from [ ${req.params.uuid} ] `, msg)
             ws.sendJson({ message: `Right back at you!` })
           })
 
@@ -131,7 +131,7 @@ module.exports = async function (expressApp) {
     })
 
     ws.on('message', (msg) => {
-      logws(`Got WebSocket message from [ ${req.params.uuid} ] `, msg)
+      logws(`<DEVCONSOLE> WebSocket message from [ ${req.params.uuid} ] `, msg.replace(/Bearer .+/, 'Bearer...'))
       if (typeof authorized === 'undefined') {
         try {
           const json = JSON.parse(msg)
