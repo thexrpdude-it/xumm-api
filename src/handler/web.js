@@ -33,7 +33,11 @@ module.exports = async function (expressApp) {
       // Do nothing, will be handled. redirectLocation doesn't serve homepage.
       return next()
     } else{
-      return res.render('index.html', { module: 'index' })
+      return res.render('index.html', {
+        module: 'index',
+        baselocation: req.config.baselocation,
+        path: req.path
+      })
     }
   })
 
