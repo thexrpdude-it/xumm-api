@@ -1,11 +1,56 @@
-<h1>XUMM user profiles</h1>
+{% extends "index.html" %}
 
-<div>
-  <h4>User</h4>
-  <pre>{{ handle|default('-') }}</pre>
-</div>
+{% import "partials/error.html" as _error %}
 
-<div>
-  <h4>Account</h4>
-  <pre>{{ account|default('-') }}</pre>
-</div>
+{% block head %}
+  <!-- Head -->
+{% endblock %}
+
+{% block button %}
+  <a href="https://xumm.app" class="shadow-sm btn border-2 border-primary btn-info btn-sm">
+    <i class="fas fa-book"></i>
+    About XUMM
+  </a>
+{% endblock %}
+
+{% block script %}
+  <!-- Script -->
+{% endblock %}
+
+{% block canonical %}
+    <link rel="canonical" href="{{ baselocation }}/{{ handle }}">
+{% endblock %}
+
+{% block main %}
+  <div class="container pb-5">
+
+    {% api "userProfile", {
+      handle: handle,
+      account: account
+    } %}
+
+      <div class="text-center mb-4">
+        <img src="/assets/images/user-profiles/icon-profile.png" style="max-width: 70%;" alt="" />
+      </div>
+
+      <div class="card shadow px-3 pt-2 pb-0 text-center">
+        <div class="card-body pb-3">
+          <h3>XUMM user profile pages are not implemented yet.</h3>
+          <pre class="text-primary">{{ results|dump }}</pre>
+        </div>
+      </div>
+      
+    {% error %}
+      {% set body %}
+        {{ 'PROFILE_BACKEND_ERROR'|i18n }}
+        {% if trusted %}
+          <hr />
+          <small class="d-block"><code class="text-muted">Debug info:</code></small>
+          <code class="text-danger">{{ error }}</code>
+        {% endif %}
+      {% endset %}
+      {{ _error.render(title, body) }}
+    {% endapi %}
+
+  </div>
+{% endblock %}
