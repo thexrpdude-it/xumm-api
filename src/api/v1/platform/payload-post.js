@@ -108,6 +108,9 @@ module.exports = async (req, res) => {
           tx.json = req.body.txjson
         } catch (e) {
           tx.error = new Error('Payload JSON transaction encoding error')
+          if (typeof e.message === 'string' && e.message.match(/valid hex representation of a byte/)) {
+            tx.error = new Error('Invalid HEX, please send valid HEX in upper case notation')
+          }
           tx.error.causingError = e
           tx.error.code = 603
         }
