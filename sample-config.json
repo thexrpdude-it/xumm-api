@@ -16,6 +16,7 @@
     "port": 6379
   },
   "deeplinkRedirectLocation": "xumm.local",
+  "userProfileLocation": "profiles.xumm.local",
   "TosAndPrivacyPolicyVersion": 1,
   "AppStoreLinks": {
     "iOS": "https://xrpl-labs.com",
