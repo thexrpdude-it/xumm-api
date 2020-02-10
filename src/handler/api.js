@@ -15,9 +15,11 @@ module.exports = async function (expressApp) {
   const errorHandler = async (e, req, res) => {
     // TODO: migrate to module
     if (typeof expressApp.config.bugsnagKey !== 'undefined') {
-      expressApp.bugsnagClient.notify(e.causingError || e, {
-        metaData: req.__auth || {}
-      })
+      if (typeof expressApp.bugsnagClient !== 'undefined') {
+        expressApp.bugsnagClient.notify(e.causingError || e, {
+          metaData: req.__auth || {}
+        })
+      }
     }
 
     const errorRef = res.get('X-Call-Ref') || uuid()
@@ -219,7 +221,11 @@ module.exports = async function (expressApp) {
                     /**
                      * Todo: normalize errors (per api type?)
                      */
-                    expressApp.bugsnagClient.notify(e)
+                    if (typeof expressApp.config.bugsnagKey !== 'undefined') {
+                      if (typeof expressApp.bugsnagClient !== 'undefined') {
+                        expressApp.bugsnagClient.notify(e)
+                      }
+                    }                      
                     res.status(500).json({ 
                       error: true,
                       message: `API Auth middleware rejected: [ ${e.message} ]`,
