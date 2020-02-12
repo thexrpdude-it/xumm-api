@@ -33,7 +33,14 @@ module.exports = (payload, response) => {
 
   ;['return_url_app', 'return_url_web'].forEach(metaKey => {
     if (typeof response.meta[metaKey] === 'string') {
-      response.meta[metaKey] = response.meta[metaKey].replace(/\{id\}/ig, response.meta.uuid)
+      /**
+       * TODO: Duplicate replacement: src/api/v1/app/payload.js
+       */
+      response.meta[metaKey] = response.meta[metaKey]
+        .replace(/\{id\}/ig, response.meta.uuid)
+        .replace(/\{txid\}/i, response.response.txid || '')
+        .replace(/\{txblob\}/i, response.response.hex || '')
+        .replace(/\{cid\}/i, encodeURIComponent(response.meta.custom_identifier || ''))
     }
   })
 

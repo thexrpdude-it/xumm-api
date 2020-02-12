@@ -350,12 +350,40 @@ module.exports = async (req, res) => {
             throw e
           } else {
             response.signed = !payloadUpdate.rejected
+            /**
+             * TODO: Duplicate replacement: src/api/v1/internal/payload-data-formatter
+             */
             response.return_url = {
-              app: payload.payload_return_url_app === null ? null : payload.payload_return_url_app.replace(/\{id\}/i, req.params.payloads__payload_id),
-              web: payload.payload_return_url_web === null ? null : payload.payload_return_url_web.replace(/\{id\}/i, req.params.payloads__payload_id)
+              app: payload.payload_return_url_app === null
+                ? null
+                : payload.payload_return_url_app
+                  .replace(/\{id\}/i, req.params.payloads__payload_id)
+                  .replace(/\{txid\}/i, payloadUpdate.response_txid || '')
+                  .replace(/\{txblob\}/i, payloadUpdate.response_hex || '')
+                  .replace(/\{cid\}/i, encodeURIComponent(payload.meta_custom_identifier || '')),
+              web: payload.payload_return_url_web === null
+                ? null
+                : payload.payload_return_url_web
+                  .replace(/\{id\}/i, req.params.payloads__payload_id)
+                  .replace(/\{txid\}/i, payloadUpdate.response_txid || '')
+                  .replace(/\{txblob\}/i, payloadUpdate.response_hex || '')
+                  .replace(/\{cid\}/i, encodeURIComponent(payload.meta_custom_identifier || ''))
             }
 
-            req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, response)
+            let meta_custom_blob = payload.meta_custom_blob
+            if (meta_custom_blob !== null)
+              try {
+                meta_custom_blob = JSON.parse(meta_custom_blob)
+              } catch (e) {}
+
+            req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, Object.assign({}, {
+              ...response,
+              custom_meta: {
+                identifier: payload.meta_custom_identifier,
+                blob: meta_custom_blob,
+                instruction: payload.meta_custom_instruction
+              }
+            }))
             
             req.app.redis.publish(`app:${payload.application_uuidv4}`, {
               call: req.params.payloads__payload_id,
