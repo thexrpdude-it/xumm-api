@@ -585,7 +585,8 @@ describe('XUMM iOS/Android APP API', () => {
     await new Promise(resolve => {
       setTimeout(resolve, 500)
     })
-    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/ci/${generatedPayloads[0].custom_meta.identifier}`,
+    const custom_identifier = generatedPayloads.filter(p => p.custom_meta.identifier.match(/_1$/))[0].custom_meta.identifier
+    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/ci/${custom_identifier}`,
     {
       headers: headers.devApi
     })
