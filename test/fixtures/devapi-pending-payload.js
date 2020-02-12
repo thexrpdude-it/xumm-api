@@ -22,11 +22,13 @@ module.exports = expect.objectContaining({
     "signed": false,
     "submit": expect.any(Boolean),
     "uuid": expect.any(String),
-    "custom_identifier": expect.any(String),
-    "custom_blob": {
+  },
+  "custom_meta":{
+    "identifier": expect.any(String),
+    "blob": {
       test: true
     },
-    "custom_instruction": "Sign Please"
+    "instruction": "Sign Please"
   },
   "payload":{
     "created_at": expect.any(String),

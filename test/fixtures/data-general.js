@@ -21,14 +21,14 @@ module.exports = {
         return_url: {
           app: 'https://app.app/?payload={id}',
           web: 'https://web.web/?payload={id}'
+        }
+      },
+      custom_meta: {
+        identifier: "custom_identifier_" + Math.round(new Date() / 1000) + '_' + i,
+        blob: {
+          test: true
         },
-        custom_meta: {
-          identifier: "custom_identifier_" + Math.round(new Date() / 1000) + '_' + i,
-          blob: {
-            test: true
-          },
-          instruction: "Sign Please"
-        }  
+        instruction: "Sign Please"
       },
       txjson: {	
         TransactionType : 'Payment',
@@ -107,11 +107,6 @@ module.exports = {
     pushed: expect.any(Boolean),
     app_opened: expect.any(Boolean),
     return_url_app: expect.any(String),
-    return_url_web: expect.any(String),
-    custom_identifier: expect.any(String),
-    custom_blob: {
-      test: true
-    },
-    custom_instruction: "Sign Please"
+    return_url_web: expect.any(String)
   }
 }

@@ -79,6 +79,16 @@ module.exports = async (req, res) => {
         formatPayloadData(payload, response)
       }
 
+      response.custom_meta = {
+        identifier: response.meta.custom_identifier || null,
+        blob: response.meta.custom_blob || null,
+        instruction: response.meta.custom_instruction || null
+      }
+
+      delete response.meta.custom_identifier
+      delete response.meta.custom_blob
+      delete response.meta.custom_instruction
+
       res.json(response)
       return
     }

@@ -208,19 +208,19 @@ module.exports = async (req, res) => {
           }
         }
 
-        if (typeof req.body.options.custom_meta === 'object' && req.body.options.custom_meta !== null) {
-          if (['string', 'number'].indexOf(typeof req.body.options.custom_meta.identifier) > -1) {
+        if (typeof req.body.custom_meta === 'object' && req.body.custom_meta !== null) {
+          if (['string', 'number'].indexOf(typeof req.body.custom_meta.identifier) > -1) {
             customMeta.touched = true
-            customMeta.identifier = String(req.body.options.custom_meta.identifier).slice(0, 100)
+            customMeta.identifier = String(req.body.custom_meta.identifier).slice(0, 100)
           }
-          if (typeof req.body.options.custom_meta.instruction === 'string') {
+          if (typeof req.body.custom_meta.instruction === 'string') {
             customMeta.touched = true
-            customMeta.instruction = req.body.options.custom_meta.instruction.trim()
+            customMeta.instruction = req.body.custom_meta.instruction.trim()
           }
-          if (['string', 'object'].indexOf(typeof req.body.options.custom_meta.blob) > -1) {
-            if (req.body.options.custom_meta.blob !== null) {
+          if (['string', 'object'].indexOf(typeof req.body.custom_meta.blob) > -1) {
+            if (req.body.custom_meta.blob !== null) {
               customMeta.touched = true
-              customMeta.blob = JSON.stringify(req.body.options.custom_meta.blob)
+              customMeta.blob = JSON.stringify(req.body.custom_meta.blob)
             }
           }
         }

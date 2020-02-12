@@ -464,7 +464,12 @@ describe('XUMM iOS/Android APP API', () => {
         cancelled: true,
         reason: 'OK'
       },
-      meta: cancelData
+      meta: cancelData,
+      custom_meta: {
+        identifier: expect.any(String),
+        blob: { test: true },
+        instruction: "Sign Please"
+      }
     }))
   })
 
@@ -484,7 +489,12 @@ describe('XUMM iOS/Android APP API', () => {
         cancelled: false,
         reason: 'ALREADY_CANCELLED'
       },
-      meta: cancelData
+      meta: cancelData,
+      custom_meta: {
+        identifier: expect.any(String),
+        blob: { test: true },
+        instruction: "Sign Please"
+      }
     }))
   })
 
@@ -575,7 +585,7 @@ describe('XUMM iOS/Android APP API', () => {
     await new Promise(resolve => {
       setTimeout(resolve, 500)
     })
-    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/ci/${generatedPayloads[0].options.custom_meta.identifier}`,
+    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/ci/${generatedPayloads[0].custom_meta.identifier}`,
     {
       headers: headers.devApi
     })

@@ -53,7 +53,8 @@ module.exports = async (req, res) => {
       },
       meta: Object.assign(potentialPayload.meta, {
         expired: true
-      })
+      }),
+      custom_meta: potentialPayload.custom_meta
     })
 
     return
