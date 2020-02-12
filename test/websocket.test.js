@@ -37,6 +37,13 @@ describe('XUMM WebSocket server', () => {
           return_url: {
             app: 'https://app.app/?payload={id}',
             web: 'https://web.web/?payload={id}'
+          },
+          custom_meta: {
+            identifier: `some_identifier_${Math.round(new Date() / 1000)}`,
+            blob: {
+              test: true
+            },
+            instruction: 'Sign Please'
           }
         },
         txjson: {	
@@ -189,7 +196,14 @@ describe('XUMM WebSocket server', () => {
         web: expect.any(String)
       },
       signed: false,
-      user_token: expect.any(Boolean)
+      user_token: expect.any(Boolean),
+      custom_meta: {
+        identifier: expect.any(String),
+        blob: {
+          test: true
+        },
+        instruction: "Sign Please"
+      }
     }))
   })
 
