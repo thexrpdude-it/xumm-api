@@ -21,7 +21,12 @@ module.exports = expect.objectContaining({
     "return_url_web": expect.any(String),
     "signed": false,
     "submit": expect.any(Boolean),
-    "uuid": expect.any(String)
+    "uuid": expect.any(String),
+    "custom_identifier": expect.any(String),
+    "custom_blob": {
+      test: true
+    },
+    "custom_instruction": "Sign Please"
   },
   "payload":{
     "created_at": expect.any(String),

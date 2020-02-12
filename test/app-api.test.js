@@ -367,10 +367,12 @@ describe('XUMM iOS/Android APP API', () => {
     expect(body.details.Bitstamp.currencies.USD).toEqual(iou.bitstamp.usd)
   })
 
+  let generatedPayloads = []
   let payloads = []
 
   it('<Public Developer API> should create three payloads', async () => {
-    const generatePayload = async () => {
+    const generatePayload = async (i) => {
+      const generatedPayload = payloadData(i)
       const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload`, 
       {
         method: 'POST',
@@ -379,11 +381,12 @@ describe('XUMM iOS/Android APP API', () => {
           'X-API-Key': process.env.APIKEY,
           'X-API-Secret': process.env.APISECRET
         },
-        body: JSON.stringify(payloadData)
+        body: JSON.stringify(generatedPayload)
       })
+      generatedPayloads.push(generatedPayload)
       return await call.json()
     }
-    for await (let body of [generatePayload(), generatePayload(), generatePayload()]) {
+    for await (let body of [generatePayload(1), generatePayload(2), generatePayload(3)]) {
       payloads.push(body)
     }
   })
@@ -559,7 +562,20 @@ describe('XUMM iOS/Android APP API', () => {
     await new Promise(resolve => {
       setTimeout(resolve, 500)
     })
-    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/${payloads[0].uuid}`, 
+    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/${payloads[0].uuid}`,
+    {
+      headers: headers.devApi
+    })
+    const body = await call.json()
+
+    expect(body).toEqual(require('./fixtures/devapi-pending-payload'))
+  })
+
+  it('<Public Developer API> should be able to fetch a (pending) payload by custom identifier', async () => {
+    await new Promise(resolve => {
+      setTimeout(resolve, 500)
+    })
+    const call = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/v1/platform/payload/ci/${generatedPayloads[0].options.custom_meta.identifier}`,
     {
       headers: headers.devApi
     })

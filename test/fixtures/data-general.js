@@ -12,20 +12,29 @@ module.exports = {
       days: 30
     }
   },
-  payloadData: {
-    options: {
-      submit: true,
-      multisign: false,
-      expire: 100,
-      return_url: {
-        app: 'https://app.app/?payload={id}',
-        web: 'https://web.web/?payload={id}'
+  payloadData (i) {
+    return {
+      options: {
+        submit: true,
+        multisign: false,
+        expire: 100,
+        return_url: {
+          app: 'https://app.app/?payload={id}',
+          web: 'https://web.web/?payload={id}'
+        },
+        custom_meta: {
+          identifier: "custom_identifier_" + Math.round(new Date() / 1000) + '_' + i,
+          blob: {
+            test: true
+          },
+          instruction: "Sign Please"
+        }  
+      },
+      txjson: {	
+        TransactionType : 'Payment',
+        Destination : 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY',
+        Amount: '50000'
       }
-    },
-    txjson: {	
-      TransactionType : 'Payment',
-      Destination : 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY',
-      Amount: '50000'
     }
   },
   lookup: {
@@ -98,6 +107,11 @@ module.exports = {
     pushed: expect.any(Boolean),
     app_opened: expect.any(Boolean),
     return_url_app: expect.any(String),
-    return_url_web: expect.any(String)
+    return_url_web: expect.any(String),
+    custom_identifier: expect.any(String),
+    custom_blob: {
+      test: true
+    },
+    custom_instruction: "Sign Please"
   }
 }
