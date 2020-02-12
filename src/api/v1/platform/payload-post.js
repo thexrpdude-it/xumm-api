@@ -215,7 +215,11 @@ module.exports = async (req, res) => {
           }
           if (typeof req.body.custom_meta.instruction === 'string') {
             customMeta.touched = true
-            customMeta.instruction = req.body.custom_meta.instruction.trim()
+            customMeta.instruction = req.body.custom_meta.instruction
+              .replace(/[ \t]+/g, ' ')
+              .replace(/^[ \t]+/gm, '')
+              .replace(/^[ \t]*[ \t\n]+[ \t]*/gm, '\n')
+              .trim()        
           }
           if (['string', 'object'].indexOf(typeof req.body.custom_meta.blob) > -1) {
             if (req.body.custom_meta.blob !== null) {
