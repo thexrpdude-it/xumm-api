@@ -27,6 +27,13 @@ module.exports = async (req, res) => {
     return_url_web: null
   }
 
+  let customMeta = {
+    touched: false,
+    identifier: null,
+    blob: null,
+    instruction: null
+  }
+
   const checkTxValid = (txjson) => {
     const validTransactionTypes = {
       TransactionType: [ 
@@ -200,6 +207,23 @@ module.exports = async (req, res) => {
             //.replace(/{id}/, uuid)
           }
         }
+
+        if (typeof req.body.options.custom_meta === 'object' && req.body.options.custom_meta !== null) {
+          if (['string', 'number'].indexOf(typeof req.body.options.custom_meta.identifier) > -1) {
+            customMeta.touched = true
+            customMeta.identifier = String(req.body.options.custom_meta.identifier).slice(0, 100)
+          }
+          if (typeof req.body.options.custom_meta.instruction === 'string') {
+            customMeta.touched = true
+            customMeta.instruction = req.body.options.custom_meta.instruction.trim()
+          }
+          if (['string', 'object'].indexOf(typeof req.body.options.custom_meta.blob) > -1) {
+            if (req.body.options.custom_meta.blob !== null) {
+              customMeta.touched = true
+              customMeta.blob = JSON.stringify(req.body.options.custom_meta.blob)
+            }
+          }
+        }
       }
 
       if (typeof req.body.user_token !== 'undefined' && req.body.user_token.match(uuidv4_format)) {
@@ -304,9 +328,51 @@ module.exports = async (req, res) => {
       if (typeof db !== 'object' || typeof db.insertId !== 'number' || db.insertId < 1) {
         throw Object.assign(new Error('Payload increment error'), { code: 605 })
       }
+
       if (typeof req.config.baselocation !== 'string' || !req.config.baselocation.match(/^http/)) {
         throw Object.assign(new Error('Platform configuration incomplete'), { code: 605 })
       }
+
+      if (typeof customMeta.touched) {
+        try {
+          // const metaDb = 
+          await req.db(`
+            INSERT INTO payloads_external_meta (
+              payload_id,
+              application_id,
+              meta_string,
+              meta_blob,
+              meta_user_instruction
+            ) VALUES (
+              :payload_id,
+              :application_id,
+              :meta_string,
+              :meta_blob,
+              :meta_user_instruction
+            )
+          `, {
+            payload_id: db.insertId,
+            application_id: req.__auth.application.id,
+            meta_string: customMeta.identifier,
+            meta_blob: customMeta.blob,
+            meta_user_instruction: customMeta.instruction
+          })
+          // log('Custom Meta touched, insert custom payload meta', {
+          //   meta: customMeta,
+          //   payload_insert_id: db.insertId,
+          //   meta_db_insert: metaDb
+          // })
+        } catch (e) {
+          if (e.message.match(/ER_DUP_ENTRY/)) {
+            const dupErr = new Error('Duplicated custom payload identifier (options.custom_meta.identifier)')
+            dupErr.code = 409
+            return res.handleError(dupErr)
+          } else {
+            return res.handleError(e)
+          }
+        }
+      }
+
       res.json({ 
         uuid: uuid,
         next: {

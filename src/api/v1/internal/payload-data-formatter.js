@@ -17,8 +17,16 @@ module.exports = (payload, response) => {
       if (section === 'meta' && Number.isInteger(value) && value >= 0 && value <= 1) {
         value = Boolean(value)
       }
+      const assignKey = k.split('_').slice(1).join('_')
+      if (assignKey === 'custom_blob' && value !== null) {
+        try {
+          value = JSON.parse(value)
+        } catch (e) {
+          value = null
+        }
+      }
       Object.assign(response[section], {
-        [k.split('_').slice(1).join('_')]: value
+        [assignKey]: value
       })
     }
   })

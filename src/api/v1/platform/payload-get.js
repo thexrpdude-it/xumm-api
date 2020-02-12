@@ -3,7 +3,44 @@ const getPayloadData = require('@api/v1/internal/payload-data')
 const formatPayloadData = require('@api/v1/internal/payload-data-formatter')
 
 module.exports = async (req, res) => {
+  if (typeof req.params.payloads_external_meta__meta_string !== 'undefined') {
+    /**
+     * Custom meta ID lookup
+     */
+    try {
+      const payloadByCustomId = await req.db(`
+        SELECT
+          payloads.call_uuidv4_txt
+        FROM 
+          payloads_external_meta
+        JOIN payloads ON (
+          payloads_external_meta.payload_id = payloads.payload_id
+          AND
+          payloads_external_meta.application_id = payloads.application_id
+        )
+        WHERE
+          payloads_external_meta.application_id = :application_id
+          AND
+          payloads_external_meta.meta_string = :payloads_external_meta__meta_string
+        LIMIT 1
+      `, {
+        application_id: req.__auth.application.id || '',
+        payloads_external_meta__meta_string: req.params.payloads_external_meta__meta_string
+      })
+      if (payloadByCustomId.constructor.name === 'Array' && payloadByCustomId.length > 0 && payloadByCustomId[0].constructor.name === 'RowDataPacket') {
+        req.params.payloads__payload_id = payloadByCustomId[0].call_uuidv4_txt
+      }
+    } catch (ce) {
+      const e = new Error(`Payload custom ID lookup error`)
+      e.causingError = ce
+      e.httpCode = 404
+      e.code = 409
+      return res.handleError(e)
+    }
+  }
+
   try {
+    // log(req.params)
     /**
      * Check if app is authorized to fetch the payload
      * because it has been created by the requesting app.

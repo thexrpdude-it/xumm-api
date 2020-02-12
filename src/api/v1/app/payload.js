@@ -65,6 +65,8 @@ module.exports = async (req, res) => {
               })
     
               response = formatPayloadData(payload, response)
+              delete response.meta.custom_identifier
+              delete response.meta.custom_blob
             }
     
             return res.json(response)
@@ -424,13 +426,27 @@ module.exports = async (req, res) => {
           })
 
           if (Array.isArray(appDetails) && appDetails.length > 0 && appDetails[0].constructor.name === 'RowDataPacket') {
+            // log(payload)
             const callbackUrl = appDetails[0].application_webhookurl
             if (callbackUrl.match(/^https:/)) {
+              let custom_meta_blob = payload.meta_custom_blob
+              if (typeof custom_meta_blob === 'string') {
+                try {
+                  custom_meta_blob = JSON.parse(custom_meta_blob)
+                } catch (e) {
+                  custom_meta_blob = null
+                }
+              }
               const callbackData = {
                 meta: {
                   url: callbackUrl,
                   application_uuidv4: payload.application_uuidv4,
-                  payload_uuidv4: req.params.payloads__payload_id
+                  payload_uuidv4: req.params.payloads__payload_id,
+                },
+                custom_meta: {
+                  identifier: payload.meta_custom_identifier,
+                  blob: custom_meta_blob,
+                  instruction: payload.meta_custom_instruction
                 },
                 payloadResponse: response,
                 userToken: !response.user_token ? null : { 

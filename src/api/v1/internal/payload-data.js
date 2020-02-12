@@ -47,7 +47,10 @@ module.exports = async (uuid, expressApp, invoker) => {
         payloads.payload_response_multisign_account as response_multisign_account,
         payloads.payload_response_account as response_account,
         tokens.token_accesstoken_txt as application_issued_user_token,
-        (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payloads.payload_expiration)) * -1 as payload_expires_in_seconds
+        (UNIX_TIMESTAMP(CURRENT_TIMESTAMP) - UNIX_TIMESTAMP(payloads.payload_expiration)) * -1 as payload_expires_in_seconds,
+        payloads_external_meta.meta_string as meta_custom_identifier,
+        payloads_external_meta.meta_blob as meta_custom_blob,
+        payloads_external_meta.meta_user_instruction as meta_custom_instruction
       FROM 
         payloads
       JOIN
@@ -62,10 +65,16 @@ module.exports = async (uuid, expressApp, invoker) => {
         tokens ON (
           tokens.payload_uuidv4_bin = payloads.call_uuidv4_bin
         )
+      LEFT JOIN
+        payloads_external_meta ON (
+          payloads_external_meta.payload_id = payloads.payload_id
+          AND
+          payloads_external_meta.application_id = payloads.application_id
+        )
       WHERE 
         payloads.call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
       ORDER BY 
-        payload_id DESC
+        payloads.payload_id DESC
       LIMIT 1
     `, {
       call_uuidv4: payloadUuid,
