@@ -1,5 +1,11 @@
 const fetch = require('node-fetch')
 
+/**
+ * Used for dev full body push sending, but
+ * also for updating the device badge count
+ *    internal/update-push-badge
+ */
+
 const options = {
   module_name: 'pushMessage',
   process_timeout: 5
@@ -9,17 +15,11 @@ const log = function () {
   process.send({ debug_log: arguments })
 }
 
-// TODO: Localize i18n
-
-/**
- * Code
- */
-
 const main = async (data) => {
   let timeout
 
   timeout = setTimeout(() => {
-    log(`TIMEOUT @ ${options.module_name} [ payload(${data.payload.uuidv4}) ]`)
+    log(`TIMEOUT @ ${options.module_name} [ payload(${data.payload.uuidv4 || ''}) ]`)
     process.exit(1)
   }, options.process_timeout * 1000)
 
@@ -29,7 +29,7 @@ const main = async (data) => {
     const pushData = {
       method: 'post',
       body: JSON.stringify({
-        to: data.device.pushtoken,
+        to: data.device.pushToken,
         notification: data.payload.body || {}
       }),
       headers: {
@@ -37,12 +37,15 @@ const main = async (data) => {
         'Authorization': 'key=' + data.config.fcmkey
       }
     }
-    log(pushData)
+    /**
+     * Display the entire push notification body, headers, etc.
+     */
+    // log(pushData)
     const response = await fetch(url, pushData)
     const responseText = await response.text()
-    log(`Webhook [ ${options.module_name} ] response text:`, responseText.slice(0, 500))
+    log(`Push notification CALL [ ${options.module_name} ] response text:`, responseText.slice(0, 500))
   } catch(e) {
-    log(`${e.message} @ ${options.module_name} [ payload(${data.payload.uuidv4}) ]`)
+    log(`${e.message} @ ${options.module_name} [ payload(${data.payload.uuidv4 || ''}) ]`)
     process.exit(1)
   }
 

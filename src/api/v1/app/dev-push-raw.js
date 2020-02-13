@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
               body: req.body
             },
             device: {
-              pushtoken: pushToken
+              pushToken
             },
             config: {
               fcmkey: req.config.googleFcmKey

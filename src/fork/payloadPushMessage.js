@@ -59,7 +59,7 @@ const main = async (data) => {
     })
 
     const responseText = await response.text()
-    log(`Webhook [ ${options.module_name} ] response text:`, responseText.slice(0, 500))
+    log(`Push notification CALL [ ${options.module_name} ] response text:`, responseText.slice(0, 500))
   } catch(e) {
     log(`${e.message} @ ${options.module_name} [ payload(${data.payload.uuidv4}) ]`)
     process.exit(1)
