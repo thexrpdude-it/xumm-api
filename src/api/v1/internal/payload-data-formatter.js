@@ -37,10 +37,10 @@ module.exports = (payload, response) => {
        * TODO: Duplicate replacement: src/api/v1/app/payload.js
        */
       response.meta[metaKey] = response.meta[metaKey]
-        .replace(/\{id\}/ig, response.meta.uuid)
-        .replace(/\{txid\}/i, response.response.txid || '')
-        .replace(/\{txblob\}/i, response.response.hex || '')
-        .replace(/\{cid\}/i, encodeURIComponent(response.meta.custom_identifier || ''))
+        .replace(/\{id\}/ig, response.meta ? (response.meta.uuid || '') : '')
+        .replace(/\{txid\}/i, response.response ? (response.response.txid || '') : '')
+        .replace(/\{txblob\}/i, response.response ? (response.response.hex || '') : '')
+        .replace(/\{cid\}/i, encodeURIComponent(response.meta ? (response.meta.custom_identifier || '') : ''))
     }
   })
 
