@@ -1,5 +1,6 @@
 // const log = require('debug')('app:payload:cancel')
 const getPayload = require('@api/v1/platform/payload-get')
+const updatePushBadge = require('@api/v1/internal/update-push-badge')
 
 module.exports = async (req, res) => {
   try {
@@ -44,6 +45,8 @@ module.exports = async (req, res) => {
         call_uuidv4: potentialPayload.meta.uuid,
         now: new Date() / 1000
       })
+
+      updatePushBadge({ payloadUuid: potentialPayload.meta.uuid }, req.db, req.config)
     }
 
     res.json({

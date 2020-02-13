@@ -7,6 +7,7 @@ const hashes = require('ripple-hashes')
 const addressCodec = require('ripple-address-codec')
 const uuid = require('uuid/v4')
 const { fork } = require('child_process')
+const updatePushBadge = require('@api/v1/internal/update-push-badge')
 
 module.exports = async (req, res) => {
   /**
@@ -432,6 +433,8 @@ module.exports = async (req, res) => {
           }
 
           res.json(response)
+
+          updatePushBadge({ deviceId: req.__auth.device.id }, req.db, req.config)
 
           const appDetails = await req.db(`
             SELECT
