@@ -34,7 +34,26 @@ module.exports = async (req, res) => {
     instruction: null
   }
 
-  const checkTxValid = (txjson) => {
+  const setFixedFeeByTxType = txjson => {
+    if (typeof txjson === 'object' && txjson !== null) {
+      if (typeof txjson.TransactionType === 'string') {
+        switch (txjson.TransactionType) {
+          case 'AccountDelete':
+            txjson.Fee = 5000000
+            break;            
+          case 'SetRegularKey':
+            txjson.Fee = 0
+            break;
+        }
+      }
+    }
+    if (typeof txjson.Fee === 'number') {
+      txjson.Fee = String(txjson.Fee)
+    }
+    return txjson
+  }
+
+  const checkTxValid = txjson => {
     const validTransactionTypes = {
       TransactionType: [ 
         'Payment',
@@ -48,6 +67,7 @@ module.exports = async (req, res) => {
         'CheckCash',
         'CheckCancel',
         'AccountSet',
+        'AccountDelete',
         'PaymentChannelCreate',
         'PaymentChannelFund',
         'SetRegularKey',
@@ -90,6 +110,7 @@ module.exports = async (req, res) => {
       try {
         const json = codec.decode(req.body.txblob.trim())
         if (checkTxValid(json)) {
+          setFixedFeeByTxType(json)
           accountlib.sign(json, accountlib.derive.passphrase('masterpassphrase'))
           tx.hex = req.body.txblob.trim()
           tx.json = json
@@ -110,9 +131,10 @@ module.exports = async (req, res) => {
           } else {
             Object.assign(txjson, req.body.txjson)
           }
+          setFixedFeeByTxType(txjson)
           const signed = accountlib.sign(txjson, accountlib.derive.passphrase('masterpassphrase'))
           tx.hex = signed.signedTransaction
-          tx.json = req.body.txjson
+          tx.json = txjson
         } catch (e) {
           tx.error = new Error('Payload JSON transaction encoding error')
           if (typeof e.message === 'string' && e.message.match(/valid hex representation of a byte/)) {
