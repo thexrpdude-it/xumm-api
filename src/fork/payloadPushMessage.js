@@ -26,10 +26,20 @@ const main = async (data) => {
   try {
     log('PUSHDATA', data.transaction)
     const url = 'https://fcm.googleapis.com/fcm/send'
-    let body = translations.translate('en', 'PUSH_MSG_TXTYPE_TO_DEST', {
-      type: data.transaction.type,
-      destination: data.transaction.destination.known.knownaccount_name || data.transaction.destination.account
-    })
+    let destination = data.transaction.destination.known.knownaccount_name || data.transaction.destination.account
+    if (destination === data.transaction.destination.account && String(destination) !== '') {
+      destination = destination.slice(0, 8) + ' ... ' + destination.slice(-7)
+    }
+
+    let body
+    if (String(destination) !== '') {
+      body = translations.translate('en', 'PUSH_MSG_TXTYPE_TO_DEST', {
+        type: data.transaction.type,
+        destination
+      })
+    } else {
+      body = data.transaction.type
+    }
 
     if (data.transaction.type.toLowerCase() === 'signin') {
       body = translations.translate('en', 'PUSH_MSG_SIGNIN_REQ', {
