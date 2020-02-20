@@ -1,20 +1,24 @@
-<html>
-<head>
-  <title>XUMM TOS</title>
+{% extends 'webviews/template.html' %}
+
+{% block content %}
+  <h1>TOS &amp; Privacy</h1>
+  <p class="alert alert-warning text-center">Terms and conditions + privay statement here</p>
+
+  <h4>module</h4>
+  <pre>{{ module }}</pre>
+  <h4>type</h4>
+  <pre>{{ type }}</pre>
+  <h4>language</h4>
+  <pre>{{ language }}</pre>
+  <h4>Test content</h4>
+{% endblock %}
+
+{% block head %}
   <script>
     (function() {
+      if (typeof window.ReactNativeWebView !== 'undefined') {
         window.ReactNativeWebView.postMessage(JSON.stringify({version: 1}))
+      }
     })()
   </script>
-</head>
-<body>
-  XUMM TOS
-
-  module: 
-      <pre>{{ module }}</pre>
-  type: 
-      <pre>{{ type }}</pre>
-  language: 
-      <pre>{{ language }}</pre>
-</body>
-</html>
+{% endblock %}

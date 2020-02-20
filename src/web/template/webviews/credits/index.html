@@ -1,15 +1,14 @@
-<html>
-<head>
-  <title>XUMM Credits</title>
-</head>
-<body>
-  XUMM Credits
+{% extends 'webviews/template.html' %}
 
-  module: 
-      <pre>{{ module }}</pre>
-  type: 
-      <pre>{{ type }}</pre>
-  language: 
-      <pre>{{ language }}</pre>
-</body>
-</html>
+{% block content %}
+  <h1>Credits page</h1>
+  <p class="alert alert-warning text-center">Credits here</p>
+
+  <h4>module</h4>
+  <pre>{{ module }}</pre>
+  <h4>type</h4>
+  <pre>{{ type }}</pre>
+  <h4>language</h4>
+  <pre>{{ language }}</pre>
+  <h4>Test content</h4>
+{% endblock %}
