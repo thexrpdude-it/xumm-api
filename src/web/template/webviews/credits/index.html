@@ -1,14 +1,18 @@
 {% extends 'webviews/template.html' %}
 
 {% block content %}
-  <h1>Credits page</h1>
+
+  {# <h3>{{ 'INAPP_TITLE_CREDITS'|i18n }}</h3> #}
+
   <p class="alert alert-warning text-center">Credits here</p>
 
-  <h4>module</h4>
-  <pre>{{ module }}</pre>
-  <h4>type</h4>
-  <pre>{{ type }}</pre>
-  <h4>language</h4>
-  <pre>{{ language }}</pre>
-  <h4>Test content</h4>
+  <h5>Credit:</h5>
+  <ul>
+    <li>Used open source projects</li>
+    <li>Developers</li>
+    <li>Testers</li>
+    <li>Translators</li>
+    <li>Patrons</li>
+  </ul>
+
 {% endblock %}
