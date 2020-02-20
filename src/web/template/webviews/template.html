@@ -40,6 +40,19 @@
   <body>
     <section class="container">
       {% block content %}{% endblock %}
+
+      {% if mode.slice(0, 3).toUpperCase() === 'DEV' %}
+        <div class="card mt-3 shadow-sm bg-light">
+          <div class="card-body px-2 pt-2 pb-0">
+            <h6><small><b>Module / Type @ Language</b></small></h6>
+            <pre class="d-inline-block mb-0 mt-0 text-primary font-weight-bold">{{ module }}</pre>
+            <pre class="d-inline-block mb-0 mt-0 text-dark font-weight-bold">/</pre>
+            <pre class="d-inline-block mb-0 mt-0 text-primary font-weight-bold">{{ type }}</pre>
+            <pre class="d-inline-block mb-0 mt-0 text-dark font-weight-bold">@</pre>
+            <pre class="d-inline-block mb-0 mt-0 text-primary font-weight-bold">{{ language }}</pre>
+          </div>
+        </div>
+      {% endif %}
     </section>
   </body>
 </html>
