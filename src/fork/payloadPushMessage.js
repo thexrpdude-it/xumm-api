@@ -58,12 +58,12 @@ const main = async (data) => {
           body,
           badge: data.device.open_sign_requests || 0,
           sound: 'default',
-          click_action: 'SIGNTX',
-          data: {
-            payload: typeof payload === 'string' ? payload : null,
-            category: 'SIGNTX'
-          }
+          click_action: 'SIGNTX'
         },
+        data: {
+          payload: typeof payload === 'string' ? payload : null,
+          category: 'SIGNTX'
+        }
       }),
       headers: {
         'Content-Type': 'application/json',
