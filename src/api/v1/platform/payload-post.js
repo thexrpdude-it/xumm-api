@@ -125,13 +125,11 @@ module.exports = async (req, res) => {
     } else if (typeof req.body.txjson === 'object') {
       if (checkTxValid(req.body.txjson)) {
         try {
-          const txjson = {}
+          const txjson = Object.assign({}, req.body.txjson)
           if (Object.keys(req.body.txjson).indexOf('TransactionType') > -1 && req.body.txjson.TransactionType.toLowerCase() === 'signin') {
             Object.assign(txjson, {
               SignIn: true
             })
-          } else {
-            Object.assign(txjson, req.body.txjson)
           }
           setFixedFeeByTxType(txjson)
           const signed = accountlib.sign(txjson, accountlib.derive.passphrase('masterpassphrase'))
