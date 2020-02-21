@@ -4,7 +4,17 @@
 
   {# <h3>{{ 'INAPP_TITLE_TOS_PRIVACY'|i18n }}</h3> #}
 
-  <p class="alert alert-warning text-center">Terms and conditions + privay statement here</p>
+  <p class="alert alert-danger text-center px-2 py-1">
+    <b>To use the XUMM application and / or platform, you have to agree with the following terms &amp; conditions:</b>
+  </p>
+
+  <ul class="pl-3 ml-2 mr-1">
+    <li class="pb-2"><b>You</b> are in charge of keeping your account secret(s) safe. Make sure you have offline backups in multiple secure places. XRPL Labs (creators of XUMM) will <b>NOT</b> be able to recover your funds.</li>
+    <li class="pb-2"><b>You</b> are responsible of keeping your device and software up to date and secure. Make sure you install OS security updates. Do not root/jailbreak your device and don't connect your device to untrusted devices, cables, chargers, etc.</li>
+    <li class="pb-2">XRPL Labs (creators of XUMM) can <b>NOT</b> vouch for solvency / trustworthiness of IOU's / IOU issuers on the XRP ledger.</li>
+    <li class="pb-2">XUMM and all XUMM related services, as well as backend services are provided on a <b>BEST EFFORT</b> basis.</li>
+    <li class="pb-2">XRPL Labs (creators of XUMM) will store <b>NO</b> personal details, except if explicitly opted in by users. The <b>ONLY EXCEPTION</b> is your <b>IP address</b>: for logging/debugging purposes your IP may be stored in our server logs.</li>
+  </ul>
 
 {% endblock %}
 
@@ -12,7 +22,7 @@
   <script>
     (function() {
       if (typeof window.ReactNativeWebView !== 'undefined') {
-        window.ReactNativeWebView.postMessage(JSON.stringify({version: 1}))
+        window.ReactNativeWebView.postMessage(JSON.stringify({version: {{version|default(1)}}}))
       }
     })()
   </script>
