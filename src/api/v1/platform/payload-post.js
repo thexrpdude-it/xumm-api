@@ -37,13 +37,15 @@ module.exports = async (req, res) => {
   const setFixedFeeByTxType = txjson => {
     if (typeof txjson === 'object' && txjson !== null) {
       if (typeof txjson.TransactionType === 'string') {
-        switch (txjson.TransactionType) {
-          case 'AccountDelete':
-            txjson.Fee = 5000000
-            break;            
-          case 'SetRegularKey':
-            txjson.Fee = 0
-            break;
+        if (typeof txjson.Fee === 'undefined') {
+          switch (txjson.TransactionType) {
+            case 'AccountDelete':
+              txjson.Fee = 5000000
+              break;            
+            // case 'SetRegularKey':
+            //   txjson.Fee = 0
+            //   break;
+          }
         }
       }
     }
