@@ -189,13 +189,23 @@ module.exports = async (req, res) => {
               }
             }
 
-            if (typeof req.body.permission === 'object' && req.body.permission !== null) {
-              if (typeof req.body.permission.push !== 'undefined') {
-                if (req.body.permission.push === true || req.body.permission.push === 'true' || req.body.permission.push === 1 || req.body.permission.push === '1') {
+            // const permission = req.body.permission
+            // TODO: check with app, Sign In doesn't grant permission? For now: always grant.
+            const permission = {}
+            if (payloadUpdate.response_hex !== '') {
+              Object.assign(permission, {
+                push: true,
+                days: 30
+              })
+            }
+
+            if (typeof permission === 'object' && permission !== null) {
+              if (typeof permission.push !== 'undefined') {
+                if (permission.push === true || permission.push === 'true' || permission.push === 1 || permission.push === '1') {
                   const tokenExpiry = new Date()
                   let days
-                  if (typeof req.body.permission.days !== 'undefined') {
-                    days = parseInt(req.body.permission.days)
+                  if (typeof permission.days !== 'undefined') {
+                    days = parseInt(permission.days)
                   }
                   if (typeof days === 'undefined' || isNaN(days) || days < 7) {
                     days = 90
