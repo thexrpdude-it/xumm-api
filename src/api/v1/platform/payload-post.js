@@ -229,33 +229,33 @@ module.exports = async (req, res) => {
             //.replace(/{id}/, uuid)
           }
         }
+      }
 
-        if (typeof req.body.custom_meta === 'object' && req.body.custom_meta !== null) {
-          if (['string', 'number'].indexOf(typeof req.body.custom_meta.identifier) > -1) {
-            customMeta.touched = true
-            customMeta.identifier = String(req.body.custom_meta.identifier)
-            if (customMeta.identifier.length > 40) {
-              throw Object.assign(new Error('custom_meta identifier gt 40 positions'), { code: 413 })
-            }
+      if (typeof req.body.custom_meta === 'object' && req.body.custom_meta !== null) {
+        if (['string', 'number'].indexOf(typeof req.body.custom_meta.identifier) > -1) {
+          customMeta.touched = true
+          customMeta.identifier = String(req.body.custom_meta.identifier)
+          if (customMeta.identifier.length > 40) {
+            throw Object.assign(new Error('custom_meta identifier gt 40 positions'), { code: 413 })
           }
-          if (typeof req.body.custom_meta.instruction === 'string') {
-            customMeta.touched = true
-            customMeta.instruction = req.body.custom_meta.instruction
-              .replace(/[ \t]+/g, ' ')
-              .replace(/^[ \t]+/gm, '')
-              .replace(/^[ \t]*[ \t\n]+[ \t]*/gm, '\n')
-              .trim()
-            if (customMeta.instruction.length > 280) {
-              throw Object.assign(new Error('custom_meta instruction gt 280 positions'), { code: 413 })
-            }
+        }
+        if (typeof req.body.custom_meta.instruction === 'string') {
+          customMeta.touched = true
+          customMeta.instruction = req.body.custom_meta.instruction
+            .replace(/[ \t]+/g, ' ')
+            .replace(/^[ \t]+/gm, '')
+            .replace(/^[ \t]*[ \t\n]+[ \t]*/gm, '\n')
+            .trim()
+          if (customMeta.instruction.length > 280) {
+            throw Object.assign(new Error('custom_meta instruction gt 280 positions'), { code: 413 })
           }
-          if (['string', 'object'].indexOf(typeof req.body.custom_meta.blob) > -1) {
-            if (req.body.custom_meta.blob !== null) {
-              customMeta.touched = true
-              customMeta.blob = JSON.stringify(req.body.custom_meta.blob)
-              if (customMeta.blob.length > 1500) {
-                throw Object.assign(new Error('custom_meta blob (stringified) gt 1500 positions'), { code: 413 })
-              }
+        }
+        if (['string', 'object'].indexOf(typeof req.body.custom_meta.blob) > -1) {
+          if (req.body.custom_meta.blob !== null) {
+            customMeta.touched = true
+            customMeta.blob = JSON.stringify(req.body.custom_meta.blob)
+            if (customMeta.blob.length > 1500) {
+              throw Object.assign(new Error('custom_meta blob (stringified) gt 1500 positions'), { code: 413 })
             }
           }
         }
