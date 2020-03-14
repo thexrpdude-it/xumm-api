@@ -75,7 +75,7 @@ module.exports = async (req, res) => {
       const updateFieldsQueryStr = updateFields.map(u => {
         let output = `${u} = :${u}`
         if (u.match(/_txt$/)) {
-          output += `${u.replace(/_txt$/, '_bin')} = UNHEX(REPLACE(:${u},'-',''))`
+          output += `, ${u.replace(/_txt$/, '_bin')} = UNHEX(REPLACE(:${u},'-',''))`
         }
         return output
       }).join(',')
