@@ -231,6 +231,13 @@ module.exports = async (req, res) => {
         }
       }
 
+      /**
+       * Never submit and never multisign for SignIn transactions
+       */
+      if (Object.keys(req.body.txjson).indexOf('TransactionType') > -1 && req.body.txjson.TransactionType.toLowerCase() === 'signin') {
+        options.submit = options.multisign = 0
+      }
+
       if (typeof req.body.custom_meta === 'object' && req.body.custom_meta !== null) {
         if (['string', 'number'].indexOf(typeof req.body.custom_meta.identifier) > -1) {
           customMeta.touched = true
