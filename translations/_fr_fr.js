@@ -8,14 +8,14 @@
   XRPL_SIGNPLATFORM: `Plateforme de signature XRPL (BETA)`,
   TITLE_SIGNTX: `Demande de signature`,
   ALREADY_SIGNED: `Déja signé`,
-  PAYLOAD_RESOLVED: `Cette demande à déjà été résolue (signé ou rejeté).`,
+  PAYLOAD_RESOLVED: `Cette demande à déjà été résolue (signée ou rejeté).`,
   SCAN_WITH_APP: `Scannez ce QR-code avec <b class="font-logo">xumm</b>`,
   PAYLOAD_NOT_FOUND: `Demande de signature introuvable.`,
   PAYLOAD_EXPIRED: `Demande de signature expirée.`,
   PAYLOAD_BACKEND_ERROR: `Désolé, une erreur s'est produite lors de la récupération des données à signer.`,
   PAYLOAD_PAGE_FOR_MOBILE: `Pour signer une demande, veuillez vérifier que vous avez l'application <b class="font-logo">xumm</b> installée préalablement.`,
   APPLICATION_DISABLED: `L'application <q><b>__appname__</b></q> est désactivée.`,
-  WAIT_CONNECT_PLATFORM: `Connection à la plateforme de signature.`,
+  WAIT_CONNECT_PLATFORM: `Connection à la plateforme de signature. Veuillez patienter...`,
   WAIT_OPEN: `En attente que vous ouvriez la 
                   <code class="text-primary"><b class="text-primary"><q>__txtype__</q></b></code>
                   demande à l'aide l'application XUMM.`,
