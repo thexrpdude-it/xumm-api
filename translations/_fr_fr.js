@@ -5,7 +5,7 @@
   ERROR_500_BODY: `Désolé, votre demande ne peut pas être effectuée à cet instant.`,
   LIPSUM: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin maximus sem ante, sit amet semper mauris venenatis non. Fusce posuere, libero ut volutpat ornare, massa ipsum hendrerit ipsum, sed finibus ipsum augue a nisl. Etiam at tempus ante, sit amet tristique leo. Vestibulum lobortis nisl a volutpat rhoncus. Ut facilisis ante a iaculis sollicitudin. Ut consectetur magna at libero vulputate, id pulvinar dui rutrum. Etiam facilisis finibus tincidunt.`,
   BY_NAME: `XPRL Labs`,
-  XRPL_SIGNPLATFORM: `plateforme de signature XRPL (BETA)`,
+  XRPL_SIGNPLATFORM: `Plateforme de signature XRPL (BETA)`,
   TITLE_SIGNTX: `Demande de signature`,
   ALREADY_SIGNED: `Déja signé`,
   PAYLOAD_RESOLVED: `Cette demande à déjà été résolue (signé ou rejeté).`,
