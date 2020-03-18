@@ -1,8 +1,18 @@
-XUMM CREDITS
+{% extends 'webviews/template.html' %}
 
-module: 
-    <pre>{{ module }}</pre>
-type: 
-    <pre>{{ type }}</pre>
-language: 
-    <pre>{{ language }}</pre>
+{% block content %}
+
+  {# <h3>{{ 'INAPP_TITLE_CREDITS'|i18n }}</h3> #}
+
+  <p class="alert alert-warning text-center">Credits here</p>
+
+  <h5>Credit:</h5>
+  <ul>
+    <li>Used open source projects</li>
+    <li>Developers</li>
+    <li>Testers</li>
+    <li>Translators</li>
+    <li>Patrons</li>
+  </ul>
+
+{% endblock %}

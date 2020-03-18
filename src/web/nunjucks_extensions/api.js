@@ -1,6 +1,7 @@
 const nunjucks = require('nunjucks')
 const apis = {
-  payloadData: require('@api/v1/internal/payload-data')
+  payloadData: require('@api/v1/internal/payload-data'),
+  userProfile: require('@api/v1/internal/user-profile-page-lookup')
 }
 
 class apiExtension {
@@ -27,17 +28,19 @@ class apiExtension {
         var [ context, method, args, body, errorBody, cb ] = arguments
       }
 
-      let results
+      // let results
       let response
       let err
 
       if (Object.keys(apis).indexOf(method) > -1) {
         // const apiResponse = apis.payloadData.apply(null, args)
         try {
-          let uuid = ''
-          if (typeof args === 'object' && args !== null) uuid = args.uuid || ''
-          if (typeof args === 'string') uuid = args
-          context.ctx.results = await apis[method](uuid, expressApp, invoker) // Assign before rendering body()
+          let param = undefined
+          if (method === 'payloadData') {
+            if (typeof args === 'object' && args !== null) param = args.uuid || ''
+            if (typeof args === 'string') param = args
+          }
+          context.ctx.results = await apis[method](param || args, expressApp, invoker) // Assign before rendering body()
           response = new nunjucks.runtime.SafeString(body())
         } catch (e) {
           // Handle soft error

@@ -21,10 +21,17 @@
     <meta name="description" content="XUMM. Wallet and payment platform for the XRP ledger">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://xumm.app/assets/images/xumm-signed-sent-delivered.png">
+    <meta name="twitter:image" content="https://xumm.app/assets/images/signed-sent-delivered.png">
     <meta name="twitter:creator" content="@XRPLLabs">
     <meta name="twitter:description" content="XUMM. Wallet and payment platform for the XRP ledger">
     <meta name="twitter:title" content="𝗫𝗨𝗠𝗠 | Signed Sent Delivered">
+
+    {% block canonical %}
+      <!-- Block: canonical, Module: {{ module }} -->
+      {% if module == 'index' or module == 'profile' %}
+        <link rel="canonical" href="{{ baselocation }}">
+      {% endif %}
+    {% endblock %}
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/fa35e16c8d.js" crossorigin="anonymous"></script>

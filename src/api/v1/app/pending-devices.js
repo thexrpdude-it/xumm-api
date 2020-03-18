@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
           WHERE
             device_lockedbydeviceid = :deviceId
           AND
-            device_accesstoken_txt IS NOT NULL
+            device_accesstoken_bin IS NOT NULL
           AND
             device_created > FROM_UNIXTIME(:expiration)
         `, {
@@ -48,11 +48,11 @@ module.exports = async (req, res) => {
               device_lockedbydeviceid = NULL,
               device_disabled = IF(:method = 'PATCH', NULL, NOW())
             WHERE
-              device_uuidv4_txt = :device_uuidv4
+              device_uuidv4_bin = UNHEX(REPLACE(:device_uuidv4,'-',''))
             AND
               device_disabled IS NOT NULL
             AND
-              device_accesstoken_txt IS NOT NULL
+              device_accesstoken_bin IS NOT NULL
             AND
               device_lockedbydeviceid = :deviceId
             LIMIT 1

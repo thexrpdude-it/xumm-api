@@ -11,7 +11,7 @@
 {% block button %}
   <a href="https://xumm.app" class="shadow-sm btn border-2 border-primary btn-info btn-sm">
     <i class="fas fa-book"></i>
-    About
+    About XUMM
   </a>
 {% endblock %}
 
@@ -45,6 +45,9 @@
   <div class="container">
 
     {% api "payloadData", uuid %}
+      {# <pre>{{ results._signed }}</pre> #}
+      {# <pre>{{ results._resolved }}</pre> #}
+      {# <pre>{{ results._cancelled }}</pre> #}
       {% if not results %}
         {% set title %}
           <i class="fas fa-ban"></i> {{ 'ERROR'|i18n }}
@@ -61,7 +64,7 @@
           {{ 'PAYLOAD_EXPIRED'|i18n }}
         {% endset %}
         {{ _error.render(title, body) }}
-      {% elseif results._finished > 0 %}
+      {% elseif results._resolved > 0 %}
         {% set title %}
           <i class="far fa-hand-paper"></i> {{ 'ALREADY_SIGNED'|i18n }}
         {% endset %}

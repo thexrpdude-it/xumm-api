@@ -7,41 +7,42 @@ const hashes = require('ripple-hashes')
 const addressCodec = require('ripple-address-codec')
 const uuid = require('uuid/v4')
 const { fork } = require('child_process')
+const updatePushBadge = require('@api/v1/internal/update-push-badge')
 
 module.exports = async (req, res) => {
+  /**
+   * Check if user is authorized to fetch the payload
+   * Either because it hasn't been handled yet, or
+   * becuase it has been handled by a device by the
+   * requesting user.
+   */
+  const payloadAuthInfo = await req.db(`
+    SELECT 
+      payloads.payload_id,
+      IF(payloads.payload_handler IS NULL, NULL, (
+        SELECT
+          user_id
+        FROM
+          devices
+        WHERE
+          devices.device_id = payloads.payload_handler
+        LIMIT 1
+      )) as __payload_handler_user_id,
+      (SELECT application_uuidv4_txt FROM applications WHERE applications.application_id = payloads.application_id) as application_uuidv4,
+      (SELECT application_id FROM applications WHERE applications.application_id = payloads.application_id) as application_id
+    FROM 
+      payloads
+    WHERE
+      call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
+    LIMIT 1
+  `, {
+    call_uuidv4: req.params.payloads__payload_id || ''
+  })
+
   try {
     const payload = await getPayloadData(req.params.payloads__payload_id, req.app, 'app')
     switch (req.method) {
       case 'GET':
-        /**
-         * Check if user is authorized to fetch the payload
-         * Either because it hasn't been handled yet, or
-         * becuase it has been handled by a device by the
-         * requesting user.
-         */
-        const payloadAuthInfo = await req.db(`
-          SELECT 
-            payloads.payload_id,
-            IF(payloads.payload_handler IS NULL, NULL, (
-              SELECT
-                user_id
-              FROM
-                devices
-              WHERE
-                devices.device_id = payloads.payload_handler
-              LIMIT 1
-            )) as __payload_handler_user_id,
-            (SELECT application_uuidv4_txt FROM applications WHERE applications.application_id = payloads.application_id) as application_uuidv4
-          FROM 
-            payloads
-          WHERE
-            -- call_uuidv4_txt = :call_uuidv4
-            call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
-          LIMIT 1
-        `, {
-          call_uuidv4: req.params.payloads__payload_id || ''
-        })
-      
         if (payloadAuthInfo.constructor.name === 'Array' && payloadAuthInfo.length > 0 && payloadAuthInfo[0].constructor.name === 'RowDataPacket') {
           if (payloadAuthInfo[0].__payload_handler_user_id === null || payloadAuthInfo[0].__payload_handler_user_id === req.__auth.user.id) {
             let response = {
@@ -65,6 +66,8 @@ module.exports = async (req, res) => {
               })
     
               response = formatPayloadData(payload, response)
+              delete response.meta.custom_identifier
+              delete response.meta.custom_blob
             }
     
             return res.json(response)
@@ -101,15 +104,28 @@ module.exports = async (req, res) => {
             throw e
           }
 
-          if (payload._expired > 0) {
-            const e = new Error(`Payload expired`)
-            e.httpCode = e.code = 510
+          /**
+           * Do not reject patching when expired,
+           * a user can still be in the signing screen
+           * and sign+submit AFTER expiration, if that
+           * happens we WILL want to receive the PATCH
+           * as the tx has been processed.
+           */
+          // if (payload._expired > 0) {
+          //   const e = new Error(`Payload expired`)
+          //   e.httpCode = e.code = 510
+          //   throw e
+          // }
+
+          if (payload._signed > 0) {
+            const e = new Error(`Payload already signed`)
+            e.httpCode = e.code = 511
             throw e
           }
 
-          if (payload._finished > 0) {
-            const e = new Error(`Payload already signed`)
-            e.httpCode = e.code = 511
+          if (payload._resolved > 0) {
+            const e = new Error(`Payload already resolved`)
+            e.httpCode = e.code = 512
             throw e
           }
           
@@ -173,13 +189,23 @@ module.exports = async (req, res) => {
               }
             }
 
-            if (typeof req.body.permission === 'object' && req.body.permission !== null) {
-              if (typeof req.body.permission.push !== 'undefined') {
-                if (req.body.permission.push === true || req.body.permission.push === 'true' || req.body.permission.push === 1 || req.body.permission.push === '1') {
+            // const permission = req.body.permission
+            // TODO: check with app, Sign In doesn't grant permission? For now: always grant.
+            const permission = {}
+            if (payloadUpdate.response_hex !== '') {
+              Object.assign(permission, {
+                push: true,
+                days: 30
+              })
+            }
+
+            if (typeof permission === 'object' && permission !== null) {
+              if (typeof permission.push !== 'undefined') {
+                if (permission.push === true || permission.push === 'true' || permission.push === 1 || permission.push === '1') {
                   const tokenExpiry = new Date()
                   let days
-                  if (typeof req.body.permission.days !== 'undefined') {
-                    days = parseInt(req.body.permission.days)
+                  if (typeof permission.days !== 'undefined') {
+                    days = parseInt(permission.days)
                   }
                   if (typeof days === 'undefined' || isNaN(days) || days < 7) {
                     days = 90
@@ -207,14 +233,18 @@ module.exports = async (req, res) => {
                       token_accesstoken_txt = :token_accesstoken,
                       call_uuidv4_txt = :call_uuidv4,
                       payload_uuidv4_txt = :payload_uuidv4,
-                      application_id = (SELECT application_id FROM applications WHERE application_uuidv4_txt = :application_uuidv4 LIMIT 1),
+                      token_accesstoken_bin = UNHEX(REPLACE(:token_accesstoken,'-','')),
+                      call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4,'-','')),
+                      payload_uuidv4_bin = UNHEX(REPLACE(:payload_uuidv4,'-','')),
+                      application_id = (SELECT application_id FROM applications WHERE application_uuidv4_bin = UNHEX(REPLACE(:application_uuidv4,'-','')) LIMIT 1),
                       token_days_valid = :token_days_valid,
                       token_hidden = 0
                     ON DUPLICATE KEY UPDATE
                       token_expiration = DATE_ADD(FROM_UNIXTIME(:token_issued), INTERVAL token_days_valid DAY),
                       call_uuidv4_txt = :call_uuidv4,
-                      -- call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
+                      call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', '')),
                       payload_uuidv4_txt = :payload_uuidv4,
+                      payload_uuidv4_bin = UNHEX(REPLACE(:payload_uuidv4, '-', '')),
                       token_hidden = 0
                   `, { 
                     ...generatedAccessToken,
@@ -249,7 +279,7 @@ module.exports = async (req, res) => {
                 AND
                   token_expiration > FROM_UNIXTIME(:now)
                 AND
-                  application_id = (SELECT application_id FROM applications WHERE application_uuidv4_txt = :application_uuidv4 LIMIT 1)
+                  application_id = (SELECT application_id FROM applications WHERE application_uuidv4_bin = UNHEX(REPLACE(:application_uuidv4,'-','')) LIMIT 1)
                 AND
                   user_id = :user
                 LIMIT 1
@@ -284,9 +314,11 @@ module.exports = async (req, res) => {
                     token_expiration = FROM_UNIXTIME(:token_expiration),
                     call_uuidv4_txt = :call_uuidv4,
                     payload_uuidv4_txt = :payload_uuidv4,
+                    call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4,'-','')),
+                    payload_uuidv4_bin = UNHEX(REPLACE(:payload_uuidv4,'-','')),
                     token_hidden = 0
                   WHERE
-                    token_accesstoken_txt = :token_accesstoken
+                    token_accesstoken_bin = UNHEX(REPLACE(:token_accesstoken,'-',''))
                 `, { 
                   ...generatedAccessToken,
                   token_expiration: generatedAccessToken.token_expiration / 1000
@@ -325,16 +357,44 @@ module.exports = async (req, res) => {
 
           if (!transactionResults.valid) {
             const e = new Error(`Invalid payload result: ${transactionResults.message}`)
-            e.httpCode = e.code = 403
+            e.httpCode = e.code = 500
             throw e
           } else {
             response.signed = !payloadUpdate.rejected
+            /**
+             * TODO: Duplicate replacement: src/api/v1/internal/payload-data-formatter
+             */
             response.return_url = {
-              app: payload.payload_return_url_app === null ? null : payload.payload_return_url_app.replace(/\{id\}/i, req.params.payloads__payload_id),
-              web: payload.payload_return_url_web === null ? null : payload.payload_return_url_web.replace(/\{id\}/i, req.params.payloads__payload_id)
+              app: payload.payload_return_url_app === null
+                ? null
+                : payload.payload_return_url_app
+                  .replace(/\{id\}/i, req.params.payloads__payload_id)
+                  .replace(/\{txid\}/i, payloadUpdate.response_txid || '')
+                  .replace(/\{txblob\}/i, payloadUpdate.response_hex || '')
+                  .replace(/\{cid\}/i, encodeURIComponent(payload.meta_custom_identifier || '')),
+              web: payload.payload_return_url_web === null
+                ? null
+                : payload.payload_return_url_web
+                  .replace(/\{id\}/i, req.params.payloads__payload_id)
+                  .replace(/\{txid\}/i, payloadUpdate.response_txid || '')
+                  .replace(/\{txblob\}/i, payloadUpdate.response_hex || '')
+                  .replace(/\{cid\}/i, encodeURIComponent(payload.meta_custom_identifier || ''))
             }
 
-            req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, response)
+            let meta_custom_blob = payload.meta_custom_blob
+            if (meta_custom_blob !== null)
+              try {
+                meta_custom_blob = JSON.parse(meta_custom_blob)
+              } catch (e) {}
+
+            req.app.redis.publish(`sign:${req.params.payloads__payload_id}`, Object.assign({}, {
+              ...response,
+              custom_meta: {
+                identifier: payload.meta_custom_identifier,
+                blob: meta_custom_blob,
+                instruction: payload.meta_custom_instruction
+              }
+            }))
             
             req.app.redis.publish(`app:${payload.application_uuidv4}`, {
               call: req.params.payloads__payload_id,
@@ -358,7 +418,6 @@ module.exports = async (req, res) => {
                 payloads.payload_response_account = :response_account,
                 payloads.payload_handler = :payload_handler
               WHERE
-                -- payloads.call_uuidv4_txt = :payload_uuidv4
                 payloads.call_uuidv4_bin = UNHEX(REPLACE(:payload_uuidv4, '-', ''))
               AND
                 payloads.payload_resolved IS NULL
@@ -385,6 +444,8 @@ module.exports = async (req, res) => {
 
           res.json(response)
 
+          updatePushBadge({ deviceId: req.__auth.device.id }, req.db, req.config)
+
           const appDetails = await req.db(`
             SELECT
               applications.application_webhookurl,
@@ -398,7 +459,7 @@ module.exports = async (req, res) => {
                 tokens.application_id = applications.application_id
               )
             WHERE
-              application_uuidv4_txt = :application_uuidv4
+              application_uuidv4_bin = UNHEX(REPLACE(:application_uuidv4,'-',''))
             LIMIT 1
           `, {
             application_uuidv4: payload.application_uuidv4,
@@ -406,13 +467,27 @@ module.exports = async (req, res) => {
           })
 
           if (Array.isArray(appDetails) && appDetails.length > 0 && appDetails[0].constructor.name === 'RowDataPacket') {
+            // log(payload)
             const callbackUrl = appDetails[0].application_webhookurl
             if (callbackUrl.match(/^https:/)) {
+              let custom_meta_blob = payload.meta_custom_blob
+              if (typeof custom_meta_blob === 'string') {
+                try {
+                  custom_meta_blob = JSON.parse(custom_meta_blob)
+                } catch (e) {
+                  custom_meta_blob = null
+                }
+              }
               const callbackData = {
                 meta: {
                   url: callbackUrl,
                   application_uuidv4: payload.application_uuidv4,
-                  payload_uuidv4: req.params.payloads__payload_id
+                  payload_uuidv4: req.params.payloads__payload_id,
+                },
+                custom_meta: {
+                  identifier: payload.meta_custom_identifier,
+                  blob: custom_meta_blob,
+                  instruction: payload.meta_custom_instruction
                 },
                 payloadResponse: response,
                 userToken: !response.user_token ? null : { 
@@ -452,6 +527,11 @@ module.exports = async (req, res) => {
         break;
     }
   } catch (e) {
+    if (payloadAuthInfo.constructor.name === 'Array' && payloadAuthInfo.length > 0 && payloadAuthInfo[0].constructor.name === 'RowDataPacket') {
+      if (payloadAuthInfo[0].application_id) {
+        e.applicationId = payloadAuthInfo[0].application_id
+      }
+    }
     res.handleError(e)
   }
 }

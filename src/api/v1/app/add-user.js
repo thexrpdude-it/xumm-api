@@ -15,7 +15,8 @@ module.exports = async (req, res) => {
     INSERT IGNORE INTO 
       users 
     SET 
-      user_uuidv4_txt = :user_uuidv4, 
+      user_uuidv4_txt = :user_uuidv4,
+      user_uuidv4_bin = UNHEX(REPLACE(:user_uuidv4,'-','')),
       user_slug = '',
       user_name = '',
       user_profilepage = 0, 
@@ -29,6 +30,7 @@ module.exports = async (req, res) => {
     SET 
       user_id = :userId,
       device_uuidv4_txt = :device_uuidv4,
+      device_uuidv4_bin = UNHEX(REPLACE(:device_uuidv4,'-','')),
       device_created = FROM_UNIXTIME(:moment_creation),
       device_created_ip = :request_ip,
       device_disabled = FROM_UNIXTIME(:device_expiration)

@@ -26,10 +26,20 @@ const main = async (data) => {
   try {
     log('PUSHDATA', data.transaction)
     const url = 'https://fcm.googleapis.com/fcm/send'
-    let body = translations.translate('en', 'PUSH_MSG_TXTYPE_TO_DEST', {
-      type: data.transaction.type,
-      destination: data.transaction.destination.known.knownaccount_name || data.transaction.destination.account
-    })
+    let destination = data.transaction.destination.known.knownaccount_name || data.transaction.destination.account
+    if (destination === data.transaction.destination.account && String(destination) !== '') {
+      destination = destination.slice(0, 8) + ' ... ' + destination.slice(-7)
+    }
+
+    let body
+    if (String(destination) !== '') {
+      body = translations.translate('en', 'PUSH_MSG_TXTYPE_TO_DEST', {
+        type: data.transaction.type,
+        destination
+      })
+    } else {
+      body = data.transaction.type
+    }
 
     if (data.transaction.type.toLowerCase() === 'signin') {
       body = translations.translate('en', 'PUSH_MSG_SIGNIN_REQ', {
@@ -45,12 +55,14 @@ const main = async (data) => {
         notification: {
           title: `${data.application.name}`,
           subtitle: translations.translate('en', 'PUSH_MSG_SIGN_REQUEST'),
-          body: body,
+          body,
           badge: data.device.open_sign_requests || 0,
-          sound: 'default',
-          click_action: 'SIGNTX',
-          payload: typeof payload === 'string' ? payload : null
+          sound: 'default'
         },
+        data: {
+          payload: typeof payload === 'string' ? payload : null,
+          category: 'SIGNTX'
+        }
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +71,7 @@ const main = async (data) => {
     })
 
     const responseText = await response.text()
-    log(`Webhook [ ${options.module_name} ] response text:`, responseText.slice(0, 500))
+    log(`Push notification CALL [ ${options.module_name} ] response text:`, responseText.slice(0, 500))
   } catch(e) {
     log(`${e.message} @ ${options.module_name} [ payload(${data.payload.uuidv4}) ]`)
     process.exit(1)

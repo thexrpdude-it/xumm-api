@@ -15,9 +15,11 @@ module.exports = async function (expressApp) {
   const errorHandler = async (e, req, res) => {
     // TODO: migrate to module
     if (typeof expressApp.config.bugsnagKey !== 'undefined') {
-      expressApp.bugsnagClient.notify(e.causingError || e, {
-        metaData: req.__auth || {}
-      })
+      if (typeof expressApp.bugsnagClient !== 'undefined') {
+        expressApp.bugsnagClient.notify(e.causingError || e, {
+          metaData: req.__auth || {}
+        })
+      }
     }
 
     const errorRef = res.get('X-Call-Ref') || uuid()
@@ -44,9 +46,9 @@ module.exports = async function (expressApp) {
         call_httpcode = :call_httpcode,
         call_ecode = :call_ecode,
         call_emessage = :call_emessage,
-        call_emessage_debug = :call_emessage_debug
+        call_emessage_debug = :call_emessage_debug,
+        application_id = IF(application_id IS NULL, :application_id, application_id)
       WHERE
-        -- call_uuidv4_txt = :call_uuidv4
         call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
       LIMIT 1
     `
@@ -69,7 +71,8 @@ module.exports = async function (expressApp) {
       call_httpcode: res.statusCode,
       call_ecode: isNaN(code) ? null : code,
       call_emessage: typeof e !== 'undefined' && typeof e.message === 'string' ? e.message.slice(0, 100) : null,
-      call_emessage_debug: causingError
+      call_emessage_debug: causingError,
+      application_id: typeof e !== 'undefined' && typeof e.applicationId !== 'undefined' ? e.applicationId : null
     })
   }
 
@@ -112,6 +115,7 @@ module.exports = async function (expressApp) {
           { method: [ 'get', 'patch', 'delete' ], path: 'pending-devices' },
           { method: [ 'get', 'patch', 'post' ], path: 'payload/:payloads__payload_id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'payload' },
           { method: 'get', path: 'pending-payloads' },
+          { method: 'get', path: 'user-devices' },
           { method: 'get', path: 'curated-ious' },
           { method: 'get', path: 'account-info/:address(r[a-zA-Z0-9]{3,})', module: 'account-info' },
           { method: 'get', path: 'handle-lookup/:handle', module: 'handle-lookup' },
@@ -130,6 +134,7 @@ module.exports = async function (expressApp) {
           { method: [ 'get', 'post' ], path: 'ping-noauth', disableAuth: true, module: 'ping' },
           { method: [ 'get', 'post' ], path: 'ping' },
           { method: [ 'get' ], path: 'payload/:payloads__payload_id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'payload-get' },
+          { method: [ 'get' ], path: 'payload/ci/:payloads_external_meta__meta_string(*)', module: 'payload-get' },
           { method: [ 'delete' ], path: 'payload/:payloads__payload_id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})', module: 'payload-cancel' },
           { method: [ 'post' ], path: 'payload', module: 'payload-post' },
         ],
@@ -218,7 +223,11 @@ module.exports = async function (expressApp) {
                     /**
                      * Todo: normalize errors (per api type?)
                      */
-                    expressApp.bugsnagClient.notify(e)
+                    if (typeof expressApp.config.bugsnagKey !== 'undefined') {
+                      if (typeof expressApp.bugsnagClient !== 'undefined') {
+                        expressApp.bugsnagClient.notify(e)
+                      }
+                    }                      
                     res.status(500).json({ 
                       error: true,
                       message: `API Auth middleware rejected: [ ${e.message} ]`,

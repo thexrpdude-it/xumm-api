@@ -7,9 +7,11 @@ module.exports = async function (expressApp) {
     log(error, req.__auth)
 
     if (typeof expressApp.config.bugsnagKey !== 'undefined') {
-      expressApp.bugsnagClient.notify(error.causingError || error, {
-        metaData: req.__auth || {}
-      })
+      if (typeof expressApp.bugsnagClient !== 'undefined') {
+        expressApp.bugsnagClient.notify(error.causingError || error, {
+          metaData: req.__auth || {}
+        })
+      }
     }
 
     const errorUuid = res.get('X-Call-Ref') || uuid()

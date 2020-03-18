@@ -1,31 +1,10 @@
-const uuid = require('uuid/v4')
+const getBadgeCount = require('@api/v1/internal/get-user-badge-count')
 
 module.exports = async (req, res) => {
-  let badge
-  try {
-    badge = await req.db(`
-      SELECT count(1) as c
-      FROM users
-      LEFT JOIN tokens ON (tokens.user_id = users.user_id)
-      LEFT JOIN payloads ON (payloads.token_id = tokens.token_id)
-      WHERE users.user_id = :user_id
-        AND tokens.token_hidden = 0
-        AND tokens.token_reported = 0
-        AND tokens.token_expiration > FROM_UNIXTIME(:now)
-        AND payloads.payload_handler IS NULL
-        AND payloads.payload_expiration > FROM_UNIXTIME(:now)
-    `, {
-      user_id: req.__auth.user.id,
-      now: new Date() / 1000
-    })
-  } catch (e) {
-    // Do nothing
-  }
-
   res.json({ 
     pong: true,
     tosAndPrivacyPolicyVersion: Number(req.config.TosAndPrivacyPolicyVersion) || 0,
-    badge: badge.length === 1 ? badge[0].c : 0,
+    badge: await getBadgeCount({ userId: req.__auth.user.id }, req.db),
     auth: Object.keys(req.__auth).reduce((a, b) => {
       return Object.assign(a, { 
         [b]: Object.keys(req.__auth[b]).filter(e => {

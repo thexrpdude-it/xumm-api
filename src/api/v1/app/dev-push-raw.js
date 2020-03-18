@@ -9,11 +9,11 @@ module.exports = async (req, res) => {
     FROM 
       devices
     WHERE
-      device_uuidv4_txt = :device
+      device_uuidv4_bin = UNHEX(REPLACE(:device,'-',''))
     AND
       devices.device_disabled IS NULL
     AND
-      devices.device_accesstoken IS NOT NULL
+      devices.device_accesstoken_bin IS NOT NULL
     AND
       devices.device_pushtoken IS NOT NULL
     AND
@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
               body: req.body
             },
             device: {
-              pushtoken: pushToken
+              pushToken
             },
             config: {
               fcmkey: req.config.googleFcmKey

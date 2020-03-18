@@ -5,6 +5,7 @@ module.exports = async (req, res) => {
     const data = await req.db(`
       SELECT
         payloads.*,
+        IF(payloads.payload_expiration > CURRENT_TIMESTAMP, 0, 1) as __payload_expired,
         payloads.call_uuidv4_txt as call_uuidv4,
         UNIX_TIMESTAMP(payloads.payload_created) as payload_created_ts,
         tokens.token_issued,
@@ -19,18 +20,18 @@ module.exports = async (req, res) => {
         )
       LEFT JOIN
         tokens ON (
-          tokens.call_uuidv4_txt = payloads.call_uuidv4_txt
+          tokens.call_uuidv4_bin = payloads.call_uuidv4_bin
         )
       WHERE
-        application_uuidv4_txt = :app
+        application_uuidv4_bin = UNHEX(REPLACE(:app,'-',''))
       AND
         application_auth0_owner = :user
       AND
         application_disabled = 0
       AND
-        payloads.call_uuidv4_txt IS NOT NULL
+        payloads.call_uuidv4_bin IS NOT NULL
       ORDER BY
-        FIELD(payloads.call_uuidv4_txt, :record) DESC,
+        FIELD(payloads.call_uuidv4_bin, UNHEX(REPLACE(:record,'-',''))) DESC,
         payloads.payload_id DESC
       LIMIT :skip, :take
     `, {

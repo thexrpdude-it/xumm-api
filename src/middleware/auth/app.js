@@ -64,7 +64,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
         LEFT JOIN
           users u ON (d.user_id = u.user_id)
         WHERE
-          d.device_accesstoken_txt = :device_accesstoken
+          d.device_accesstoken_bin = UNHEX(REPLACE(:device_accesstoken,'-',''))
         AND
           (d.device_disabled IS NULL OR d.device_disabled > NOW())
       `
@@ -76,7 +76,7 @@ module.exports = (expressApp, req, res, apiDetails) => {
           device_lastcall = CURRENT_TIMESTAMP,
           device_idempotence = :device_idempotence
         WHERE
-          device_accesstoken_txt = :device_accesstoken
+          device_accesstoken_bin = UNHEX(REPLACE(:device_accesstoken,'-',''))
         LIMIT 1
       `
 
@@ -87,7 +87,10 @@ module.exports = (expressApp, req, res, apiDetails) => {
         })
 
         if (userDetails.length > 0) {
-          const hashAndIdempotencyValid = userDetails[0].__call_hash.toLowerCase() === bearer[3].toLowerCase() && userDetails[0].__call_idempotence_valid > 0
+          /**
+           * DISABLED IDEMPOTENCY, TESTING WITH @ALLOY
+           */
+          const hashAndIdempotencyValid = userDetails[0].__call_hash.toLowerCase() === bearer[3].toLowerCase() /*&& userDetails[0].__call_idempotence_valid > 0*/
 
           if (hashAndIdempotencyValid || req.ipTrusted) {
             if (hashAndIdempotencyValid) {

@@ -1,5 +1,6 @@
 // const log = require('debug')('app:payload:cancel')
 const getPayload = require('@api/v1/platform/payload-get')
+const updatePushBadge = require('@api/v1/internal/update-push-badge')
 
 module.exports = async (req, res) => {
   try {
@@ -17,7 +18,9 @@ module.exports = async (req, res) => {
     let cancelled = false
     let reason = 'UNKNOWN'
 
-    if (potentialPayload.meta.finished) {
+    if (potentialPayload.meta.cancelled) {
+      reason = 'ALREADY_CANCELLED'
+    } else if (potentialPayload.meta.resolved) {
       reason = 'ALREADY_RESOLVED'
     } else if (potentialPayload.meta.expired) {
       reason = 'ALREADY_EXPIRED'
@@ -33,15 +36,17 @@ module.exports = async (req, res) => {
         UPDATE 
           payloads
         SET
-          payload_expiration = FROM_UNIXTIME(:now)
+          payload_expiration = FROM_UNIXTIME(:now),
+          payload_cancelled = 1
         WHERE
-          -- call_uuidv4_txt = :call_uuidv4
           call_uuidv4_bin = UNHEX(REPLACE(:call_uuidv4, '-', ''))
         LIMIT 1
       `, {
         call_uuidv4: potentialPayload.meta.uuid,
         now: new Date() / 1000
       })
+
+      updatePushBadge({ payloadUuid: potentialPayload.meta.uuid }, req.db, req.config)
     }
 
     res.json({
@@ -51,7 +56,8 @@ module.exports = async (req, res) => {
       },
       meta: Object.assign(potentialPayload.meta, {
         expired: true
-      })
+      }),
+      custom_meta: potentialPayload.custom_meta
     })
 
     return

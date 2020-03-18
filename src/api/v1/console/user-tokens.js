@@ -15,13 +15,13 @@ module.exports = async (req, res) => {
           tokens.application_id = applications.application_id
         )
       WHERE
-        application_uuidv4_txt = :app
+        application_uuidv4_bin = UNHEX(REPLACE(:app,'-',''))
       AND
         application_auth0_owner = :user
       AND
         application_disabled = 0
       AND
-        call_uuidv4_txt IS NOT NULL
+        call_uuidv4_bin IS NOT NULL
       ORDER BY
         tokens.token_id DESC
       LIMIT :skip, :take

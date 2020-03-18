@@ -27,7 +27,35 @@ module.exports = async (req, res) => {
     return_url_web: null
   }
 
-  const checkTxValid = (txjson) => {
+  let customMeta = {
+    touched: false,
+    identifier: null,
+    blob: null,
+    instruction: null
+  }
+
+  const setFixedFeeByTxType = txjson => {
+    if (typeof txjson === 'object' && txjson !== null) {
+      if (typeof txjson.TransactionType === 'string') {
+        if (typeof txjson.Fee === 'undefined') {
+          switch (txjson.TransactionType) {
+            case 'AccountDelete':
+              txjson.Fee = 5000000
+              break;            
+            // case 'SetRegularKey':
+            //   txjson.Fee = 0
+            //   break;
+          }
+        }
+      }
+    }
+    if (typeof txjson.Fee === 'number') {
+      txjson.Fee = String(txjson.Fee)
+    }
+    return txjson
+  }
+
+  const checkTxValid = txjson => {
     const validTransactionTypes = {
       TransactionType: [ 
         'Payment',
@@ -41,6 +69,7 @@ module.exports = async (req, res) => {
         'CheckCash',
         'CheckCancel',
         'AccountSet',
+        'AccountDelete',
         'PaymentChannelCreate',
         'PaymentChannelFund',
         'SetRegularKey',
@@ -83,6 +112,7 @@ module.exports = async (req, res) => {
       try {
         const json = codec.decode(req.body.txblob.trim())
         if (checkTxValid(json)) {
+          setFixedFeeByTxType(json)
           accountlib.sign(json, accountlib.derive.passphrase('masterpassphrase'))
           tx.hex = req.body.txblob.trim()
           tx.json = json
@@ -95,19 +125,21 @@ module.exports = async (req, res) => {
     } else if (typeof req.body.txjson === 'object') {
       if (checkTxValid(req.body.txjson)) {
         try {
-          const txjson = {}
+          const txjson = Object.assign({}, req.body.txjson)
           if (Object.keys(req.body.txjson).indexOf('TransactionType') > -1 && req.body.txjson.TransactionType.toLowerCase() === 'signin') {
             Object.assign(txjson, {
               SignIn: true
             })
-          } else {
-            Object.assign(txjson, req.body.txjson)
           }
+          setFixedFeeByTxType(txjson)
           const signed = accountlib.sign(txjson, accountlib.derive.passphrase('masterpassphrase'))
           tx.hex = signed.signedTransaction
-          tx.json = req.body.txjson
+          tx.json = txjson
         } catch (e) {
           tx.error = new Error('Payload JSON transaction encoding error')
+          if (typeof e.message === 'string' && e.message.match(/valid hex representation of a byte/)) {
+            tx.error = new Error('Invalid HEX, please send valid HEX in upper case notation')
+          }
           tx.error.causingError = e
           tx.error.code = 603
         }
@@ -199,6 +231,43 @@ module.exports = async (req, res) => {
         }
       }
 
+      /**
+       * Never submit and never multisign for SignIn transactions
+       */
+      if (Object.keys(req.body.txjson).indexOf('TransactionType') > -1 && req.body.txjson.TransactionType.toLowerCase() === 'signin') {
+        options.submit = options.multisign = 0
+      }
+
+      if (typeof req.body.custom_meta === 'object' && req.body.custom_meta !== null) {
+        if (['string', 'number'].indexOf(typeof req.body.custom_meta.identifier) > -1) {
+          customMeta.touched = true
+          customMeta.identifier = String(req.body.custom_meta.identifier)
+          if (customMeta.identifier.length > 40) {
+            throw Object.assign(new Error('custom_meta identifier gt 40 positions'), { code: 413 })
+          }
+        }
+        if (typeof req.body.custom_meta.instruction === 'string') {
+          customMeta.touched = true
+          customMeta.instruction = req.body.custom_meta.instruction
+            .replace(/[ \t]+/g, ' ')
+            .replace(/^[ \t]+/gm, '')
+            .replace(/^[ \t]*[ \t\n]+[ \t]*/gm, '\n')
+            .trim()
+          if (customMeta.instruction.length > 280) {
+            throw Object.assign(new Error('custom_meta instruction gt 280 positions'), { code: 413 })
+          }
+        }
+        if (['string', 'object'].indexOf(typeof req.body.custom_meta.blob) > -1) {
+          if (req.body.custom_meta.blob !== null) {
+            customMeta.touched = true
+            customMeta.blob = JSON.stringify(req.body.custom_meta.blob)
+            if (customMeta.blob.length > 1500) {
+              throw Object.assign(new Error('custom_meta blob (stringified) gt 1500 positions'), { code: 413 })
+            }
+          }
+        }
+      }
+
       if (typeof req.body.user_token !== 'undefined' && req.body.user_token.match(uuidv4_format)) {
         pushToken = await req.db(`
           SELECT 
@@ -221,7 +290,7 @@ module.exports = async (req, res) => {
               applications.application_id = tokens.application_id
             )
           WHERE
-            token_accesstoken_txt = :token_accesstoken
+            token_accesstoken_bin = UNHEX(REPLACE(:token_accesstoken,'-',''))
           AND
             token_hidden = 0
           AND
@@ -229,7 +298,7 @@ module.exports = async (req, res) => {
           AND
             devices.device_disabled IS NULL
           AND
-            devices.device_accesstoken_txt IS NOT NULL
+            devices.device_accesstoken_bin IS NOT NULL
           AND
             devices.device_pushtoken IS NOT NULL
           AND
@@ -301,9 +370,51 @@ module.exports = async (req, res) => {
       if (typeof db !== 'object' || typeof db.insertId !== 'number' || db.insertId < 1) {
         throw Object.assign(new Error('Payload increment error'), { code: 605 })
       }
+
       if (typeof req.config.baselocation !== 'string' || !req.config.baselocation.match(/^http/)) {
         throw Object.assign(new Error('Platform configuration incomplete'), { code: 605 })
       }
+
+      if (typeof customMeta.touched) {
+        try {
+          // const metaDb = 
+          await req.db(`
+            INSERT INTO payloads_external_meta (
+              payload_id,
+              application_id,
+              meta_string,
+              meta_blob,
+              meta_user_instruction
+            ) VALUES (
+              :payload_id,
+              :application_id,
+              :meta_string,
+              :meta_blob,
+              :meta_user_instruction
+            )
+          `, {
+            payload_id: db.insertId,
+            application_id: req.__auth.application.id,
+            meta_string: customMeta.identifier,
+            meta_blob: customMeta.blob,
+            meta_user_instruction: customMeta.instruction
+          })
+          // log('Custom Meta touched, insert custom payload meta', {
+          //   meta: customMeta,
+          //   payload_insert_id: db.insertId,
+          //   meta_db_insert: metaDb
+          // })
+        } catch (e) {
+          if (e.message.match(/ER_DUP_ENTRY/)) {
+            const dupErr = new Error('Duplicated custom payload identifier (options.custom_meta.identifier)')
+            dupErr.code = 409
+            return res.handleError(dupErr)
+          } else {
+            return res.handleError(e)
+          }
+        }
+      }
+
       res.json({ 
         uuid: uuid,
         next: {

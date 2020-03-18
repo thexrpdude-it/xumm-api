@@ -1,4 +1,4 @@
-// const log = require('debug')('app:web')
+const log = require('debug')('app:web')
 
 const translations = require('@src/global/translations')
 const express = require('express')
@@ -8,13 +8,14 @@ const mobile = require('is-mobile')
 
 const bodyParser = require('body-parser')
 
+const QrPng = require('./web-misc/qr-png')
+const QrJson = require('./web-misc/qr-json')
+const QrTxHashJson = require('./web-misc/hash-qr-array')
+
 const dbExtension = require('@web/nunjucks_extensions/db')
 const apiExtension = require('@web/nunjucks_extensions/api')
 const qrExtension = require('@web/nunjucks_extensions/qr')
 const I18nFilter = require('@web/nunjucks_extensions/i18n')
-
-const sharp = require('sharp')
-const QRCode = require('qrcode')
 
 module.exports = async function (expressApp) {
   expressApp.use(bodyParser.urlencoded({ extended: true }))
@@ -31,14 +32,26 @@ module.exports = async function (expressApp) {
   router.get(['/', '/index.html'], (req, res, next) => {
     if (req.hostname === (req.config.deeplinkRedirectLocation || '')) {
       // Do nothing, will be handled. redirectLocation doesn't serve homepage.
-      return next()
+      return next('route')
+    } else if (req.hostname === (req.config.userProfileLocation || '')) {
+      // Do nothing, will be handled. redirectLocation doesn't serve homepage.
+      return res.redirect(301, req.config.baselocation)
     } else{
-      return res.render('index.html', { module: 'index' })
+      return res.render('index.html', {
+        module: 'index',
+        baselocation: req.config.baselocation,
+        path: req.path
+      })
     }
   })
 
   router.get('/app/webviews/:type([a-zA-Z0-9-]+)/:language([a-zA-Z_-]+)?', (req, res, next) => {
-    return res.render('webviews/' + req.params.type + '/index.html', { module: 'webviews', ...(req.params) })
+    return res.render('webviews/' + req.params.type + '/index.html', {
+      module: 'webviews',
+      mode: req.config.mode,
+      version: req.config.TosAndPrivacyPolicyVersion || 1,
+      ...(req.params)
+    })
   })
 
   router.get('/*', (req, res, next) => {
@@ -86,9 +99,37 @@ module.exports = async function (expressApp) {
       } else {
         return res.redirect(301, req.config.baselocation + (req.params[0] || ''))
       }
+    } else if (req.hostname === (req.config.userProfileLocation || '')) {
+      // Route to user page
+      req.url = `/user${req.url}`
+      return next('route')  
     }
     return next('route')
   }, handleSignPage)
+
+  router.get('/user/:handle([a-zA-Z0-9_-]+)/:account(r[a-zA-Z0-9]+)?', (req, res, next) => {
+    return res.render('user-profiles/index.html', {
+      module: 'profile',
+      baselocation: req.config.baselocation,
+      path: req.path,
+      handle: req.params.handle || undefined,
+      account: req.params.account || undefined,
+      params: req.params,
+      mobile: mobile({ ua: req.headers['user-agent'] || '', tablet: true }),
+      is: {
+        ios: (req.headers['user-agent'] || '').match(/iPhone|iPad/i),
+        mac: (req.headers['user-agent'] || '').match(/Macintosh/i),
+        android: (req.headers['user-agent'] || '').match(/android/i)
+      },
+      mode: req.config.mode,
+      locale: req.locale,
+      baselocation: req.config.baselocation,
+      mode: req.config.mode,
+      appstorelinks: req.config.AppStoreLinks,
+      trusted: req.ipTrusted,
+      hostname: req.hostname
+    })
+  })
 
   router.get('/about', (req, res, next) => {
     // throw new Error("BROKEN")
@@ -96,128 +137,9 @@ module.exports = async function (expressApp) {
   })
 
   router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):qr(/qr)?:deeplink(/deeplink)?', handleSignPage)
-  
-  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):level(_[mqh])?.png', async (req, res, next) => {
-    res.setHeader('Content-Type', 'image/png')
-    res.setHeader('Content-Disposition', 'inline; filename=' + req.params.uuid + '.png')
-    
-    const qrParams = {
-      _m: {
-        level: 'M',
-        width: 289
-      },
-      _q: {
-        level: 'Q',
-        width: 292
-      },
-      _h: {
-        level: 'H',
-        width: 318
-      }
-    }
-    const qrimage = await new Promise((resolve, reject) => {
-      QRCode.toDataURL(req.config.baselocation + '/sign/' + req.params.uuid, {
-        errorCorrectionLevel: qrParams[req.params.level || '_q'].level,
-        type: 'png',
-        margin: 1,
-        width: qrParams[req.params.level || '_q'].width,
-        color: {
-          light: '#ffffffff',
-          dark: '#000000ff'
-        }
-      }, (err, url) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(Buffer.from(url.split(',')[1], 'base64'))
-        }
-      })
-    }).catch(r => {
-      res.send(Buffer.from(req.config.qrpng, 'base64'))
-    })
-
-    if (qrimage) {
-      const output = await sharp(qrimage)
-        .composite([{input: Buffer.from(req.config.qrpng, 'base64'), gravity: 'centre' }])
-        .png()
-        .toBuffer()
-      
-      res.send(Buffer.from(output, 'binary'))
-    }
-  })
-
-  router.get('/tx/:hash([0-9a-fA-F]{64}).json', async (req, res, next) => {
-    res.setHeader('Content-Type', 'application/json')
-
-    const qrcontents = await new Promise((resolve, reject) => {
-      QRCode.toString(req.params.hash, {
-        type: 'utf8', errorCorrectionLevel: 'Q'
-      }, (err, data) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(data.split('\n').filter(r => {
-            return !r.match(/^[ ]+$/)
-          }).reduce((x, r) => {
-            const chars = r.slice(4, -4).split('')
-            let a = []
-            let b = []
-            for (c in chars) {
-              a.push(chars[c] === '▀' || chars[c] === '█')
-              b.push(chars[c] === '▄' || chars[c] === '█')
-            }
-            x.push(a)
-            x.push(b)
-            
-            return x
-          }, []))
-        }
-      })
-    }).catch(r => {
-      res.json({ matrix: [] })
-    })
-
-    if (qrcontents) {
-      res.json({ matrix: qrcontents })
-    }
-  })
-
-  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):level(_[mqh])?.json', async (req, res, next) => {
-    res.setHeader('Content-Type', 'application/json')
-
-    const qrcontents = await new Promise((resolve, reject) => {
-      QRCode.toString(req.config.baselocation + '/sign/' + req.params.uuid, {
-        type: 'utf8',
-        errorCorrectionLevel: (req.params.level || '_q').slice(1)
-      }, (err, data) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(data.split('\n').filter(r => {
-            return !r.match(/^[ ]+$/)
-          }).reduce((x, r) => {
-            const chars = r.slice(4, -4).split('')
-            let a = []
-            let b = []
-            for (c in chars) {
-              a.push(chars[c] === '▀' || chars[c] === '█')
-              b.push(chars[c] === '▄' || chars[c] === '█')
-            }
-            x.push(a)
-            x.push(b)
-            
-            return x
-          }, []))
-        }
-      })
-    }).catch(r => {
-      res.json({ matrix: [] })
-    })
-
-    if (qrcontents) {
-      res.json({ matrix: qrcontents })
-    }
-  })
+  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):level(_[mqh])?.png', QrPng)
+  router.get('/tx/:hash([0-9a-fA-F]{64}).json', QrTxHashJson)
+  router.get('/sign/:uuid([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}):level(_[mqh])?.json', QrJson)
 
   // WEBROUTER WILDCARD - FALLBACK
   router.all('*', function(req, res){
@@ -253,16 +175,12 @@ module.exports = async function (expressApp) {
   /**
    * Add translations i18n, read from folder with
    * translation js files.
-   */
-  
+   */  
   env.addFilter('i18n', new I18nFilter({
     default: 'en',
     translations: translations.raw
   }))
 
-  // /**
-  //  * Testing.
-  //  */
   // env.addFilter('sleep', function sleep (input, callback) {
   //   const args = Object.values(arguments).slice(1, -1)
   //   setTimeout(() => {

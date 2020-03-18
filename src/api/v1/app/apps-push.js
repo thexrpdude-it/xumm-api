@@ -73,7 +73,7 @@ module.exports = async (req, res) => {
             AND
               tokens.token_reported < 1
             AND
-              tokens.call_uuidv4_txt = :uuidv4
+              tokens.call_uuidv4_bin = UNHEX(REPLACE(:uuidv4,'-',''))
             LIMIT 1
           `, {
             userId: req.__auth.user.id,

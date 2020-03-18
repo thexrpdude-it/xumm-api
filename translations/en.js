@@ -13,6 +13,7 @@ module.exports = {
   PAYLOAD_NOT_FOUND: `Sign request not found.`,
   PAYLOAD_EXPIRED: `Sign request expired.`,
   PAYLOAD_BACKEND_ERROR: `Sorry, an error occurred while fetching the data to be signed.`,
+  PROFILE_BACKEND_ERROR: `Sorry, an error occurred while fetching the user profile data.`,
   PAYLOAD_PAGE_FOR_MOBILE: `To sign a request, make sure you have the <b class="font-logo">xumm</b> app installed.`,
   APPLICATION_DISABLED: `The application <q><b>__appname__</b></q> is disabled.`,
   WAIT_CONNECT_PLATFORM: `Connecting to the Signing Platform.`,
